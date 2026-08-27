@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!--
+        Site identity. The visible site name is written from `siteName` in
+        main.js; these metadata copies carry the same value so the document
+        is correct before JavaScript runs.
+    -->
+    <title>GOLDTRAP EA — Automated MT4/MT5 Gold Trading</title>
+    <meta name="description" content="GOLDTRAP EA automates trade execution and basket management for XAUUSD on MetaTrader 4 and MetaTrader 5, using a structured trading approach built for consistency.">
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="GOLDTRAP EA">
+    <meta property="og:title" content="GOLDTRAP EA — Automated MT4/MT5 Gold Trading">
+    <meta property="og:description" content="GOLDTRAP EA automates trade execution and basket management for XAUUSD on MetaTrader 4 and MetaTrader 5.">
+    <meta property="og:image" content="assets/images/logo-gt.svg">
+
+    <!-- Twitter / social -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="GOLDTRAP EA — Automated MT4/MT5 Gold Trading">
+    <meta name="twitter:description" content="GOLDTRAP EA automates trade execution and basket management for XAUUSD on MetaTrader 4 and MetaTrader 5.">
+    <meta name="twitter:image" content="assets/images/logo-gt.svg">
+
+    <link rel="icon" href="assets/images/favicon.svg" type="image/svg+xml">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;700;800;900&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="assets/styles/styles.css">
+</head>
+
+<body>
+    <a class="skip-link" href="#main-content">Skip to main content</a>
+
+    <div class="page-wrapper">
+
+        <!-- ==========================================================
+             TOP ACTION BAR (§5.1)
+             Dismissible; the text is an anchor whose destination and
+             wording are both configured in main.js.
+             ========================================================== -->
+        <div class="action-bar" id="action-bar">
+            <div class="container action-bar__inner">
+                <span class="action-bar__icon" aria-hidden="true">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg>
+                </span>
+
+                <a class="action-bar__link" id="action-bar-link" href="#"></a>
+
+                <button type="button" class="action-bar__close" id="action-bar-close"
+                        aria-label="Dismiss announcement">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
+            </div>
+        </div>
+
+
+        <!-- ==========================================================
+             SECTION 1 — HERO + NAVIGATION (§5)
+             ========================================================== -->
+        <header class="site-header">
+            <div class="container site-header__inner">
+
+                <a class="brand" href="index.html">
+                    <img class="brand__mark" src="assets/images/logo-gt.svg"
+                         alt="" width="48" height="48">
+                    <span class="brand__name" data-site-name>GOLDTRAP EA</span>
+                </a>
+
+                <!-- §5.2 Navigation -->
+                <nav class="primary-nav" aria-label="Primary">
+                    <ul class="primary-nav__list">
+                        <li><a class="primary-nav__link" href="#how-it-works">How It Trades</a></li>
+                        <li><a class="primary-nav__link" href="#benefits">Features</a></li>
+                        <li><a class="primary-nav__link" href="#pricing">Pricing</a></li>
+                        <li><a class="primary-nav__link" href="#downloads">Downloads</a></li>
+                        <li><a class="primary-nav__link" href="#faq">FAQ</a></li>
+                    </ul>
+                </nav>
+
+                <!-- §5.3 Translation / language selector -->
+                <div class="lang-select" id="lang-select">
+                    <button type="button" class="lang-select__toggle" id="lang-select-toggle"
+                            aria-expanded="false" aria-haspopup="listbox"
+                            aria-controls="lang-select-panel">
+                        <span id="lang-select-label">English</span>
+                        <svg class="lang-select__chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+                    </button>
+
+                    <div class="lang-select__panel" id="lang-select-panel" hidden>
+                        <label class="visually-hidden" for="lang-select-search">Search languages</label>
+                        <input type="search" class="lang-select__search" id="lang-select-search"
+                               placeholder="Search languages…" autocomplete="off">
+                        <div class="lang-select__list" id="lang-select-list"
+                             role="listbox" aria-label="Languages"></div>
+                    </div>
+                </div>
+
+            </div>
+        </header>
+
+        <main id="main-content">
+            <!-- Section 1 body — the warm glow band ends here -->
+            <section class="hero" aria-labelledby="hero-title">
+                <div class="container hero__inner">
+                    <div class="hero__copy">
+                        <p class="eyebrow-pill scroll-reveal">
+                            <span class="status-dot" aria-hidden="true"></span>
+                            Automated MT4/MT5 Trading
+                        </p>
+
+                        <h1 class="hero__title scroll-reveal" id="hero-title">GOLDTRAP EA</h1>
+
+                        <p class="hero__subtitle scroll-reveal">
+                            Optimized for Gold Trading. Built for MT4 &amp; MT5.
+                        </p>
+
+                        <p class="hero__text scroll-reveal">
+                            GoldTrap EA automates trade execution and basket management
+                            using a structured trading approach designed for traders who
+                            prefer consistency over manual execution.
+                        </p>
+
+                        <div class="hero__actions scroll-reveal">
+                            <a class="btn btn--gold btn--lg" href="#pricing">
+                                <span>Get <span data-site-name>GOLDTRAP EA</span></span>
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+                            </a>
+                            <a class="btn btn--dark btn--lg" href="#how-it-works">How it works</a>
+                        </div>
+                    </div>
+
+                    <div class="hero__chart scroll-reveal">
+                        <!--
+                            §5.4 Live chart container.
+                            Deliberately empty — an external chart/API widget is
+                            inserted here later. The panel already carries the final
+                            dimensions, aspect ratio and styling, so injecting a chart
+                            cannot change the hero layout.
+                        -->
+                        <div class="hero__chart-panel">
+                            <div id="live-chart-container"
+                                 role="img"
+                                 aria-label="Live XAUUSD price chart"></div>
+                        </div>
+                        <p class="hero__chart-caption">
+                            Live chart is for reference. GoldTrap EA still runs inside your
+                            own MetaTrader terminal.
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+
+                <!-- ==================================================
+                     SECTION 2 — QUICK BENEFITS (§6)
+                     ================================================== -->
+                <section class="section section--zinc" id="benefits" aria-labelledby="benefits-title">
+                    <div class="container section__inner">
+                        <p class="eyebrow scroll-reveal">Quick Benefits</p>
+                        <h2 class="section-heading scroll-reveal" id="benefits-title">
+                            Why Traders Choose GoldTrap EA
+                        </h2>
+
+                        <div class="benefits__grid">
+                            <div class="card benefit-card scroll-reveal">
+                                <span class="icon-disc" aria-hidden="true">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                                </span>
+                                <span class="benefit-card__label">Automated Trade Execution</span>
+                            </div>
+                            <div class="card benefit-card scroll-reveal">
+                                <span class="icon-disc" aria-hidden="true">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                                </span>
+                                <span class="benefit-card__label">Basket Management System</span>
+                            </div>
+                            <div class="card benefit-card scroll-reveal">
+                                <span class="icon-disc" aria-hidden="true">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                                </span>
+                                <span class="benefit-card__label">MT4 &amp; MT5 Compatible</span>
+                            </div>
+                            <div class="card benefit-card scroll-reveal">
+                                <span class="icon-disc" aria-hidden="true">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                                </span>
+                                <span class="benefit-card__label">VPS Friendly</span>
+                            </div>
+                            <div class="card benefit-card scroll-reveal">
+                                <span class="icon-disc" aria-hidden="true">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                                </span>
+                                <span class="benefit-card__label">Daily Profit Target Option</span>
+                            </div>
+                            <div class="card benefit-card scroll-reveal">
+                                <span class="icon-disc" aria-hidden="true">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                                </span>
+                                <span class="benefit-card__label">Built-In Risk Management Features</span>
+                            </div>
+                            <div class="card benefit-card scroll-reveal">
+                                <span class="icon-disc" aria-hidden="true">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                                </span>
+                                <span class="benefit-card__label">Optimized for Gold Trading</span>
+                            </div>
+                            <div class="card benefit-card scroll-reveal">
+                                <span class="icon-disc" aria-hidden="true">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                                </span>
+                                <span class="benefit-card__label">Suitable for Cent &amp; Standard Accounts</span>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+
+                <!-- ==================================================
+                     SECTION 3 — HOW GOLDTRAP WORKS (§7)
+                     ================================================== -->
+                <section class="section section--black" id="how-it-works" aria-labelledby="how-it-works-title">
+                    <div class="container section__inner">
+                        <p class="eyebrow scroll-reveal">How GoldTrap Works</p>
+                        <h2 class="section-heading scroll-reveal" id="how-it-works-title">
+                            One repeating cycle. No prediction. Pure structure.
+                        </h2>
+
+                        <div class="steps__grid">
+                            <article class="card card--lg step-card scroll-reveal">
+                                <span class="icon-disc icon-disc--solid" aria-hidden="true">01</span>
+                                <h3 class="step-card__title">Automated Entry</h3>
+                                <p class="step-card__text">
+                                    GoldTrap EA automatically places and manages trades based on
+                                    its built-in strategy.
+                                </p>
+                            </article>
+
+                            <article class="card card--lg step-card scroll-reveal">
+                                <span class="icon-disc icon-disc--solid" aria-hidden="true">02</span>
+                                <h3 class="step-card__title">Basket Management</h3>
+                                <p class="step-card__text">
+                                    Positions are managed as a basket rather than relying on
+                                    individual trades.
+                                </p>
+                            </article>
+
+                            <article class="card card--lg step-card scroll-reveal">
+                                <span class="icon-disc icon-disc--solid" aria-hidden="true">03</span>
+                                <h3 class="step-card__title">Built-In Recovery Logic</h3>
+                                <p class="step-card__text">
+                                    The EA includes recovery and position management features
+                                    designed to help navigate changing market conditions.
+                                </p>
+                            </article>
+
+                            <article class="card card--lg step-card scroll-reveal">
+                                <span class="icon-disc icon-disc--solid" aria-hidden="true">04</span>
+                                <h3 class="step-card__title">Structured Exit Management</h3>
+                                <p class="step-card__text">
+                                    Take profit levels are managed automatically according to
+                                    the EA's built-in logic.
+                                </p>
+                            </article>
+
+                            <article class="card card--lg step-card scroll-reveal">
+                                <span class="icon-disc icon-disc--solid" aria-hidden="true">05</span>
+                                <h3 class="step-card__title">Repeat The Process</h3>
+                                <p class="step-card__text">
+                                    Once a trading cycle is completed, the EA prepares for the
+                                    next opportunity automatically.
+                                </p>
+                            </article>
+
+                            <article class="card card--lg step-card scroll-reveal">
+                                <span class="icon-disc icon-disc--solid" aria-hidden="true">06</span>
+                                <h3 class="step-card__title">Built-In Trading Pause</h3>
+                                <p class="step-card__text">
+                                    To help avoid unstable rollover conditions, GoldTrap EA
+                                    pauses new entries during specific periods while continuing
+                                    to manage active trades.
+                                </p>
+                            </article>
+                        </div>
+                    </div>
+                </section>
+
+
+                <!-- ==================================================
+                     SECTION 4 — LIVE RESULTS (§8)
+                     ================================================== -->
+                <section class="section section--warm" id="live-results" aria-labelledby="live-results-title">
+                    <div class="container live-results__inner">
+                        <div class="live-results__copy">
+                            <p class="eyebrow scroll-reveal">Live Results</p>
+                            <h2 class="section-heading scroll-reveal" id="live-results-title">
+                                Real Results. Real Users.
+                            </h2>
+                            <p class="section-lead scroll-reveal">
+                                See live account updates, user feedback, and trading results
+                                shared by the GoldTrap community.
+                            </p>
+                        </div>
+
+                        <!-- §8.1 destination comes from telegramChannel in main.js -->
+                        <a class="btn btn--blue btn--lg scroll-reveal" data-telegram="channel"
+                           href="#" target="_blank" rel="noopener noreferrer">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                            View Live Results
+                        </a>
+                    </div>
+
+                    <!-- §8.2 / §8.3 live activity indicator and statistics -->
+                    <div class="live-stats">
+                        <div class="container live-stats__inner">
+                            <p class="live-stats__pill">
+                                <span class="pulsing-dot" aria-hidden="true"></span>
+                                Live Activity
+                            </p>
+
+                            <div class="live-stats__figures">
+                                <div class="stat">
+                                    <p class="stat__value" id="stat-license-keys"></p>
+                                    <p class="stat__label">License keys generated today</p>
+                                </div>
+                                <div class="stat__divider" aria-hidden="true"></div>
+                                <div class="stat">
+                                    <p class="stat__value" id="stat-eas-running"></p>
+                                    <p class="stat__label">EAs running today</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+
+                <!-- ==================================================
+                     SECTION 5 — GET GOLDTRAP EA (§9)
+                     SECTION 6 — SOURCE CODE (§11) shares this band
+                     ================================================== -->
+                <section class="section section--zinc" id="pricing" aria-labelledby="pricing-title">
+                    <div class="container section__inner">
+                        <h2 class="section-heading scroll-reveal" id="pricing-title">
+                            Get <span data-site-name>GOLDTRAP EA</span>
+                        </h2>
+                        <p class="section-lead scroll-reveal">Choose how you want to get started.</p>
+
+                        <!-- Cards are generated from `pricingPlans` in main.js (§9.2) -->
+                        <div class="pricing__grid" id="pricing-grid"></div>
+
+                        <!-- Section 6 — Source Code -->
+                        <div class="source-code" id="source-code">
+                            <div class="source-code__card scroll-reveal">
+                                <p class="eyebrow-pill eyebrow-pill--solid source-code__tag">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+                                    For Developers &amp; Partners
+                                </p>
+
+                                <div class="source-code__layout">
+                                    <div class="source-code__copy">
+                                        <h2 class="source-code__title" id="source-code-heading">
+                                            Get the <span class="accent">Source Code</span>
+                                        </h2>
+
+                                        <p class="source-code__text">
+                                            Full MQL4 &amp; MQL5 source code for
+                                            <span data-ea-title>GOLDTRAP EA v4.2.3</span>.
+                                            Read every line, modify logic, integrate with your
+                                            own tooling, or build on top of it.
+                                        </p>
+
+                                        <ul class="feature-list feature-list--2col">
+                                            <li>
+                                                <svg class="check" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+                                                <span>Full MQL4 (.mq4) &amp; MQL5 (.mq5) source</span>
+                                            </li>
+                                            <li>
+                                                <svg class="check" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+                                                <span>Modify, customize, rebrand</span>
+                                            </li>
+                                            <li>
+                                                <svg class="check" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+                                                <span>No license server lock-in</span>
+                                            </li>
+                                            <li>
+                                                <svg class="check" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+                                                <span>Direct support from Abang Rimba</span>
+                                            </li>
+                                        </ul>
+
+                                        <p class="source-code__price-row">
+                                            <span class="source-code__price" id="source-code-price">$9,650</span>
+                                            <span class="source-code__meta">
+                                                <span id="source-code-currency">USD</span>
+                                                · One-time payment · Lifetime ownership of the
+                                                source · No refund
+                                            </span>
+                                        </p>
+                                    </div>
+
+                                    <div class="source-code__actions">
+                                        <!-- §12: opens the shared dialog; price read from the page -->
+                                        <button type="button" class="btn btn--gold" id="source-code-purchase">
+                                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="6" width="18" height="14" rx="2"/><path d="M3 10h18"/><circle cx="17" cy="15" r="1.2"/></svg>
+                                            Purchase — $9,650 USD
+                                        </button>
+
+                                        <!-- §12.2 destination from telegramPersonal -->
+                                        <a class="btn btn--dark" data-telegram="personal"
+                                           href="#" target="_blank" rel="noopener noreferrer">
+                                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                                            Discuss on Telegram
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+
+                <!-- ==================================================
+                     SECTION 7 — FREE ACCESS (§13)
+                     SECTION 8 — DOWNLOAD (§14) shares this band
+                     ================================================== -->
+                <section class="section section--black" id="free-access" aria-labelledby="free-access-title">
+                    <div class="container container--sm section__inner free-access__inner">
+                        <p class="eyebrow scroll-reveal">Free Access</p>
+                        <h2 class="section-heading section-heading--center scroll-reveal"
+                            id="free-access-title">
+                            How to Get <span class="accent">Free Access</span>
+                        </h2>
+                        <p class="section-lead section-lead--center scroll-reveal">
+                            Follow these simple steps to get
+                            <span data-site-name>GOLDTRAP EA</span> for free.
+                        </p>
+
+                        <div class="free-access__grid">
+                            <div class="card free-access__step scroll-reveal">
+                                <span class="icon-disc icon-disc--solid icon-disc--sm" aria-hidden="true">01</span>
+                                <span class="free-access__step-label">Register Under My Link</span>
+                            </div>
+                            <div class="card free-access__step scroll-reveal">
+                                <span class="icon-disc icon-disc--solid icon-disc--sm" aria-hidden="true">02</span>
+                                <span class="free-access__step-label">Full Verify Your Account</span>
+                            </div>
+                            <div class="card free-access__step scroll-reveal">
+                                <span class="icon-disc icon-disc--solid icon-disc--sm" aria-hidden="true">03</span>
+                                <span class="free-access__step-label">Create an MT5 Trading Account</span>
+                            </div>
+                            <div class="card free-access__step scroll-reveal">
+                                <span class="icon-disc icon-disc--solid icon-disc--sm" aria-hidden="true">04</span>
+                                <span class="free-access__step-label">Submit Your Details</span>
+                            </div>
+                        </div>
+
+                        <div class="free-access__actions scroll-reveal">
+                            <a class="btn btn--green btn--lg btn--glow-green" data-whitelist-link
+                               href="#" target="_blank" rel="noopener noreferrer">
+                                Free Access
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+                            </a>
+                            <a class="btn btn--dark btn--lg" data-telegram="personal"
+                               href="#" target="_blank" rel="noopener noreferrer">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>
+                                Already Registered? Not Under Our Link
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Section 8 — Download -->
+                    <div class="container container--md section__inner download__inner" id="downloads">
+                        <p class="eyebrow-pill scroll-reveal">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                            Downloads
+                        </p>
+                        <h2 class="section-heading section-heading--center scroll-reveal" id="downloads-title">
+                            Download <span data-site-name>GOLDTRAP EA</span>
+                        </h2>
+                        <p class="section-lead section-lead--center scroll-reveal">
+                            Compiled for MetaTrader 4 &amp; 5. Install into your platform's
+                            <span class="mono">Experts</span> folder and activate with your
+                            license key.
+                        </p>
+
+                        <div class="download__grid">
+                            <article class="card card--lg download-card scroll-reveal">
+                                <div class="download-card__head">
+                                    <span class="icon-disc" aria-hidden="true">
+                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                                    </span>
+                                    <div>
+                                        <h3 class="download-card__title">MetaTrader 5</h3>
+                                        <p class="download-card__file">GoldTrap_v4_2_3.ex5</p>
+                                    </div>
+                                </div>
+
+                                <p class="download-card__licence">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="7.5" cy="15.5" r="4.5"/><line x1="10.7" y1="12.3" x2="21" y2="2"/><line x1="18" y1="5" x2="21" y2="8"/></svg>
+                                    License key required at runtime
+                                </p>
+
+                                <a class="btn btn--gold btn--block" data-whitelist-link
+                                   href="#" target="_blank" rel="noopener noreferrer">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                                    Download
+                                </a>
+                            </article>
+
+                            <article class="card card--lg download-card scroll-reveal">
+                                <div class="download-card__head">
+                                    <span class="icon-disc" aria-hidden="true">
+                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                                    </span>
+                                    <div>
+                                        <h3 class="download-card__title">MetaTrader 4</h3>
+                                        <p class="download-card__file">GoldTrap_v4_2_3.ex4</p>
+                                    </div>
+                                </div>
+
+                                <p class="download-card__licence">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="7.5" cy="15.5" r="4.5"/><line x1="10.7" y1="12.3" x2="21" y2="2"/><line x1="18" y1="5" x2="21" y2="8"/></svg>
+                                    License key required at runtime
+                                </p>
+
+                                <a class="btn btn--dark btn--block" data-whitelist-link
+                                   href="#" target="_blank" rel="noopener noreferrer">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                                    Download
+                                </a>
+                            </article>
+                        </div>
+
+                        <div class="preset-banner scroll-reveal">
+                            <span class="icon-disc" aria-hidden="true">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                            </span>
+                            <div class="preset-banner__copy">
+                                <p class="preset-banner__title">Need preset .set files?</p>
+                                <p class="preset-banner__text">
+                                    Ready-made 50K capital presets for every pair, tuned for
+                                    MT4 &amp; MT5 at 1:500 and 1:2000 leverage.
+                                </p>
+                            </div>
+                            <a class="preset-banner__link" data-telegram="channel"
+                               href="#" target="_blank" rel="noopener noreferrer">
+                                Browse preset files
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+                            </a>
+                        </div>
+
+                        <p class="download__licence-hint scroll-reveal">
+                            Don't have a license yet? <a href="#pricing">Get one below</a>.
+                        </p>
+
+                        <!-- §14.1 whitelist URL + copy control -->
+                        <div class="setup-note scroll-reveal">
+                            <p class="setup-note__title">Setup note — required once per terminal</p>
+                            <p class="setup-note__text">
+                                The EA verifies your license online. Add this URL to your
+                                MetaTrader whitelist:
+                            </p>
+
+                            <span class="setup-note__url-row">
+                                <span class="setup-note__url mono" id="whitelist-url"></span>
+                                <button type="button" class="copy-btn" id="whitelist-copy">
+                                    <svg class="icon-copy" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                                    <svg class="icon-check" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+                                    <span id="whitelist-copy-label">Copy</span>
+                                </button>
+                            </span>
+
+                            <p class="setup-note__steps">
+                                MT5/MT4 → Tools → Options → Expert Advisors → tick "Allow
+                                WebRequest for listed URL" → add the domain → OK.
+                            </p>
+                        </div>
+                    </div>
+                </section>
+
+
+                <!-- ==================================================
+                     SECTION 9 — FAQ (§15)
+                     Content is generated from the FAQ service; the homepage
+                     shows the first 6 questions of the active category.
+                     ================================================== -->
+                <section class="section section--zinc" id="faq" aria-labelledby="faq-title"
+                         data-faq-mode="single" data-faq-limit="6">
+                    <div class="container container--md section__inner faq__inner">
+                        <p class="eyebrow scroll-reveal">FAQ</p>
+                        <h2 class="section-heading section-heading--center scroll-reveal" id="faq-title">
+                            Frequently Asked Questions
+                        </h2>
+                        <p class="section-lead section-lead--center scroll-reveal">
+                            Everything you need to know about GoldTrap EA.
+                        </p>
+
+                        <div class="faq__categories" id="faq-categories" role="tablist"
+                             aria-label="FAQ categories"></div>
+
+                        <div id="faq-panels"></div>
+
+                        <div class="faq__browse scroll-reveal">
+                            <a class="btn btn--dark btn--lg" href="frequently-asked-questions.html">
+                                Browse all questions
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                            </a>
+                        </div>
+                    </div>
+                </section>
+        </main>
+
+
+        <!-- ==================================================
+             SECTION 10 — FOOTER (§18)
+             ================================================== -->
+        <footer class="site-footer">
+                <div class="container site-footer__inner">
+                    <!-- Editable footer caveat / disclaimer — text from main.js -->
+                    <p id="footer-caveat" class="scroll-reveal"></p>
+
+                    <p class="terms-notice scroll-reveal">
+                        Using this site and/or any of its products puts you under its
+                        <a id="terms-and-conditions-link" href="#">Terms and Conditions</a>
+                    </p>
+
+                    <!-- §18.4 destination from telegramChannel -->
+                    <a class="footer-telegram scroll-reveal" data-telegram="channel"
+                       href="#" aria-label="Telegram" target="_blank" rel="noopener noreferrer">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                    </a>
+
+                <p class="site-footer__copyright scroll-reveal" id="footer-copyright"></p>
+            </div>
+        </footer>
+    </div>
+
+
+    <!-- ==============================================================
+         LIVE CHAT WIDGET (§5.5)
+         ============================================================== -->
+    <a class="chat-widget" data-telegram="personal" href="#"
+       target="_blank" rel="noopener noreferrer"
+       aria-label="Chat with Abang Rimba on Telegram — online">
+        <img class="chat-widget__avatar" src="assets/images/chat-avatar.png"
+             alt="Abang Rimba" width="72" height="72">
+        <span class="chat-widget__status" aria-hidden="true"></span>
+    </a>
+
+
+    <!-- ==============================================================
+         REUSABLE PURCHASE DIALOG (§10 / §12 / §26)
+         One dialog serves both the EA plans and the source code. Its
+         title, plan, amount and network are filled in from the clicked
+         card at open time — nothing here is hard-coded.
+         ============================================================== -->
+    <dialog class="purchase-dialog" id="purchase-dialog" aria-labelledby="purchase-dialog-title">
+        <div class="purchase-dialog__head">
+            <div>
+                <h2 class="purchase-dialog__title" id="purchase-dialog-title"></h2>
+                <p class="purchase-dialog__subtitle" id="purchase-dialog-subtitle"></p>
+            </div>
+            <button type="button" class="purchase-dialog__close" id="purchase-dialog-close"
+                    aria-label="Close dialog">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+        </div>
+
+        <div class="purchase-dialog__body">
+            <div class="purchase-dialog__rows" id="purchase-dialog-rows"></div>
+
+            <p class="purchase-dialog__note" id="purchase-dialog-note"></p>
+
+            <a class="btn btn--gold btn--block btn--lg purchase-dialog__confirm"
+               id="purchase-dialog-confirm" href="#" target="_blank" rel="noopener noreferrer">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                <span class="btn-label"></span>
+            </a>
+        </div>
+    </dialog>
+
+    <!-- Google Translate mounts here; the widget's own UI stays hidden. -->
+    <div id="google_translate_element" aria-hidden="true"></div>
+
+    <script type="module" src="assets/scripts/main.js"></script>
+</body>
+</html>
