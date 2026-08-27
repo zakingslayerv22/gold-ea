@@ -111,15 +111,29 @@
     --radius-lg: 24px;            /* large cards: pricing, source code, chart panel */
 
     /* --- Type --- */
-    --font-display: "Figtree", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
-    --font-body: "Inter", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
-    --font-mono: "JetBrains Mono", "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+    /*
+     * Typefaces matched against the mockups by overlaying rendered specimens
+     * on crops of the artwork and scoring the letterform overlap:
+     *   headings — Poppins  (geometric, single-storey 'a', best measured fit)
+     *   body     — Roboto   (clear winner: 0.74 overlap vs 0.62 runner-up)
+     *   mono     — Roboto Mono, to stay in the Roboto family
+     */
+    --font-display: "Poppins", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+    --font-body: "Roboto", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+    --font-mono: "Roboto Mono", "SFMono-Regular", Consolas, "Liberation Mono", monospace;
 
-    /* Fluid across the desktop range so nothing jumps between 1024 and 1920. */
-    --fs-display: clamp(3.5rem, 4.7vw, 5.625rem);   /* hero H1  ~56 → 90px */
-    --fs-h2: clamp(2.25rem, 3vw, 3.625rem);         /* section  ~36 → 58px */
-    --fs-h3: clamp(1.25rem, 1.35vw, 1.625rem);      /* card     ~20 → 26px */
-    --fs-lead: clamp(1.0625rem, 1.05vw, 1.25rem);   /* hero body ~17 → 20px */
+    /*
+     * Sizes derived from the mockup's measured cap heights (Poppins cap
+     * ratio 0.710, Roboto 0.715), fluid across the desktop range:
+     *   H1 cap 67px → 94px    H2 cap 46px → 65px
+     *   hero body cap 18px → 25px    section lead cap ~14px → 20px
+     */
+    --fs-display: clamp(3.5rem, 4.9vw, 5.875rem);   /* hero H1   ~56 → 94px */
+    --fs-h2: clamp(2.25rem, 3.39vw, 4.0625rem);     /* section   ~36 → 65px */
+    --fs-h2-sm: clamp(1.875rem, 2.5vw, 3rem);       /* Download + FAQ ~30 → 48px */
+    --fs-h3: clamp(1.25rem, 1.35vw, 1.625rem);      /* card      ~20 → 26px */
+    --fs-hero-body: clamp(1.125rem, 1.3vw, 1.5625rem); /* hero body ~18 → 25px */
+    --fs-lead: clamp(1.0625rem, 1.05vw, 1.25rem);   /* section lead ~17 → 20px */
     --fs-body: 1rem;
     --fs-sm: 0.875rem;
     --fs-xs: 0.8125rem;
@@ -322,18 +336,36 @@ button {
 
 .section-heading {
     font-size: var(--fs-h2);
-    /* 800px is what makes the headings break where the mockup breaks them. */
-    max-width: 800px;
+    /* The mockup sets section headings very tight — a 2-line heading
+       occupies a 116px box at 65px, i.e. a line-height just under 0.9. */
+    line-height: 0.9;
+    letter-spacing: 0.007em;
+    /*
+     * 894px sits inside the [825, 962) window that reproduces every line
+     * break in the mockup: "Why Traders Choose / GoldTrap EA" and
+     * "One repeating cycle. No / prediction. Pure structure." both wrap
+     * where the artwork wraps, and the one-line headings stay on one line.
+     */
+    max-width: 894px;
+}
+
+/*
+ * The mockup runs two heading tiers: 65px for most sections, and a smaller
+ * ~48px for the Download and FAQ headings.
+ */
+.section-heading--sm {
+    font-size: var(--fs-h2-sm);
 }
 
 .section-heading--center {
     margin-inline: auto;
     text-align: center;
-    max-width: 800px;
+    max-width: 894px;
 }
 
-/* Two-tone headings, e.g. "Get the <gold>Source Code</gold>". */
-.section-heading .accent {
+/* Two-tone headings, e.g. "Get the <gold>Source Code</gold>".
+   Not scoped to .section-heading — the source-code title uses it too. */
+.accent {
     color: var(--gold-300);
 }
 
@@ -983,7 +1015,7 @@ button {
     font-size: var(--fs-display);
     font-weight: 900;
     line-height: 0.95;
-    letter-spacing: -0.03em;
+    letter-spacing: 0;
     text-transform: uppercase;
 
     /* Gold gradient text — the display treatment used only here. */
@@ -1004,8 +1036,8 @@ button {
 .hero__text {
     max-width: 752px;
     color: var(--text-muted);
-    font-size: var(--fs-lead);
-    line-height: 2;
+    font-size: var(--fs-hero-body);
+    line-height: 1.62;
 }
 
 .hero__actions {
@@ -1118,13 +1150,14 @@ button {
 }
 
 .step-card__title {
-    margin: 38px 0 20px;
+    margin: 38px 0 16px;
     font-size: var(--fs-h3);
 }
 
 .step-card__text {
     color: var(--text-muted);
-    line-height: 1.85;
+    font-size: 1.125rem;
+    line-height: 1.5;
 }
 
 
@@ -1141,7 +1174,7 @@ button {
 }
 
 .live-results__copy {
-    max-width: 800px;
+    max-width: 894px;
 }
 
 /* The stats strip is a second band, separated by warm hairlines. */
@@ -1379,7 +1412,11 @@ button {
 
 .source-code {
     position: relative;
-    margin-top: 80px;
+    /*
+     * The mockup sets the source-code card almost flush beneath the pricing
+     * grid: cards end at y4069, the card's top border is at y4076.
+     */
+    margin-top: 8px;
 }
 
 .source-code__card {
