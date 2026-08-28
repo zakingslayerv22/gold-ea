@@ -889,21 +889,26 @@ button {
 }
 
 
-/* --- 7.2b Mobile navigation toggle ------------------------------------
- * Hidden at desktop widths. The mobile phase reveals it in its media
- * query; the behaviour (aria-expanded, Escape, outside click, link
- * closes menu, focus return) is already implemented in main.js.
+/* --- 7.2b Header actions group + hamburger ----------------------------
+ * The language control and the hamburger live in one group so they stay
+ * beside each other on mobile. The hamburger is hidden while the inline
+ * navigation still fits; the responsive section reveals it.
  * ------------------------------------------------------------------- */
 
+.site-header__actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+}
+
 .nav-toggle {
-    display: none;                 /* desktop: navigation is always visible */
-    flex-direction: column;
+    display: none;                 /* revealed below the nav breakpoint */
+    align-items: center;
     justify-content: center;
-    gap: 5px;
     width: 44px;
     height: 44px;
-    padding: 10px;
-    border-radius: 10px;
+    border-radius: 12px;
     background: var(--surface-2);
     border: 1px solid var(--border-subtle);
     transition: background var(--transition), border-color var(--transition);
@@ -915,12 +920,50 @@ button {
     border-color: var(--border-gold);
 }
 
-.nav-toggle__bar {
+/* Fixed box so the bars can rotate into an X without moving the button. */
+.nav-toggle__box {
+    position: relative;
     display: block;
+    width: 20px;
+    height: 14px;
+}
+
+.nav-toggle__bar {
+    position: absolute;
+    left: 0;
     height: 2px;
     width: 100%;
     border-radius: 2px;
     background: var(--text);
+    transition: transform var(--transition), opacity var(--transition),
+                top var(--transition);
+}
+
+.nav-toggle__bar:nth-child(1) { top: 0; }
+.nav-toggle__bar:nth-child(2) { top: 6px; }
+.nav-toggle__bar:nth-child(3) { top: 12px; }
+
+/* Open state: the bars cross into an X. */
+.nav-toggle[aria-expanded="true"] .nav-toggle__bar:nth-child(1) {
+    top: 6px;
+    transform: rotate(45deg);
+}
+
+.nav-toggle[aria-expanded="true"] .nav-toggle__bar:nth-child(2) {
+    opacity: 0;
+}
+
+.nav-toggle[aria-expanded="true"] .nav-toggle__bar:nth-child(3) {
+    top: 6px;
+    transform: rotate(-45deg);
+}
+
+/*
+ * The header shows the full language name by default; the abbreviation
+ * replaces it on mobile. Both are kept current by main.js.
+ */
+.lang-select__code {
+    display: none;
 }
 
 
@@ -2294,4 +2337,781 @@ font {
     font: inherit !important;
     color: inherit !important;
     background: transparent !important;
+}
+
+
+/* ======================================================================
+ * 21. RESPONSIVE — TABLET AND MOBILE
+ * ======================================================================
+ * Phases 2 and 3 of the workflow in CLAUDE.md. The desktop layout above
+ * is untouched; everything here lives inside a media query so it can only
+ * ever apply below desktop widths.
+ *
+ * THREE BREAKPOINTS, each earning its place:
+ *
+ *   1024px — layout. The hero stops being two columns, the three-across
+ *            grids drop to two, and pricing stacks. Matches the tablet
+ *            mockup, which shows 2-up benefit and step cards and
+ *            single-column pricing.
+ *
+ *    900px — navigation. The inline nav needs roughly 820px before it
+ *            starts crowding the brand and the language pill, so this is
+ *            where it collapses into the hamburger panel. Landscape
+ *            tablets keep the inline nav the tablet mockup shows;
+ *            portrait tablets and phones get the hamburger.
+ *
+ *    640px — mobile. Single column throughout, the mobile mockup's 20px
+ *            gutter, full-width buttons, and the compact header with the
+ *            language abbreviation.
+ *
+ * Sizing between those points is fluid: the type scale already uses
+ * clamp(), the grids use auto-fit/minmax, and spacing uses clamp() so
+ * intermediate widths are interpolated rather than snapped.
+ *
+ * Values were measured from the supplied mobile mockup at 360px:
+ *   gutter 20px · section padding ~83px · benefit cards 66px tall with a
+ *   12px gap · buttons full width at ~53px · H1 ~48px · H2 ~36px ·
+ *   hero body ~18px · chart panel roughly 320 × 370 (portrait).
+ * ====================================================================== */
+
+
+/* ----------------------------------------------------------------------
+ * 21.1 TABLET AND BELOW (< 1024px)
+ * -------------------------------------------------------------------- */
+
+@media (max-width: 1023.98px) {
+
+    /* The hero becomes one column: copy first, chart beneath it. */
+    .hero__inner {
+        grid-template-columns: minmax(0, 1fr);
+        gap: clamp(32px, 5vw, 48px);
+        padding-block: 28px clamp(48px, 6vw, 72px);
+    }
+
+    /*
+     * The chart panel is landscape on desktop and portrait on mobile;
+     * between the two it simply fills the column at a squarer ratio.
+     */
+    #live-chart-container {
+        aspect-ratio: 16 / 12;
+    }
+
+    .hero__chart-caption {
+        text-align: left;
+    }
+
+    /* Three-across grids become two-across, as the tablet mockup shows. */
+    .steps__grid {
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    }
+
+    /*
+     * Pricing stacks to a single column on tablet. auto-fit with a large
+     * minimum does this without a hard column count, so a fourth plan
+     * still behaves.
+     */
+    .pricing__grid {
+        grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr));
+    }
+
+    /* The source-code card's two columns stack. */
+    .source-code__layout {
+        flex-direction: column;
+        gap: 32px;
+    }
+
+    .source-code__actions {
+        width: 100%;
+        min-width: 0;
+    }
+
+    .source-code__card {
+        padding: 36px clamp(20px, 4vw, 40px);
+    }
+
+    /*
+     * Live results keeps its side-by-side arrangement on tablet — the
+     * tablet mockup shows the heading block and the button on one row.
+     * It only stacks at mobile widths (21.3 below).
+     */
+    .live-results__inner {
+        gap: 32px;
+    }
+
+    /*
+     * Dialogs must never exceed the viewport on a short or narrow screen.
+     * Applied from tablet down so a landscape tablet with little height
+     * still scrolls the dialog rather than clipping it.
+     */
+    .purchase-dialog {
+        width: min(640px, calc(100vw - 40px));
+        max-height: calc(100dvh - 40px);
+        overflow-y: auto;
+    }
+}
+
+
+/* ----------------------------------------------------------------------
+ * 21.2 NAVIGATION COLLAPSE (< 900px)
+ * ----------------------------------------------------------------------
+ * The hamburger appears and the inline links become a panel. The markup
+ * is unchanged — the same <nav> is restyled, so there is no duplicate
+ * navigation anywhere in the project.
+ * -------------------------------------------------------------------- */
+
+@media (max-width: 899.98px) {
+
+    .nav-toggle {
+        display: inline-flex;
+    }
+
+    .site-header__inner {
+        justify-content: space-between;
+        gap: 12px;
+        min-height: 76px;
+    }
+
+    /*
+     * The panel drops from under the header. It is constrained to the
+     * viewport width and scrolls internally if the list is ever taller
+     * than the screen, so it can never cause horizontal overflow.
+     */
+    .primary-nav {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        z-index: 40;
+        display: block;
+        max-height: calc(100dvh - 100%);
+        overflow-y: auto;
+        padding: 8px clamp(16px, 5vw, 32px) 20px;
+        background: var(--bg-zinc);
+        border-bottom: 1px solid var(--border-subtle);
+        box-shadow: 0 24px 48px -24px rgba(0, 0, 0, 0.9);
+
+        /* Closed state. visibility keeps it out of the tab order. */
+        opacity: 0;
+        visibility: hidden;
+        transform: translateY(-8px);
+        transition: opacity var(--transition), transform var(--transition),
+                    visibility var(--transition);
+    }
+
+    .primary-nav.is-open {
+        opacity: 1;
+        visibility: visible;
+        transform: translateY(0);
+    }
+
+    .primary-nav__list {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 2px;
+    }
+
+    /* Comfortable touch targets, comfortably above the 44px guideline. */
+    .primary-nav__link {
+        display: block;
+        padding: 15px 12px;
+        border-radius: 12px;
+        font-size: 1.0625rem;
+        font-weight: 500;
+    }
+
+    .primary-nav__link:hover,
+    .primary-nav__link:focus-visible {
+        background: var(--surface);
+    }
+
+    /* The header must establish the panel's containing block. */
+    .site-header {
+        position: relative;
+    }
+
+    /* Stop the page scrolling behind the open panel. */
+    body.nav-is-open {
+        overflow: hidden;
+    }
+}
+
+
+/* ----------------------------------------------------------------------
+ * 21.3 MOBILE (< 640px)
+ * -------------------------------------------------------------------- */
+
+@media (max-width: 639.98px) {
+
+    /* The mobile mockup's 20px gutter, for every container width. */
+    :root {
+        --gutter: 20px;
+        --gutter-hero: 20px;
+
+        /* Measured from the mobile mockup rather than scaled from desktop. */
+        --fs-display: clamp(2.5rem, 13vw, 3rem);      /* H1 ~48px  */
+        --fs-h2: clamp(1.75rem, 10vw, 2.25rem);       /* H2 ~36px  */
+        --fs-h2-sm: clamp(1.5rem, 8.5vw, 1.875rem);   /* ~30px     */
+        --fs-h3: 1.25rem;
+        --fs-hero-body: 1.125rem;                     /* 18px      */
+        --fs-lead: 1rem;
+    }
+
+    /* Section rhythm: ~83px top / ~78px bottom in the mockup. */
+    .section__inner {
+        padding-block: clamp(56px, 21vw, 84px) clamp(52px, 20vw, 80px);
+    }
+
+    /* ---- Header ------------------------------------------------------
+     * Brand on the left, language + hamburger grouped on the right.
+     * The space between them is what space-between distributes; the two
+     * controls stay together.
+     * ---------------------------------------------------------------- */
+
+    .site-header__inner {
+        min-height: 72px;
+        gap: 10px;
+    }
+
+    .brand {
+        min-width: 0;              /* allows the wordmark to shrink */
+        gap: 10px;
+    }
+
+    .brand__mark {
+        width: 40px;
+        height: 40px;
+    }
+
+    .brand__name {
+        font-size: clamp(0.9375rem, 4.4vw, 1.125rem);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    /* Closed header shows only the current language's abbreviation. */
+    .lang-select__name {
+        display: none;
+    }
+
+    .lang-select__code {
+        display: inline;
+    }
+
+    .lang-select__toggle {
+        gap: 4px;
+        padding: 11px 12px;
+        font-size: 0.9375rem;
+    }
+
+    /*
+     * The dropdown is anchored to the right edge of the header and never
+     * wider than the viewport minus its gutters, so it cannot overflow on
+     * a narrow screen. The search field stays at the top, unchanged.
+     */
+    .lang-select__panel {
+        width: min(280px, calc(100vw - 32px));
+        right: 0;
+    }
+
+    /* ---- Hero -------------------------------------------------------- */
+
+    .hero__inner {
+        padding-block: 24px 40px;
+        gap: 28px;
+    }
+
+    .hero__title {
+        line-height: 1.02;
+    }
+
+    .hero__text {
+        max-width: none;
+        line-height: 1.7;
+    }
+
+    .hero__actions {
+        margin-top: 30px;
+        gap: 12px;
+    }
+
+    /* Portrait chart, matching the mobile mockup's proportions. */
+    #live-chart-container {
+        aspect-ratio: 320 / 370;
+    }
+
+    .hero__chart-panel {
+        padding: 8px;
+        border-radius: 20px;
+    }
+
+    /* ---- Buttons ----------------------------------------------------
+     * Calls to action span the column on mobile, as the mockup shows.
+     * ---------------------------------------------------------------- */
+
+    .hero__actions .btn,
+    .free-access__actions .btn,
+    .source-code__actions .btn,
+    .plan-card__cta {
+        width: 100%;
+    }
+
+    .btn {
+        padding: 15px 22px;
+        white-space: normal;       /* long labels wrap instead of overflowing */
+    }
+
+    .btn--lg {
+        padding: 16px 24px;
+        font-size: 1rem;
+    }
+
+    /* ---- Single-column grids ---------------------------------------- */
+
+    .benefits__grid,
+    .steps__grid,
+    .pricing__grid,
+    .free-access__grid,
+    .download__grid,
+    .faq__columns {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .benefits__grid {
+        gap: 12px;
+        margin-top: 36px;
+    }
+
+    .benefit-card {
+        min-height: 66px;          /* measured from the mobile mockup */
+        padding: 12px 16px;
+        gap: 12px;
+    }
+
+    .benefit-card__label {
+        font-size: 0.9375rem;
+    }
+
+    .steps__grid,
+    .free-access__grid,
+    .download__grid {
+        gap: 14px;
+        margin-top: 32px;
+    }
+
+    .step-card {
+        padding: 24px 20px;
+    }
+
+    .step-card .icon-disc {
+        width: 42px;
+        height: 42px;
+    }
+
+    .step-card__title {
+        margin: 24px 0 12px;
+    }
+
+    .step-card__text {
+        font-size: 1rem;
+    }
+
+    /* Free-access step rows: compact enough to keep each label on one line. */
+    .free-access__step {
+        min-height: 60px;
+        padding: 12px 14px;
+        gap: 12px;
+    }
+
+    .free-access__step-label {
+        font-size: 0.875rem;
+    }
+
+    .free-access__actions {
+        margin-top: 28px;
+        gap: 12px;
+    }
+
+    /* Download cards */
+    .download-card {
+        padding: 20px 18px;
+    }
+
+    .download-card__head {
+        gap: 12px;
+        margin-bottom: 16px;
+    }
+
+    .download-card__title {
+        font-size: 1.1875rem;
+    }
+
+    .download-card__licence {
+        padding: 12px 14px;
+        margin-bottom: 14px;
+        font-size: 0.8125rem;
+    }
+
+    .setup-note__title {
+        font-size: 0.9375rem;
+    }
+
+    .setup-note__text,
+    .setup-note__steps {
+        font-size: 0.8125rem;
+    }
+
+    .download__licence-hint {
+        margin-top: 22px;
+        font-size: 0.8125rem;
+    }
+
+    /* ---- Live results ------------------------------------------------ */
+
+    /* Mobile: the button drops below the heading block, as the mockup shows. */
+    .live-results__inner {
+        flex-direction: column;
+        align-items: flex-start;
+        padding-block: clamp(56px, 21vw, 84px);
+        gap: 24px;
+    }
+
+    /* Pill on its own line, the two figures side by side beneath it. */
+    .live-stats__inner {
+        flex-direction: column;
+        gap: 20px;
+        padding-block: 24px;
+    }
+
+    .live-stats__figures {
+        width: 100%;
+        justify-content: space-around;
+        gap: 16px;
+    }
+
+    .stat__label {
+        font-size: 0.6875rem;
+    }
+
+    /* ---- Pricing ----------------------------------------------------- */
+
+    .pricing__grid {
+        gap: 16px;
+        margin-top: 32px;
+    }
+
+    .plan-card {
+        padding: 24px 20px;
+    }
+
+    .plan-card__price {
+        font-size: 2.75rem;
+    }
+
+    /*
+     * Card internals are tighter on mobile, matching the mockup's rhythm.
+     * The timer row keeps its reserved space (CLAUDE.md §9.4) but at mobile
+     * proportions, so hiding and showing it still never resizes the card.
+     */
+    .plan-card__caption {
+        margin-top: 8px;
+        font-size: 0.8125rem;
+    }
+
+    .plan-card__timer {
+        min-height: 20px;
+        margin-top: 10px;
+    }
+
+    .plan-card__divider {
+        margin: 18px 0;
+    }
+
+    .plan-card__features,
+    .plan-card__steps {
+        gap: 11px;
+    }
+
+    .plan-card__features li,
+    .plan-card__steps li {
+        font-size: 0.875rem;
+    }
+
+    .plan-card__note {
+        margin-bottom: 16px;
+    }
+
+    .plan-card__name {
+        font-size: 1.1875rem;
+    }
+
+    /* ---- Source code -------------------------------------------------- */
+
+    .source-code {
+        margin-top: 40px;
+    }
+
+    .source-code__card {
+        padding: 32px 20px 28px;
+        border-radius: 20px;
+    }
+
+    .source-code__tag {
+        left: 20px;
+    }
+
+    .feature-list--2col {
+        grid-template-columns: minmax(0, 1fr);
+        column-gap: 0;
+    }
+
+    .source-code__price-row {
+        gap: 6px;
+        margin-top: 18px;
+    }
+
+    .source-code__title {
+        margin-bottom: 10px;
+    }
+
+    .source-code__text {
+        margin-bottom: 16px;
+        font-size: 0.9375rem;
+    }
+
+    .feature-list {
+        gap: 11px;
+    }
+
+    .feature-list li {
+        font-size: 0.9375rem;
+    }
+
+    /* ---- Download ----------------------------------------------------- */
+
+    /*
+     * The mockup keeps the preset banner as a row on mobile — icon at the
+     * left, copy beside it — rather than stacking, so only the trailing
+     * link moves below the text.
+     */
+    .preset-banner {
+        flex-wrap: wrap;
+        align-items: flex-start;
+        gap: 12px;
+        padding: 16px;
+    }
+
+    .preset-banner .icon-disc {
+        width: 34px;
+        height: 34px;
+    }
+
+    .preset-banner__copy {
+        flex: 1 1 200px;
+    }
+
+    .preset-banner__title {
+        font-size: 0.9375rem;
+    }
+
+    .preset-banner__text {
+        font-size: 0.8125rem;
+    }
+
+    .preset-banner__link {
+        flex-basis: 100%;
+        margin-left: 46px;         /* aligns under the copy, not the icon */
+    }
+
+    .setup-note {
+        padding: 22px 18px;
+    }
+
+    /* The URL chip and its Copy button wrap rather than overflow. */
+    .setup-note__url-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        width: 100%;
+        padding: 10px 12px;
+    }
+
+    .setup-note__url {
+        word-break: break-all;
+    }
+
+    /* ---- FAQ ---------------------------------------------------------- */
+
+    .faq__categories {
+        gap: 8px;
+        margin-top: 28px;
+    }
+
+    /* Two pills per row, as the mobile mockup shows. */
+    .faq__category {
+        flex: 1 1 calc(50% - 4px);
+        padding: 11px 12px;
+        font-size: 0.875rem;
+    }
+
+    .faq__columns {
+        gap: 12px;
+        margin-top: 24px;
+    }
+
+    .faq__column {
+        gap: 12px;
+    }
+
+    .faq-item__trigger {
+        padding: 18px 16px;
+        font-size: 1rem;
+        gap: 12px;
+    }
+
+    .faq-item__panel {
+        padding: 0 16px 20px;
+        font-size: 0.9375rem;
+    }
+
+    /* ---- Footer -------------------------------------------------------- */
+
+    .site-footer__inner {
+        padding-block: 44px;
+    }
+
+    #footer-caveat,
+    .terms-notice,
+    .site-footer__copyright {
+        font-size: 0.8125rem;
+    }
+
+    /* ---- Announcement bar ---------------------------------------------- */
+
+    .action-bar__inner {
+        padding: 10px 44px;
+        min-height: 0;
+    }
+
+    .action-bar__link {
+        font-size: 0.8125rem;
+        line-height: 1.5;
+    }
+
+    .action-bar__close {
+        right: 8px;
+    }
+
+    /* ---- Live chat ------------------------------------------------------
+     * Same 68px launcher, pulled closer to the corner so it sits clear of
+     * the content. The hover label is suppressed on touch below.
+     * ------------------------------------------------------------------ */
+
+    .chat-widget {
+        right: 16px;
+        bottom: 16px;
+    }
+
+    /* ---- Dialogs --------------------------------------------------------
+     * Full-width within the viewport, scrollable if the content is taller
+     * than the screen, and never wider than the screen.
+     * ------------------------------------------------------------------ */
+
+    .purchase-dialog {
+        width: calc(100vw - 24px);
+        max-height: calc(100dvh - 32px);
+        overflow-y: auto;
+        border-radius: 20px;
+    }
+
+    .purchase-dialog__head {
+        padding: 22px 20px 18px;
+    }
+
+    .purchase-dialog__title {
+        font-size: 1.1875rem;
+    }
+
+    .purchase-dialog__body {
+        padding: 18px 20px 24px;
+    }
+
+    .purchase-row {
+        padding: 14px 16px;
+        gap: 12px;
+    }
+
+    .purchase-row__value--amount {
+        font-size: 1.1875rem;
+    }
+
+    .wallet-row {
+        padding: 14px 16px;
+        gap: 12px;
+    }
+
+    .wallet-row__value {
+        font-size: 0.8125rem;
+    }
+}
+
+
+/* ----------------------------------------------------------------------
+ * 21.4 VERY NARROW SCREENS (< 380px)
+ * ----------------------------------------------------------------------
+ * Not a device-specific hack: below roughly 380px the brand wordmark and
+ * the two header controls genuinely compete for room. Only the header is
+ * adjusted, and only enough to keep everything legible and tappable.
+ * -------------------------------------------------------------------- */
+
+@media (max-width: 379.98px) {
+
+    :root {
+        --gutter: 16px;
+        --gutter-hero: 16px;
+    }
+
+    .brand__mark {
+        width: 36px;
+        height: 36px;
+    }
+
+    .brand__name {
+        font-size: 0.875rem;
+    }
+
+    .lang-select__toggle {
+        padding: 10px;
+    }
+
+    .nav-toggle {
+        width: 40px;
+        height: 40px;
+    }
+}
+
+
+/* ----------------------------------------------------------------------
+ * 21.5 TOUCH DEVICES
+ * ----------------------------------------------------------------------
+ * The live-chat label is a hover affordance. On touch there is no hover,
+ * so it is suppressed rather than left half-triggered by a tap; the
+ * launcher's aria-label still carries the same wording for assistive
+ * technology, and keyboard focus still reveals it on hybrid devices.
+ * -------------------------------------------------------------------- */
+
+@media (hover: none) {
+
+    .chat-widget:hover .chat-widget__label {
+        opacity: 0;
+    }
+
+    .chat-widget:focus-visible .chat-widget__label {
+        opacity: 1;
+    }
+
+    /* No lift on tap — it reads as a stuck state on touch. */
+    .chat-widget:hover {
+        transform: none;
+    }
 }

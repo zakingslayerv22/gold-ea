@@ -275,15 +275,38 @@ const termsAndConditionsLink = "#";
 
 
 /* ======================================================================
- * TRANSLATION (GTRANSLATE FREE)
+ * TRANSLATION LANGUAGES
  * ======================================================================
  * Translation is powered by the free GTranslate widget. The site's own
  * gold dropdown is the visible interface; GTranslate runs hidden behind
  * it and does the actual translating.
  *
- * translationLanguages is the shortlist shown when the panel opens.
- * Everything in translationExtraLanguages stays searchable — type any
- * language name into the panel's search box to find it.
+ * The languages offered in the dropdown are configured here.
+ *
+ * Each language has:
+ *   - code: the language code the translation system uses
+ *   - name: the human-readable language name
+ *
+ * translationLanguages is the shortlist shown the moment the panel opens.
+ * translationExtraLanguages holds the rest; they do not clutter the list
+ * but stay fully reachable — typing any language name into the panel's
+ * search box searches BOTH lists.
+ *
+ * To add another supported language, add another object to either list:
+ *
+ *     {
+ *         code: "de",
+ *         name: "German"
+ *     }
+ *
+ * WHAT APPEARS WHERE
+ *   - The mobile header does NOT display this whole list. It shows only a
+ *     two-letter abbreviation of the CURRENTLY selected language, derived
+ *     from `code` (so "pt" renders as PT, "zh-CN" as ZH). Nothing needs to
+ *     be added here for that to work.
+ *   - Desktop and tablet headers show the full `name` instead.
+ *   - The open dropdown always lists full `name` values, never codes.
+ *   - The search field stays at the TOP of the dropdown.
  *
  * English is the site's original language and must stay first.
  * ====================================================================== */
@@ -291,42 +314,42 @@ const termsAndConditionsLink = "#";
 const translationDefaultLanguage = "en";
 
 const translationLanguages = [
-    { code: "en", label: "English" },
-    { code: "es", label: "Spanish" },
-    { code: "pt", label: "Portuguese" },
-    { code: "fr", label: "French" },
-    { code: "de", label: "German" },
-    { code: "zh-CN", label: "Chinese (Simplified)" },
-    { code: "hi", label: "Hindi" },
-    { code: "ar", label: "Arabic" },
-    { code: "ru", label: "Russian" },
-    { code: "ja", label: "Japanese" },
-    { code: "ko", label: "Korean" },
-    { code: "it", label: "Italian" },
-    { code: "tr", label: "Turkish" },
-    { code: "id", label: "Indonesian" },
-    { code: "ms", label: "Malay" },
-    { code: "vi", label: "Vietnamese" },
-    { code: "th", label: "Thai" }
+    { code: "en", name: "English" },
+    { code: "es", name: "Spanish" },
+    { code: "pt", name: "Portuguese" },
+    { code: "fr", name: "French" },
+    { code: "de", name: "German" },
+    { code: "zh-CN", name: "Chinese (Simplified)" },
+    { code: "hi", name: "Hindi" },
+    { code: "ar", name: "Arabic" },
+    { code: "ru", name: "Russian" },
+    { code: "ja", name: "Japanese" },
+    { code: "ko", name: "Korean" },
+    { code: "it", name: "Italian" },
+    { code: "tr", name: "Turkish" },
+    { code: "id", name: "Indonesian" },
+    { code: "ms", name: "Malay" },
+    { code: "vi", name: "Vietnamese" },
+    { code: "th", name: "Thai" }
 ];
 
 /* Also selectable, but only once searched for. */
 const translationExtraLanguages = [
-    { code: "nl", label: "Dutch" }, { code: "pl", label: "Polish" },
-    { code: "uk", label: "Ukrainian" }, { code: "ro", label: "Romanian" },
-    { code: "el", label: "Greek" }, { code: "cs", label: "Czech" },
-    { code: "sv", label: "Swedish" }, { code: "da", label: "Danish" },
-    { code: "fi", label: "Finnish" }, { code: "no", label: "Norwegian" },
-    { code: "hu", label: "Hungarian" }, { code: "he", label: "Hebrew" },
-    { code: "bn", label: "Bengali" }, { code: "ta", label: "Tamil" },
-    { code: "te", label: "Telugu" }, { code: "ur", label: "Urdu" },
-    { code: "fa", label: "Persian" }, { code: "sw", label: "Swahili" },
-    { code: "tl", label: "Filipino" }, { code: "zh-TW", label: "Chinese (Traditional)" },
-    { code: "bg", label: "Bulgarian" }, { code: "sr", label: "Serbian" },
-    { code: "hr", label: "Croatian" }, { code: "sk", label: "Slovak" },
-    { code: "af", label: "Afrikaans" }, { code: "ha", label: "Hausa" },
-    { code: "yo", label: "Yoruba" }, { code: "ig", label: "Igbo" },
-    { code: "zu", label: "Zulu" }, { code: "am", label: "Amharic" }
+    { code: "nl", name: "Dutch" }, { code: "pl", name: "Polish" },
+    { code: "uk", name: "Ukrainian" }, { code: "ro", name: "Romanian" },
+    { code: "el", name: "Greek" }, { code: "cs", name: "Czech" },
+    { code: "sv", name: "Swedish" }, { code: "da", name: "Danish" },
+    { code: "fi", name: "Finnish" }, { code: "no", name: "Norwegian" },
+    { code: "hu", name: "Hungarian" }, { code: "he", name: "Hebrew" },
+    { code: "bn", name: "Bengali" }, { code: "ta", name: "Tamil" },
+    { code: "te", name: "Telugu" }, { code: "ur", name: "Urdu" },
+    { code: "fa", name: "Persian" }, { code: "sw", name: "Swahili" },
+    { code: "tl", name: "Filipino" }, { code: "zh-TW", name: "Chinese (Traditional)" },
+    { code: "bg", name: "Bulgarian" }, { code: "sr", name: "Serbian" },
+    { code: "hr", name: "Croatian" }, { code: "sk", name: "Slovak" },
+    { code: "af", name: "Afrikaans" }, { code: "ha", name: "Hausa" },
+    { code: "yo", name: "Yoruba" }, { code: "ig", name: "Igbo" },
+    { code: "zu", name: "Zulu" }, { code: "am", name: "Amharic" }
 ];
 
 
@@ -675,6 +698,15 @@ function getAllTranslationLanguages() {
     return [...translationLanguages, ...translationExtraLanguages];
 }
 
+/**
+ * The two-letter abbreviation the mobile header shows for a language.
+ * Derived from the code, so adding a language needs no extra field:
+ * "pt" → PT, "zh-CN" → ZH.
+ */
+function languageAbbreviation(code) {
+    return String(code).split("-")[0].slice(0, 2).toUpperCase();
+}
+
 /** Loads GTranslate's free widget once, after its settings are in place. */
 function loadGTranslate() {
     if (qs("#gtranslate-script")) {
@@ -791,6 +823,7 @@ function initTranslation() {
     const search = qs("#lang-select-search", root);
     const list = qs("#lang-select-list", root);
     const label = qs("#lang-select-label", root);
+    const codeLabel = qs("#lang-select-code", root);
 
     if (!toggle || !panel || !search || !list || !label) {
         return;
@@ -798,13 +831,34 @@ function initTranslation() {
 
     const allLanguages = getAllTranslationLanguages();
 
+    /**
+     * Writes the current language into the header.
+     * The full name is shown on desktop and tablet, the abbreviation on
+     * mobile; CSS decides which is visible, so both are always current.
+     * The accessible name always states the full language.
+     */
+    function showCurrentLanguage(entry) {
+        label.textContent = entry.name;
+
+        if (codeLabel) {
+            codeLabel.textContent = languageAbbreviation(entry.code);
+        }
+
+        toggle.setAttribute("aria-label", `Language: ${entry.name}. Change language`);
+    }
+
     // Reflect the language the visitor is already in (cookie survives reloads).
     let activeCode = getActiveTranslationLanguage();
     const activeEntry = allLanguages.find((language) => language.code === activeCode);
+
     if (activeEntry) {
-        label.textContent = activeEntry.label;
+        showCurrentLanguage(activeEntry);
     } else {
         activeCode = translationDefaultLanguage;
+        const fallback = allLanguages.find((l) => l.code === activeCode);
+        if (fallback) {
+            showCurrentLanguage(fallback);
+        }
     }
 
     /**
@@ -815,8 +869,9 @@ function initTranslation() {
     function renderOptions(filter = "") {
         const term = filter.trim().toLowerCase();
         const pool = term ? allLanguages : translationLanguages;
+        // The open dropdown always lists full language names, never codes.
         const matches = pool.filter((language) =>
-            language.label.toLowerCase().includes(term)
+            language.name.toLowerCase().includes(term)
         );
 
         list.innerHTML = "";
@@ -836,7 +891,7 @@ function initTranslation() {
             option.setAttribute("role", "option");
             option.setAttribute("aria-selected", String(language.code === activeCode));
             option.dataset.code = language.code;
-            option.textContent = language.label;
+            option.textContent = language.name;
             list.append(option);
         });
     }
@@ -879,7 +934,7 @@ function initTranslation() {
         }
 
         activeCode = option.dataset.code;
-        label.textContent = option.textContent;
+        showCurrentLanguage({ code: activeCode, name: option.textContent });
         setSiteLanguage(activeCode);
         closePanel({ restoreFocus: true });
     });

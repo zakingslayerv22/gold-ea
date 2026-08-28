@@ -77,21 +77,10 @@
                 </a>
 
                 <!--
-                    §5.2 Navigation.
-                    The hamburger toggle is an intentional requirement for the
-                    mobile build even though the supplied mobile mockup shows
-                    no menu button at all. It is hidden at desktop widths by
-                    CSS; its behaviour is already wired in main.js so the
-                    mobile phase only has to reveal and style it.
+                    §5.2 Navigation. Inline at desktop and landscape-tablet
+                    widths; below the nav breakpoint it becomes the panel the
+                    hamburger opens. Same links, same markup — no duplication.
                 -->
-                <button type="button" class="nav-toggle" id="nav-toggle"
-                        aria-label="Open navigation menu" aria-expanded="false"
-                        aria-controls="primary-nav">
-                    <span class="nav-toggle__bar" aria-hidden="true"></span>
-                    <span class="nav-toggle__bar" aria-hidden="true"></span>
-                    <span class="nav-toggle__bar" aria-hidden="true"></span>
-                </button>
-
                 <nav class="primary-nav" id="primary-nav" aria-label="Primary">
                     <ul class="primary-nav__list">
                         <li><a class="primary-nav__link" href="#how-it-works">How It Trades</a></li>
@@ -102,22 +91,56 @@
                     </ul>
                 </nav>
 
-                <!-- §5.3 Translation / language selector -->
-                <div class="lang-select" id="lang-select">
-                    <button type="button" class="lang-select__toggle" id="lang-select-toggle"
-                            aria-expanded="false" aria-haspopup="listbox"
-                            aria-controls="lang-select-panel">
-                        <span id="lang-select-label">English</span>
-                        <svg class="lang-select__chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+                <!--
+                    Header actions. The language control and the hamburger are
+                    deliberately grouped so they stay side by side on mobile,
+                    where horizontal space is scarce. The brand sits at the far
+                    left and this group at the far right; the space between them
+                    is what justify-content: space-between distributes.
+                -->
+                <div class="site-header__actions">
+
+                    <!-- §5.3 Translation / language selector -->
+                    <div class="lang-select" id="lang-select">
+                        <button type="button" class="lang-select__toggle" id="lang-select-toggle"
+                                aria-expanded="false" aria-haspopup="listbox"
+                                aria-controls="lang-select-panel">
+                            <!--
+                                Two labels, one visible at a time. Desktop and
+                                tablet show the full language name; mobile shows
+                                only the two-letter abbreviation of the CURRENT
+                                language. main.js keeps both in sync — neither is
+                                hard-coded.
+                            -->
+                            <span class="lang-select__name" id="lang-select-label">English</span>
+                            <span class="lang-select__code" id="lang-select-code">EN</span>
+                            <svg class="lang-select__chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+                        </button>
+
+                        <div class="lang-select__panel" id="lang-select-panel" hidden>
+                            <label class="visually-hidden" for="lang-select-search">Search languages</label>
+                            <input type="search" class="lang-select__search" id="lang-select-search"
+                                   placeholder="Search languages…" autocomplete="off">
+                            <div class="lang-select__list" id="lang-select-list"
+                                 role="listbox" aria-label="Languages"></div>
+                        </div>
+                    </div>
+
+                    <!--
+                        Hamburger. Hidden while the inline navigation still fits;
+                        revealed below the nav breakpoint. Behaviour lives in
+                        initMobileNavigation() in main.js.
+                    -->
+                    <button type="button" class="nav-toggle" id="nav-toggle"
+                            aria-label="Open navigation menu" aria-expanded="false"
+                            aria-controls="primary-nav">
+                        <span class="nav-toggle__box" aria-hidden="true">
+                            <span class="nav-toggle__bar"></span>
+                            <span class="nav-toggle__bar"></span>
+                            <span class="nav-toggle__bar"></span>
+                        </span>
                     </button>
 
-                    <div class="lang-select__panel" id="lang-select-panel" hidden>
-                        <label class="visually-hidden" for="lang-select-search">Search languages</label>
-                        <input type="search" class="lang-select__search" id="lang-select-search"
-                               placeholder="Search languages…" autocomplete="off">
-                        <div class="lang-select__list" id="lang-select-list"
-                             role="listbox" aria-label="Languages"></div>
-                    </div>
                 </div>
 
             </div>

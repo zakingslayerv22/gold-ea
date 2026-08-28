@@ -1,0 +1,427 @@
+# Mobile Implementation
+
+**Date:** 28 August 2026
+**Scope:** responsive mobile + tablet layout, built on the approved desktop
+implementation as the content and functional baseline.
+
+The desktop layout is untouched. It still renders at 7688px with every
+section within the same margin of the desktop mockup as when it was
+approved — verified after this work, not assumed.
+
+No mobile-only HTML page was created. Everything runs from the existing
+`index.html`, `frequently-asked-questions.html`, `assets/scripts/main.js`,
+`assets/scripts/faq-index-page.js` and `assets/styles/styles.css`.
+
+This document sits alongside `DESKTOPUPDATE.md` and `CLAUDE.md`; neither
+was modified.
+
+---
+
+## Mobile Header
+
+The header is one flex row with two groups and the space between them
+distributed by `justify-content: space-between`:
+
+```
+┌──────────────────────────────────────────┐
+│ [GB] GOLDTRAP EA              [EN ⌄] [☰] │
+└──────────────────────────────────────────┘
+   brand group          →      actions group
+```
+
+**Left — `.brand`**
+- The GB logo (`assets/images/logo-gb.svg`), 40px on mobile and 36px
+  below 380px.
+- The site name, written from `siteName` in `main.js` via
+  `data-site-name`. It is never hard-coded in the HTML. The wordmark can
+  shrink and, in the extreme, ellipsise rather than push the controls off
+  screen.
+
+**Right — `.site-header__actions`**
+- The language control, then the hamburger, in that order.
+- They sit in **one shared container with a 10px gap**, so `space-between`
+  can only ever separate the brand from the pair — never the language
+  control from the hamburger. This is deliberate: horizontal room is
+  scarce on a phone and the two controls belong together.
+
+The markup change was to wrap the language selector and the hamburger in
+`.site-header__actions`. On desktop that group holds only the visible
+language pill, so the desktop header is unchanged.
+
+**Responsive behaviour**
+- ≥ 900px — inline navigation, full language name, no hamburger.
+- < 900px — hamburger appears, navigation becomes a panel.
+- < 640px — the language control switches to the abbreviation, the header
+  drops to a 72px row, the logo to 40px.
+- < 380px — logo 36px, wordmark 14px, hamburger 40px, gutters 16px.
+
+---
+
+## Mobile Language Selector
+
+**Closed**, the header shows only the abbreviation of the language
+currently in use — `EN`, `FR`, `PT`, `ES` — never a list of codes.
+
+**Open**, the panel is exactly the one the desktop uses. It was not
+redesigned:
+
+```
+┌──────────────────────────┐
+│ 🔍 Search languages…     │   ← still at the TOP
+├──────────────────────────┤
+│ English                  │   ← full names, never codes
+│ Spanish                  │
+│ Portuguese               │
+│ French                   │
+│ German                   │
+│ …                        │
+└──────────────────────────┘
+```
+
+- The search field remains the first element in the panel. It was not
+  moved, restyled or replaced.
+- The list always renders `name`, so the open dropdown shows full language
+  names at every screen size.
+- The currently selected language is marked with `aria-selected="true"`
+  and shown in gold.
+- Selecting a language closes the panel and returns focus to the toggle.
+- The panel is `width: min(280px, calc(100vw - 32px))` and right-aligned,
+  so it cannot overflow a narrow screen.
+
+**How the abbreviation stays current.** The toggle contains two labels:
+
+```html
+<span class="lang-select__name" id="lang-select-label">English</span>
+<span class="lang-select__code" id="lang-select-code">EN</span>
+```
+
+CSS decides which is visible — the name above 640px, the code below.
+`showCurrentLanguage()` in `main.js` writes **both** every time the
+language changes, so neither can drift and nothing is hard-coded. The
+abbreviation is derived from the language code by `languageAbbreviation()`
+(`"pt"` → `PT`, `"zh-CN"` → `ZH`), so adding a language needs no extra
+field.
+
+The toggle's `aria-label` is also rewritten — "Language: Portuguese.
+Change language" — so screen-reader users get the full name even though
+the visible label is two letters.
+
+---
+
+## Language Configuration
+
+Everything lives in one place: the **TRANSLATION LANGUAGES** section of
+`assets/scripts/main.js`. There is no second copy of the language data
+anywhere in the project.
+
+```js
+const translationLanguages = [
+    { code: "en", name: "English" },
+    { code: "es", name: "Spanish" },
+    { code: "pt", name: "Portuguese" },
+    …
+];
+
+const translationExtraLanguages = [
+    { code: "nl", name: "Dutch" },
+    …
+];
+```
+
+- `translationLanguages` — the 17 shown the moment the panel opens.
+- `translationExtraLanguages` — a further 30 that stay out of the way but
+  remain searchable. Typing in the search box searches **both** lists.
+
+**To add a language**, add one object to either list:
+
+```js
+{
+    code: "de",
+    name: "German"
+}
+```
+
+That is the only edit required. The dropdown picks it up, the search
+finds it, GTranslate receives the code, and the mobile header derives its
+abbreviation automatically.
+
+The section carries a comment block explaining exactly this, including
+which part of the UI shows the code and which shows the name, and a
+reminder to keep the search field at the top.
+
+---
+
+## Hamburger Navigation
+
+The hamburger uses the **same `<nav>` element** as the desktop. The links
+are not duplicated anywhere — below 900px that nav is restyled into a
+drop-down panel.
+
+**Visual state.** Three bars in a fixed 20 × 14 box; when
+`aria-expanded="true"` the outer bars rotate ±45° onto the centre line and
+the middle bar fades, forming an ×. CSS transitions only, and they are
+covered by the reduced-motion rules.
+
+**Behaviour** (`initMobileNavigation()` in `main.js`):
+
+| Action | Result |
+|---|---|
+| Tap / Enter on the hamburger | toggles the panel |
+| `Escape` | closes it and returns focus to the hamburger |
+| Click or tap outside | closes it |
+| Choosing any link | closes it |
+
+**Accessibility**
+- `aria-label="Open navigation menu"`
+- `aria-expanded` maintained on every state change
+- `aria-controls="primary-nav"`, resolving to the real nav element
+- 44 × 44px target (40 × 40 below 380px), above the 44px guideline at the
+  sizes that matter
+- Visible focus ring from the site-wide `:focus-visible` rule
+- Closed state uses `visibility: hidden`, so the links leave the tab order
+  rather than staying focusable behind the header
+
+The panel is `position: absolute` under the header, constrained to the
+viewport, `max-height: calc(100dvh - 100%)` with internal scrolling, so a
+long list can never push the page sideways. `body.nav-is-open` locks page
+scrolling behind it.
+
+---
+
+## Responsive Layout
+
+Three breakpoints, each earning its place. Sizing between them is fluid —
+the type scale uses `clamp()`, grids use `auto-fit`/`minmax()`, and
+spacing uses `clamp()` — so intermediate widths interpolate rather than
+snap. There are no per-device media queries.
+
+| Breakpoint | What changes | Why |
+|---|---|---|
+| **1024px** | Hero becomes one column; three-across grids drop to two; pricing stacks; source-code card stacks; dialogs gain scroll safety | Matches the tablet mockup, which shows 2-up benefit and step cards and single-column pricing |
+| **900px** | Inline nav collapses into the hamburger panel | The inline nav needs roughly 820px before it crowds the brand and language pill. Landscape tablets keep the inline nav the tablet mockup shows; portrait tablets and phones get the hamburger |
+| **640px** | Single column throughout, 20px gutter, full-width buttons, compact header with the language abbreviation | The mobile mockup |
+| *(380px)* | Header only: smaller logo, wordmark and controls, 16px gutters | Not a device hack — below ~380px the brand and the two controls genuinely compete for room |
+
+**Values measured from the mobile mockup at 360px** rather than scaled
+down from desktop:
+
+- gutter **20px**
+- section padding **~83px top / ~78px bottom**
+- H1 **~48px**, H2 **~36px**, hero body **~18px**
+- benefit cards **66px tall with a 12px gap**
+- buttons full width at **~53px**
+- chart panel roughly **320 × 370** (portrait)
+
+**Section-by-section**, all single column on mobile: hero (copy then
+chart), quick benefits, how-it-works, live results (button below the
+heading block), pricing, source code, free access, download, FAQ, footer.
+No content was removed at any width.
+
+**The live chart** uses `aspect-ratio` rather than fixed dimensions:
+`672/597` on desktop, `16/12` on tablet, `320/370` on mobile. It fills its
+column and cannot overflow.
+
+---
+
+## Pricing
+
+The grid keeps its `auto-fit` architecture, so a fourth plan still drops
+in from configuration alone at every width.
+
+- **Desktop** — `repeat(auto-fit, minmax(150px, 1fr))`, three across.
+- **Tablet and below** — `repeat(auto-fit, minmax(min(100%, 420px), 1fr))`,
+  which resolves to a single column without hard-coding a column count.
+- **Mobile** — one column, 16px gap, 24/20px card padding, full-width CTA.
+
+Card internals were tightened to the mockup's mobile rhythm: 18px divider
+margins, 11px feature-list gaps, smaller caption and plan name.
+
+**Timers are unchanged.** `pricingTimerStatus` is still `"hide"`,
+durations and increments untouched, each plan still independent. The
+hidden timer still reserves its space (`visibility: hidden`, 20px
+min-height and 10px margin on mobile), so switching to `"show"` never
+resizes a card. Verified at mobile width with `"show"` temporarily set.
+
+---
+
+## Dialogs
+
+Both the payment dialog and the source-code dialog were made responsive
+without redesigning them.
+
+- **Tablet and below** — `width: min(640px, calc(100vw - 40px))`,
+  `max-height: calc(100dvh - 40px)`, `overflow-y: auto`.
+- **Mobile** — `width: calc(100vw - 24px)`, tighter padding, 20px radius,
+  smaller title and amount, wallet address at 13px.
+
+Everything else is preserved and was re-tested at 320px, 390px and 768px:
+plan name and amount from the clicked card, `TRC20 (TRON)`, `USDT`, the
+wallet copy behaviour with its 5-second green check, the Telegram
+confirmation link, the X button, outside-click closing and `Escape`.
+
+---
+
+## Live Chat
+
+- Still **68 × 68px** at every width — not resized for mobile.
+- Green online indicator unchanged, still a separate element from the
+  gold pulse.
+- The continuous gold pulse still uses `var(--site-primary-accent)`, and
+  there is still no permanent gold ring — the glow only appears while the
+  ring is expanding.
+- Positioned `right: 16px; bottom: 16px` on mobile (40px on desktop), so
+  it sits clear of content and inside the viewport.
+
+**Touch handling.** The hover label is a hover affordance, so under
+`@media (hover: none)` it is suppressed rather than left half-triggered by
+a tap, and the launcher's lift on hover is disabled because it reads as a
+stuck state on touch. The launcher's `aria-label` carries the same wording
+(`Chat with Abang Rimba — online`) so the information is never
+hover-only, and keyboard focus still reveals the label on hybrid devices.
+
+The launcher remains a plain anchor, so it is fully usable by tap.
+
+---
+
+## FAQ
+
+Architecture unchanged — still one `FaqServiceHomepage` instance feeding
+both pages, with no duplicated data.
+
+- **Categories** — two pills per row on mobile
+  (`flex: 1 1 calc(50% - 4px)`), matching the mockup, at 11px/12px padding
+  for a comfortable target.
+- **Questions** — one column below 640px, 18px/16px trigger padding, 16px
+  question text.
+- Only one answer open at a time; opening another closes the previous one.
+- Keyboard operation, `aria-expanded` and `aria-controls` all unchanged.
+
+---
+
+## Footer
+
+- Content stays centred and stacks naturally; no layout change was needed
+  beyond type sizing.
+- Caveat, terms notice and copyright drop to 13px on mobile.
+- Padding reduces to 44px top and bottom.
+- The dynamic year, `siteName`, `siteOwner`, the configurable caveat, the
+  Terms and Conditions link and the Telegram icon all behave exactly as on
+  desktop.
+- No horizontal overflow at any tested width.
+
+---
+
+## Accessibility
+
+- Semantic HTML throughout; no new wrappers that break the landmark
+  structure. The header actions group is a plain `<div>` inside the
+  existing `<header>`.
+- Touch targets: hamburger 44px, nav links 15px vertical padding, FAQ
+  triggers 18px, buttons ≥ 48px tall.
+- `aria-expanded` on the hamburger, the language toggle and every FAQ
+  trigger; `aria-controls` pointing at real elements.
+- The language toggle's accessible name states the full language even when
+  only two letters are visible.
+- `Escape` closes the nav panel, the language panel and both dialogs, each
+  returning focus to its trigger.
+- Visible focus rings everywhere from the shared `:focus-visible` rule.
+- Nothing depends solely on hover: the chat label is suppressed on touch
+  and its content is duplicated in the `aria-label`.
+- Reduced motion is respected — the nav transition, hamburger animation,
+  chat pulse and scroll reveal are all disabled or neutralised under
+  `prefers-reduced-motion: reduce`.
+- Scroll reveal remains behind `@media (scripting: enabled)`, so content is
+  fully visible if JavaScript never runs.
+
+---
+
+## Testing
+
+Rendered and asserted in a real browser at every category below. No
+horizontal overflow at any width.
+
+| Category | Width | Overflow | Hamburger | Language label | Layout |
+|---|---|---|---|---|---|
+| Very small phone | 320 | 0px | yes | `EN` | 1 column |
+| Small phone | 360 | 0px | yes | `EN` | 1 column |
+| Normal phone | 390 | 0px | yes | `EN` | 1 column |
+| Large phone | 430 | 0px | yes | `EN` | 1 column |
+| Portrait tablet | 768 | 0px | yes | full name | 2-up grids, 1-col pricing |
+| Landscape tablet | 1024 | 0px | no | full name | desktop layout |
+| Small laptop | 1280 | 0px | no | full name | desktop layout |
+| Desktop | 1920 | 0px | no | full name | desktop layout |
+
+**Automated suites — 210 checks passing**, plus the full GTranslate
+round-trip suite:
+
+| Suite | Checks |
+|---|---|
+| Mobile header / language / hamburger | 22 |
+| Mobile dialogs / chat / FAQ (320, 390, 768) | 51 |
+| Functional (desktop) | 46 |
+| Update / configuration | 45 |
+| Accessibility | 26 |
+| Announcement versioning + timers | 17 |
+| Motion / reduced motion / no-JS | 3 |
+| Translation round-trips | all pass |
+| Four-plan pricing grid | passes |
+
+**Specifically verified on mobile:** `EN` shown initially; tapping it
+opens the dropdown; the search field is above the first option; full names
+are listed; selecting French → `FR`, Portuguese → `PT`, Spanish → `ES`,
+English → `EN`; hamburger opens and closes; `aria-expanded` flips; Escape,
+outside click and link selection all close it; focus returns to the
+hamburger; pricing stacks; the chart fits; both dialogs fit and scroll;
+the wallet copy works; the footer fits.
+
+**Visual comparison** against the supplied mockups: the mobile hero,
+pricing band and free-access/download band were rendered at 360px and
+compared side by side with `mockups/mobile.png`; the tablet layout was
+rendered at 820px and compared with `mockups/tablet.png`. Card internals,
+the preset banner and the free-access/download spacing were corrected
+based on what those comparisons showed.
+
+Section heights against the mobile mockup after those corrections:
+
+| Section | Mockup | Built | Δ |
+|---|---|---|---|
+| announcement | 69 | 71 | +2 |
+| hero | 1228 | 1197 | −31 |
+| quick benefits | 969 | 967 | −2 |
+| how it works | 1832 | 1768 | −64 |
+| live results | 452 | 454 | +2 |
+| stats strip | 158 | 179 | +21 |
+| pricing + source | 2266 | 2537 | +271 |
+| free access + download | 2042 | 2247 | +205 |
+| FAQ | 1250 | 1271 | +21 |
+| footer | 233 | 355 | +122 |
+
+Seven of the ten sections are within ~2%. The two larger deltas are
+structural rather than layout errors: the pricing band carries the
+countdown timers' reserved rows, which CLAUDE.md §9.4 requires to stay
+even while hidden, and the footer carries the specification's Terms and
+Conditions line, which the mockup does not contain. Per the brief, the
+page was not compressed further merely to reduce its total height.
+
+**Desktop regression:** re-rendered at 1920px after all mobile work. Total
+page height 7688px and every section delta identical to the approved
+build — unchanged.
+
+---
+
+## Known Limitations
+
+1. **The tablet mockup shows no hamburger**, and neither does the mobile
+   mockup — the mobile mockup simply drops the nav links, leaving the logo
+   and language pill. A hamburger was nonetheless required by the brief,
+   so the collapse point was set at 900px: landscape tablets keep the
+   inline nav the tablet mockup shows, and portrait tablets and phones get
+   the hamburger.
+
+2. **Live translation still has not been exercised against Google's
+   servers** in this environment, for the reason recorded in
+   `DESKTOPUPDATE.md`. The mobile language switching was verified through
+   the same harness, using GTranslate's real `dropdown.js`.
+
+3. **`termsAndConditionsLink` remains `"#"`** — no terms URL has been
+   supplied.
