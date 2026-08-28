@@ -41,13 +41,21 @@
  * ====================================================================== */
 
 :root {
+    /*
+     * THEME COLOURS
+     * The eight --site-* properties below are written by main.js from its
+     * SITE COLORS block, so the palette is editable from one place without
+     * touching CSS. Each var() carries the same value as a fallback, so the
+     * page is correctly coloured before JavaScript runs and if it fails.
+     */
+
     /* --- Surfaces: the page alternates between these near-black bands --- */
-    --bg-black: #050505;          /* hero band, how-it-works, free+download, footer */
+    --bg-black: var(--site-background, #050505);  /* hero, works, free+download, footer */
     --bg-zinc: #09090B;           /* quick benefits, pricing, FAQ                   */
     --bg-hero: #0B0A07;           /* hero base, under the gold glow                 */
     --bg-warm: #0D0C08;           /* live results band                              */
 
-    --surface: #111113;           /* neutral card (benefits, FAQ, dark buttons)     */
+    --surface: var(--site-surface, #111113);      /* neutral card, dark buttons     */
     --surface-warm: #14120F;      /* warm card (pricing, source code)               */
     --surface-2: #1A1A1D;         /* inactive pills, secondary buttons              */
     --surface-3: #202023;         /* hover state for dark surfaces                  */
@@ -55,20 +63,20 @@
     /* --- Lines --- */
     --rule: #222223;              /* neutral 1px section hairline                   */
     --rule-warm: #292312;         /* warm hairline (live results band)              */
-    --border-subtle: #232019;     /* default card border                            */
+    --border-subtle: var(--site-border, #232019); /* default card border            */
     --border-gold: #4A3F21;       /* emphasised card border                         */
-    --border-gold-solid: #DDB954; /* spec token: hover borders + icons (§10.3)      */
+    --border-gold-solid: var(--site-primary-accent, #DDB954); /* hover borders + icons */
 
     /* --- Gold ramp: the brand spine --- */
     --gold-100: #F1D998;          /* button gradient, top stop                      */
     --gold-200: #E8D59B;          /* display heading gradient, light stop           */
     --gold-300: #E8C97A;          /* eyebrows and gold body text                    */
-    --gold-400: #DDB954;          /* primary gold accent                            */
+    --gold-400: var(--site-primary-accent, #DDB954);  /* primary gold accent        */
     --gold-500: #C9A94E;          /* button gradient, bottom stop                   */
     --gold-600: #C4AC60;          /* display heading gradient, dark stop            */
 
     /* --- Accents --- */
-    --green-dot: #00D492;         /* live / online indicators                       */
+    --green-dot: var(--site-success, #00D492);    /* live / online indicators       */
     --green-btn: #2BC18A;         /* Free Access call to action                     */
     --green-text: #05A974;        /* the word "FREE" on the free plan               */
     --blue: #51B3E7;              /* View Live Results button (single use)          */
@@ -76,11 +84,11 @@
     --danger-text: #F87171;
 
     /* --- Text --- */
-    --text: #FFFFFF;
-    --text-muted: #AFAEB1;        /* body paragraphs                                */
+    --text: var(--site-text, #FFFFFF);
+    --text-muted: var(--site-muted-text, #AFAEB1);/* body paragraphs                */
     --text-dim: #9F9FA9;          /* idle nav links, top bar, meta                  */
     --text-faint: #8A8A93;        /* footer tier — see note below                   */
-    --on-gold: #09090B;           /* text sitting on gold or green fills            */
+    --on-gold: var(--site-primary-accent-hover, #09090B); /* text on gold/green     */
 
     /*
      * ACCESSIBILITY DEVIATION (the only one in this build).
@@ -430,7 +438,7 @@ button {
  */
 .btn--gold:hover,
 .btn--gold:focus-visible {
-    background: var(--on-gold);
+    background: var(--site-primary-accent-hover, #09090B);
     color: var(--gold-300);
     box-shadow: inset 0 0 0 1px var(--gold-400);
 }
@@ -684,13 +692,21 @@ button {
  * so groups of cards cascade without needing one CSS rule per child.
  * ====================================================================== */
 
-.scroll-reveal {
-    opacity: 0;
-    transform: translateY(var(--reveal-distance));
-    transition:
-        opacity var(--reveal-duration) ease-out,
-        transform var(--reveal-duration) ease-out;
-    transition-delay: calc(var(--reveal-index, 0) * var(--reveal-stagger));
+/*
+ * The hidden starting state is applied ONLY where scripting is available,
+ * so a visitor with JavaScript disabled or broken sees every section at
+ * full opacity instead of a blank page. Browsers that do not support the
+ * `scripting` media feature also fall through to the visible default.
+ */
+@media (scripting: enabled) {
+    .scroll-reveal {
+        opacity: 0;
+        transform: translateY(var(--reveal-distance));
+        transition:
+            opacity var(--reveal-duration) ease-out,
+            transform var(--reveal-duration) ease-out;
+        transition-delay: calc(var(--reveal-index, 0) * var(--reveal-stagger));
+    }
 }
 
 .scroll-reveal.is-visible {
@@ -715,6 +731,14 @@ button {
 
     .pulsing-dot::after {
         animation: none;
+    }
+
+    /* No perpetual animation for visitors who asked for reduced motion.
+       The launcher keeps its steady halo, so it still reads as active. */
+    .chat-widget__pulse,
+    .chat-widget__pulse::after {
+        animation: none;
+        opacity: 0.32;
     }
 
     *,
@@ -866,6 +890,41 @@ button {
 .primary-nav__link:hover,
 .primary-nav__link:focus-visible {
     color: var(--text);
+}
+
+
+/* --- 7.2b Mobile navigation toggle ------------------------------------
+ * Hidden at desktop widths. The mobile phase reveals it in its media
+ * query; the behaviour (aria-expanded, Escape, outside click, link
+ * closes menu, focus return) is already implemented in main.js.
+ * ------------------------------------------------------------------- */
+
+.nav-toggle {
+    display: none;                 /* desktop: navigation is always visible */
+    flex-direction: column;
+    justify-content: center;
+    gap: 5px;
+    width: 44px;
+    height: 44px;
+    padding: 10px;
+    border-radius: 10px;
+    background: var(--surface-2);
+    border: 1px solid var(--border-subtle);
+    transition: background var(--transition), border-color var(--transition);
+}
+
+.nav-toggle:hover,
+.nav-toggle:focus-visible {
+    background: var(--surface-3);
+    border-color: var(--border-gold);
+}
+
+.nav-toggle__bar {
+    display: block;
+    height: 2px;
+    width: 100%;
+    border-radius: 2px;
+    background: var(--text);
 }
 
 
@@ -1894,7 +1953,8 @@ button {
     bottom: 40px;
     z-index: 60;
     display: inline-flex;
-    border-radius: 50%;
+    align-items: center;
+    gap: 12px;
     transition: transform var(--transition);
 }
 
@@ -1903,17 +1963,99 @@ button {
     transform: translateY(-3px);
 }
 
+.chat-widget__avatar-wrap {
+    position: relative;
+    display: inline-flex;
+    flex-shrink: 0;
+}
+
 .chat-widget__avatar {
-    width: 72px;
-    height: 72px;
+    position: relative;
+    z-index: 1;
+    width: 68px;
+    height: 68px;
     border-radius: 50%;
     border: 1px solid #69655B;
     object-fit: cover;
 }
 
-/* Online indicator — stays visually active at all times. */
+/*
+ * Continuous gold "energy" pulse. It is a separate ring behind the photo,
+ * so the avatar itself never scales, blurs or distorts. The colour is the
+ * configurable site accent, not a hard-coded gold.
+ */
+.chat-widget__pulse {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background: var(--site-primary-accent, #DDB954);
+    opacity: 0.55;
+    animation: chat-pulse 2.6s ease-out infinite;
+}
+
+.chat-widget__pulse::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background: inherit;
+    animation: chat-pulse 2.6s ease-out infinite;
+    animation-delay: 1.3s;
+}
+
+@keyframes chat-pulse {
+    0%   { transform: scale(1);    opacity: 0.5; }
+    70%  { transform: scale(1.45); opacity: 0; }
+    100% { transform: scale(1.45); opacity: 0; }
+}
+
+/* A steady halo underneath, so the launcher reads as "live" between pulses. */
+.chat-widget__avatar-wrap::after {
+    content: "";
+    position: absolute;
+    inset: -6px;
+    border-radius: 50%;
+    box-shadow: 0 0 24px -4px var(--site-primary-accent, #DDB954);
+    pointer-events: none;
+}
+
+/*
+ * Hover / focus label, sliding out to the LEFT. It is absolutely
+ * positioned so revealing it cannot shift the launcher or the page.
+ */
+.chat-widget__label {
+    position: absolute;
+    right: calc(100% + 12px);
+    top: 50%;
+    transform: translate(8px, -50%);
+    white-space: nowrap;
+    padding: 10px 16px;
+    border-radius: var(--radius-pill);
+    background: var(--surface);
+    border: 1px solid var(--border-gold);
+    color: var(--text);
+    font-family: var(--font-display);
+    font-size: var(--fs-sm);
+    font-weight: 700;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity var(--transition), transform var(--transition);
+}
+
+/* Keyboard focus gets the same visible state as hover. */
+.chat-widget:hover .chat-widget__label,
+.chat-widget:focus-visible .chat-widget__label {
+    opacity: 1;
+    transform: translate(0, -50%);
+}
+
+/*
+ * Online indicator — green, and deliberately separate from the gold pulse
+ * above. Green means "available"; gold is the site's accent animation.
+ */
 .chat-widget__status {
     position: absolute;
+    z-index: 2;
     top: 0;
     right: 0;
     width: 14px;
@@ -1921,6 +2063,26 @@ button {
     border-radius: 50%;
     background: var(--green-dot);
     border: 2px solid var(--bg-black);
+}
+
+
+/*
+ * Reduced motion for the launcher.
+ * This block must come AFTER the .chat-widget rules above: the earlier
+ * reduced-motion block in section 6 has equal specificity and would
+ * otherwise be overridden by source order.
+ */
+@media (prefers-reduced-motion: reduce) {
+    .chat-widget__pulse,
+    .chat-widget__pulse::after {
+        animation: none;
+        opacity: 0.32;
+    }
+
+    .chat-widget:hover,
+    .chat-widget:focus-visible {
+        transform: none;
+    }
 }
 
 
@@ -2108,14 +2270,18 @@ button {
 
 
 /* ======================================================================
- * 20. GOOGLE TRANSLATE OVERRIDES
+ * 20. GTRANSLATE OVERRIDES
  * ======================================================================
- * The widget injects a banner frame and shifts the document down. These
- * rules neutralise that so translation never disturbs the layout.
+ * Translation runs on the free GTranslate widget. GTranslate's own UI is
+ * hidden here so the site's custom gold dropdown stays the only visible
+ * interface, and the banner frame Google injects is suppressed so
+ * translating never shifts the layout.
  * ====================================================================== */
 
-#google_translate_element {
-    display: none;
+/* GTranslate's markup and the hidden engine it mounts inside it. */
+.gtranslate_wrapper,
+#google_translate_element2 {
+    display: none !important;
 }
 
 .skiptranslate iframe,

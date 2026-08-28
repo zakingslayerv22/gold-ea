@@ -1,32 +1,232 @@
 /* ======================================================================
  * GOLDTRAP EA — MAIN SCRIPT
  * ======================================================================
- * Everything you are likely to want to change lives in the SITE
- * CONFIGURATION block immediately below. Nothing in this file's lower
- * half needs editing to rebrand, re-price, or re-link the site.
+ * EVERYTHING YOU ARE LIKELY TO WANT TO EDIT IS IN THE CONFIGURATION
+ * BLOCK BELOW. You do not need to understand the rest of this file, or
+ * touch any HTML or CSS, to change the site's name, colours, prices,
+ * links, wallet address, announcement or chat text.
+ *
+ * Each setting says what it controls and where it shows up.
  * ====================================================================== */
 
 
 /* ======================================================================
- * SITE CONFIGURATION
+ * SITE INFORMATION
  * ======================================================================
- * Site identity. Used in the <title>, all social/meta tags, the header
- * wordmark and the footer copyright — never hard-coded in the HTML.
+ * siteName  is the single authoritative source for the product name.
+ *           It is written into the browser tab title, the meta and
+ *           social tags, the header wordmark, headings, buttons, the
+ *           purchase dialogs and the footer copyright.
+ *           Change it here and the whole site follows — the name is not
+ *           hard-coded anywhere in the HTML.
+ *
+ * siteOwner is the person the site belongs to. It appears in the footer
+ *           copyright, the purchase dialogs and the live-chat label.
  * ====================================================================== */
 
 const siteName = "GOLDTRAP EA";
 const siteOwner = "Abang Rimba";
 
+/*
+ * The current Expert Advisor version, e.g. "v4.2.3".
+ * Shown in the source-code section, both purchase dialogs and the
+ * download filenames. Change it here when you release a new version.
+ */
+const eaCurrentVersion = "v4.2.3";
+
+/*
+ * The compiled MetaTrader 5 filename offered on the Download section.
+ * The MetaTrader 4 filename is derived from it by swapping the
+ * extension, so you normally only need to edit this one line.
+ */
+const eaCurrentFileName = "GoldTrap_v4_2_3.ex5";
+
+/*
+ * A short tagline used in the browser tab title and the social preview
+ * text, printed after the site name.
+ */
+const siteTagline = "Automated MT4/MT5 Gold Trading";
+
+/*
+ * The sentence search engines and social networks show under the title.
+ * "{siteName}" is replaced with the value of siteName above.
+ */
+const siteDescription =
+    "{siteName} automates trade execution and basket management for XAUUSD " +
+    "on MetaTrader 4 and MetaTrader 5, using a structured trading approach " +
+    "built for consistency.";
+
 
 /* ======================================================================
- * TELEGRAM
+ * SITE COLORS
+ * ======================================================================
+ * These are the website's real colours, sampled from the design. They
+ * are pushed into CSS at runtime as custom properties, so changing a
+ * value here re-themes the whole site — no CSS editing required.
+ *
+ * Colours only. Spacing, type sizes, layout and animation timing stay
+ * in assets/styles/styles.css where they belong.
+ * ====================================================================== */
+
+/* The darkest page background, behind every section. */
+const siteBackgroundColor = "#050505";
+
+/* Card and panel background — benefit cards, FAQ items, dark buttons. */
+const siteSurfaceColor = "#111113";
+
+/* The gold used for buttons, eyebrows, icons and the live-chat pulse. */
+const sitePrimaryAccentColor = "#DDB954";
+
+/*
+ * The near-black that gold buttons switch to when hovered, and the text
+ * colour printed on top of gold and green fills.
+ */
+const sitePrimaryAccentHoverColor = "#09090B";
+
+/* Headings and primary copy. */
+const siteTextColor = "#FFFFFF";
+
+/* Body paragraphs and secondary copy. */
+const siteMutedTextColor = "#AFAEB1";
+
+/* Hairline borders around cards, inputs and pills. */
+const siteBorderColor = "#232019";
+
+/* Green used by the live/online indicators and the free-plan accents. */
+const siteSuccessColor = "#00D492";
+
+
+/* ======================================================================
+ * LIVE CHAT / PITCHBAR
+ * ======================================================================
+ * The floating avatar in the bottom-right corner.
+ *
+ * The real chat system will be Pitchbar, self-hosted on a VPS. It is NOT
+ * integrated yet. The launcher below is the site's own element and will
+ * keep working exactly as it does now; when Pitchbar is ready you only
+ * fill in the section marked "PITCHBAR INTEGRATION POINT" further down
+ * this file. Nothing else on the site has to change.
+ * ====================================================================== */
+
+/*
+ * The label that slides out to the LEFT of the avatar on hover or
+ * keyboard focus. Edit the words before ${siteOwner} freely.
+ */
+const liveChatIconHoverText = `Chat with ${siteOwner}`;
+
+/*
+ * Until Pitchbar is installed the launcher opens a direct Telegram chat.
+ * Set to false once Pitchbar takes over the click.
+ */
+const liveChatUsesTelegramFallback = true;
+
+
+/* ======================================================================
+ * LIVE CHART
+ * ======================================================================
+ * The hero holds an empty, correctly-sized container for an external
+ * price chart. homepageLiveChartApi is the endpoint / embed URL that
+ * chart is loaded from; it is read by the chart initialiser below and is
+ * never written into the HTML.
+ *
+ * The mockup shows a TradingView XAUUSD widget. Put your own endpoint
+ * here — leave it as an empty string to keep the container empty.
+ * Never put a private API key in this file: it ships to the browser.
+ * ====================================================================== */
+
+const homepageLiveChartApi =
+    "https://s.tradingview.com/widgetembed/?symbol=OANDA%3AXAUUSD&interval=15&theme=dark&style=1&timezone=Etc%2FUTC&hide_side_toolbar=0&withdateranges=1&studies=Volume%40tv-basicstudies";
+
+
+/* ======================================================================
+ * PAYMENT
+ * ======================================================================
+ * These populate both purchase dialogs.
+ *
+ * IMPORTANT: paymentNetwork and walletAddress must describe the SAME
+ * blockchain. Sending funds on the wrong network loses them.
+ * ====================================================================== */
+
+const walletAddress = "TM74BDqkK3uoaJpZiFcNNChnj8jXQ3xWrT";
+
+/* The chain shown on the "Network" row of the purchase dialogs. */
+const paymentNetwork = "TRC20 (TRON)";
+
+/* The currency printed beside the amount, e.g. "$299 USDT". */
+const paymentAmountSuffix = "USDT";
+
+
+/* ======================================================================
+ * PRICING TIMERS
+ * ======================================================================
+ * Every pricing card has its own independent countdown. When a card's
+ * countdown reaches zero, that card's price rises by its own increment
+ * and its timer restarts. Cards never affect each other.
+ *
+ *   "show" — reveal the countdowns
+ *   "hide" — keep the countdowns running but invisible
+ *
+ * "hide" is the default because no countdown appears in the approved
+ * design. Hiding uses visibility:hidden, so the space stays reserved and
+ * the cards do not change height when you switch between the two.
+ *
+ * Per-plan price, increment and duration live in PRICING PLANS below.
+ * ====================================================================== */
+
+const pricingTimerStatus = "hide";
+
+
+/* ======================================================================
+ * ANNOUNCEMENT BAR
+ * ======================================================================
+ * The dismissible offer bar across the very top of the page.
+ *
+ * HOW TO PUBLISH A NEW ANNOUNCEMENT
+ *   1. Edit the announcement text below.
+ *   2. Change announcementVersion to a new value (the date is easiest).
+ *   3. Make sure announcementStatus is "new".
+ *
+ * Everyone sees the new announcement again, including visitors who
+ * dismissed the previous one. Nobody has to clear their browser data.
+ *
+ * How it works: when a visitor dismisses the bar, their browser stores
+ * the announcementVersion they dismissed. The bar stays hidden only
+ * while that stored version matches the version below. A different
+ * version means a different announcement, so it shows again.
+ * ====================================================================== */
+
+/*
+ * Set to "new" when an announcement should be displayed.
+ * Set to "old" when the announcement should no longer be displayed
+ * at all, for everyone, regardless of what they have dismissed.
+ */
+let announcementStatus = "new";
+
+/*
+ * Change this whenever you publish a NEW announcement.
+ * Changing this value makes the announcement new again for all visitors.
+ */
+const announcementVersion = "2026-08-28";
+
+/* The announcement wording. announcementBoldText is emphasised in white,
+ * announcementHighlightText is emphasised in gold and underlined. */
+const announcementBoldText = "New Client Offer - Free until Aug 31, 2026:";
+const announcementBodyText = "full access, all features — register with";
+const announcementHighlightText = "VT Markets";
+const announcementTailText = "via our IB link. No payment needed.";
+
+/* Where the announcement text links to. */
+const announcementLink = "https://a689.link";
+
+
+/* ======================================================================
+ * TELEGRAM LINKS
  * ======================================================================
  * telegramPersonal — direct chat with the owner. Used by the purchase
- *                    dialogs ("Confirm Payment on Telegram"), the source
- *                    code "Discuss on Telegram" button and the chat widget.
- * telegramChannel  — the public channel. Used by "View Live Results" and
- *                    the footer Telegram icon.
- * Both are reused site-wide; do not duplicate these URLs anywhere else.
+ *                    dialogs, "Discuss on Telegram" and the live chat.
+ * telegramChannel  — the public channel. Used by "View Live Results",
+ *                    the preset files link and the footer icon.
+ * Reused everywhere; never write a Telegram URL into the HTML.
  * ====================================================================== */
 
 const telegramPersonal = "https://t.me/abangrimba";
@@ -34,104 +234,117 @@ const telegramChannel = "https://t.me/goldtrapea";
 
 
 /* ======================================================================
- * PAYMENT
- * ======================================================================
- * These populate the purchase dialogs. `network` and `walletAddress` must
- * describe the SAME chain — sending funds on the wrong network loses them.
- *
- * NOTE: CLAUDE.md's example configuration reads "BSC BEP20", but both
- * supplied dialog mockups show TRC20 (Tron) together with a Tron-format
- * address. The mockups are the visual source of truth, so TRC20 is used
- * here. Change both lines together if you switch chains.
- * ====================================================================== */
-
-const walletAddress = "TM74BDqkK3uoaJpZiFcNNChnj8jXQ3xWrT";
-const network = "TRC20 (Tron)";
-const amountSuffix = "USDT";
-
-
-/* ======================================================================
- * LIVE ACTIVITY
- * ======================================================================
- * Colour of the pulsing dot in the Live Results stats strip. Accepts any
- * CSS colour. The pulse animation itself is defined in styles.css.
- * ====================================================================== */
-
-const liveActivityColor = "green";
-
-
-/* ======================================================================
- * LIVE STATISTICS
- * ======================================================================
- * The two figures shown in the Live Results strip. Written into the page
- * with textContent — they are never hard-coded in the HTML.
- * ====================================================================== */
-
-const licenseKeysGeneratedToday = "24";
-const easRunningToday = "2,371";
-
-
-/* ======================================================================
  * DOWNLOAD / WHITELIST
  * ======================================================================
- * The URL a trader must add to the MetaTrader WebRequest whitelist. It is
- * printed into the setup note and copied by the Copy control.
+ * The URL a trader must add to the MetaTrader WebRequest whitelist. It
+ * is printed into the setup note and copied by the Copy button.
  * ====================================================================== */
 
 const metaTraderWhitelist = "https://a689.link";
 
 
 /* ======================================================================
- * TOP ACTION BAR
+ * LIVE ACTIVITY + STATISTICS
  * ======================================================================
- * The dismissible offer bar. `offerBarBroker` is the highlighted broker
- * name; the supplied mockups disagree on it (desktop says "Vantage",
- * mobile says "VT Markets"), so it is configurable here rather than fixed.
- * Dismissal lasts for the current page session only.
+ * The pulsing dot and the two figures in the Live Results strip.
+ * liveActivityColor accepts any CSS colour.
  * ====================================================================== */
 
-const offerBarLead = "New Client Offer - Free until Aug 31, 2026:";
-const offerBarBody = "full access, all features — register with";
-const offerBarBroker = "VT Markets";
-const offerBarTail = "via our IB link. No payment needed.";
-const offerBarLink = "https://a689.link";
+const liveActivityColor = "green";
+
+const licenseKeysGeneratedToday = "24";
+const easRunningToday = "2,371";
 
 
 /* ======================================================================
- * FOOTER CONFIGURATION
+ * FOOTER
  * ======================================================================
- * footerCaveat          — the editable risk disclaimer at the foot of the
- *                         page. Written into #footer-caveat from here.
- * termsAndConditionsLink— destination of the Terms and Conditions anchor.
- * telegramChannel       — configured above; reused by the footer icon.
- * The copyright year is generated with new Date().getFullYear().
+ * The copyright line is generated automatically as
+ *     © [current year] [siteName] by [siteOwner]
+ * so the year is never out of date.
  * ====================================================================== */
 
-const footerCaveat =
+/* The editable risk disclaimer at the foot of every page. */
+const footerCaveatText =
     "Trading XAUUSD involves substantial risk. Past performance does not " +
     "guarantee future results. The EA, like any automated system, can lose " +
     "money. Use only capital you can afford to lose.";
 
+/* Where the "Terms and Conditions" link in the footer points. */
 const termsAndConditionsLink = "#";
+
+
+/* ======================================================================
+ * TRANSLATION (GTRANSLATE FREE)
+ * ======================================================================
+ * Translation is powered by the free GTranslate widget. The site's own
+ * gold dropdown is the visible interface; GTranslate runs hidden behind
+ * it and does the actual translating.
+ *
+ * translationLanguages is the shortlist shown when the panel opens.
+ * Everything in translationExtraLanguages stays searchable — type any
+ * language name into the panel's search box to find it.
+ *
+ * English is the site's original language and must stay first.
+ * ====================================================================== */
+
+const translationDefaultLanguage = "en";
+
+const translationLanguages = [
+    { code: "en", label: "English" },
+    { code: "es", label: "Spanish" },
+    { code: "pt", label: "Portuguese" },
+    { code: "fr", label: "French" },
+    { code: "de", label: "German" },
+    { code: "zh-CN", label: "Chinese (Simplified)" },
+    { code: "hi", label: "Hindi" },
+    { code: "ar", label: "Arabic" },
+    { code: "ru", label: "Russian" },
+    { code: "ja", label: "Japanese" },
+    { code: "ko", label: "Korean" },
+    { code: "it", label: "Italian" },
+    { code: "tr", label: "Turkish" },
+    { code: "id", label: "Indonesian" },
+    { code: "ms", label: "Malay" },
+    { code: "vi", label: "Vietnamese" },
+    { code: "th", label: "Thai" }
+];
+
+/* Also selectable, but only once searched for. */
+const translationExtraLanguages = [
+    { code: "nl", label: "Dutch" }, { code: "pl", label: "Polish" },
+    { code: "uk", label: "Ukrainian" }, { code: "ro", label: "Romanian" },
+    { code: "el", label: "Greek" }, { code: "cs", label: "Czech" },
+    { code: "sv", label: "Swedish" }, { code: "da", label: "Danish" },
+    { code: "fi", label: "Finnish" }, { code: "no", label: "Norwegian" },
+    { code: "hu", label: "Hungarian" }, { code: "he", label: "Hebrew" },
+    { code: "bn", label: "Bengali" }, { code: "ta", label: "Tamil" },
+    { code: "te", label: "Telugu" }, { code: "ur", label: "Urdu" },
+    { code: "fa", label: "Persian" }, { code: "sw", label: "Swahili" },
+    { code: "tl", label: "Filipino" }, { code: "zh-TW", label: "Chinese (Traditional)" },
+    { code: "bg", label: "Bulgarian" }, { code: "sr", label: "Serbian" },
+    { code: "hr", label: "Croatian" }, { code: "sk", label: "Slovak" },
+    { code: "af", label: "Afrikaans" }, { code: "ha", label: "Hausa" },
+    { code: "yo", label: "Yoruba" }, { code: "ig", label: "Igbo" },
+    { code: "zu", label: "Zulu" }, { code: "am", label: "Amharic" }
+];
 
 
 /* ======================================================================
  * PRICING PLANS
  * ======================================================================
  * The pricing grid is generated from this array, so adding a fourth plan
- * is a matter of adding one object here — the CSS grid (auto-fit) absorbs
- * it with no other change.
+ * is a matter of adding one object here — the CSS grid absorbs it with
+ * no other change.
  *
  * Per-plan fields:
- *   planName    plan title shown on the card and in the purchase dialog
+ *   planName    plan title, shown on the card and in the purchase dialog
  *   price       current price as a number (0 renders as "FREE")
- *   increment   how much `price` rises each time the countdown expires
- *   timerTime   countdown duration in SECONDS
- *   status      "show" reveals the countdown, "hide" keeps its space but
- *               hides it (visibility: hidden — the card never resizes)
+ *   increment   how much this plan's price rises when its timer expires
+ *   timerTime   this plan's countdown duration, in SECONDS
  *   currency    suffix printed beside the price
  *   eyebrow     small label above the plan name
- *   accent      "gold" | "green" — drives the card's colour treatment
+ *   accent      "gold" | "green" — the card's colour treatment
  *   caption     one-line description under the price
  *   hot         true renders the small HOT badge beside the price
  *   features    tick list
@@ -140,9 +353,7 @@ const termsAndConditionsLink = "#";
  *   cta         { label, type, href }. Omit href to open the purchase
  *               dialog; supply one to link out instead.
  *
- * TIMERS ARE SET TO "hide" BY DEFAULT because no countdown appears in the
- * supplied mockups and visual fidelity comes first. Change a plan's
- * `status` to "show" to reveal its timer — the logic is fully implemented.
+ * Timer visibility is global — see PRICING TIMERS above.
  * ====================================================================== */
 
 const pricingPlans = [
@@ -151,7 +362,6 @@ const pricingPlans = [
         price: 0,
         increment: 0,
         timerTime: 0,
-        status: "hide",
         currency: "",
         eyebrow: "Free Option",
         eyebrowIcon: "dot",
@@ -164,14 +374,13 @@ const pricingPlans = [
             "Submit MT5/MT4 ID + email for instant access"
         ],
         note: 'Free option is locked to <strong>1 MT5 account ID</strong> only.',
-        cta: { label: "Free Access", type: "green", href: offerBarLink, icon: "arrow" }
+        cta: { label: "Free Access", type: "green", href: announcementLink, icon: "arrow" }
     },
     {
         planName: "5 Accounts",
         price: 299,
         increment: 20,
         timerTime: 3600,
-        status: "hide",
         currency: "USDT",
         eyebrow: "Most Popular",
         eyebrowIcon: "flame",
@@ -191,7 +400,6 @@ const pricingPlans = [
         price: 740,
         increment: 20,
         timerTime: 3600,
-        status: "hide",
         currency: "USDT",
         eyebrow: "Unlimited Access",
         eyebrowIcon: "crown",
@@ -211,40 +419,15 @@ const pricingPlans = [
 
 
 /* ======================================================================
- * LANGUAGES
- * ======================================================================
- * Offered in the language selector. `code` must be a Google Translate
- * language code. Add or remove entries freely.
- * ====================================================================== */
-
-const languages = [
-    { code: "en", label: "English" },
-    { code: "es", label: "Spanish" },
-    { code: "zh-CN", label: "Chinese (Simplified)" },
-    { code: "hi", label: "Hindi" },
-    { code: "ar", label: "Arabic" },
-    { code: "pt", label: "Portuguese" },
-    { code: "ru", label: "Russian" },
-    { code: "ja", label: "Japanese" },
-    { code: "de", label: "German" },
-    { code: "fr", label: "French" },
-    { code: "ko", label: "Korean" },
-    { code: "it", label: "Italian" },
-    { code: "tr", label: "Turkish" },
-    { code: "id", label: "Indonesian" },
-    { code: "ms", label: "Malay" },
-    { code: "vi", label: "Vietnamese" },
-    { code: "th", label: "Thai" }
-];
-
-
-/* ======================================================================
  * BEHAVIOUR CONSTANTS
  * ====================================================================== */
 
 const COPY_FEEDBACK_MS = 5000;   // how long a "copied" confirmation persists
 const REVEAL_THRESHOLD = 0.15;   // how much of an element must be visible
 const TIMER_TICK_MS = 1000;
+const ANNOUNCEMENT_STORAGE_KEY = "goldtrap:announcement-dismissed-version";
+
+
 
 
 /* ======================================================================
@@ -288,62 +471,316 @@ const icons = {
 
 
 /* ======================================================================
- * TOP ACTION BAR  (CLAUDE.md §5.1)
+ * SITE COLORS → CSS CUSTOM PROPERTIES
+ * ======================================================================
+ * Pushes the SITE COLORS configuration onto the document root. The
+ * stylesheet reads these through var(--site-*, fallback), so the page is
+ * already correctly coloured before this runs and simply re-themes when
+ * it does. Only genuine theme colours live here — layout, spacing,
+ * typography and animation timing stay in styles.css.
  * ====================================================================== */
 
-function initActionBar() {
-    const bar = qs("#action-bar");
+function applySiteColors() {
+    const root = document.documentElement;
+
+    const palette = {
+        "--site-background": siteBackgroundColor,
+        "--site-surface": siteSurfaceColor,
+        "--site-primary-accent": sitePrimaryAccentColor,
+        "--site-primary-accent-hover": sitePrimaryAccentHoverColor,
+        "--site-text": siteTextColor,
+        "--site-muted-text": siteMutedTextColor,
+        "--site-border": siteBorderColor,
+        "--site-success": siteSuccessColor
+    };
+
+    Object.entries(palette).forEach(([property, value]) => {
+        if (value) {
+            root.style.setProperty(property, value);
+        }
+    });
+}
+
+
+/* ======================================================================
+ * SITE IDENTITY → PAGE
+ * ======================================================================
+ * Writes siteName, eaCurrentVersion and eaCurrentFileName into every
+ * place they appear, so none of them is hard-coded in the HTML.
+ *
+ *   data-site-name       element's text becomes siteName
+ *   data-site-name-in    "{siteName}" inside the text is substituted
+ *   data-ea-version      element's text becomes eaCurrentVersion
+ *   data-ea-filename     element's text becomes the EA filename; the
+ *                        optional value picks the platform ("mt4"/"mt5")
+ *
+ * Document title, meta description and the Open Graph / Twitter tags are
+ * rewritten from the same values.
+ * ====================================================================== */
+
+/** Replaces the {siteName} / {eaVersion} placeholders in a string. */
+function fillTokens(text) {
+    return text
+        .replace(/\{siteName\}/g, siteName)
+        .replace(/\{eaVersion\}/g, eaCurrentVersion)
+        .replace(/\{siteOwner\}/g, siteOwner);
+}
+
+/** MetaTrader 4 uses the same filename with an .ex4 extension. */
+function eaFileNameFor(platform) {
+    if (platform === "mt4") {
+        return eaCurrentFileName.replace(/\.ex5$/i, ".ex4");
+    }
+    return eaCurrentFileName;
+}
+
+function applySiteIdentity() {
+    qsa("[data-site-name]").forEach((element) => {
+        element.textContent = siteName;
+    });
+
+    qsa("[data-site-name-in]").forEach((element) => {
+        element.textContent = fillTokens(element.textContent);
+    });
+
+    qsa("[data-ea-version]").forEach((element) => {
+        element.textContent = eaCurrentVersion;
+    });
+
+    qsa("[data-ea-filename]").forEach((element) => {
+        element.textContent = eaFileNameFor(element.dataset.eaFilename);
+    });
+
+    // Metadata — the title pattern is supplied by the page itself.
+    const titleTemplate = document.documentElement.dataset.titleTemplate
+        || "{siteName} — " + siteTagline;
+    document.title = fillTokens(titleTemplate);
+
+    const description = fillTokens(
+        document.documentElement.dataset.description || siteDescription
+    );
+
+    const meta = (selector, value) => {
+        withElement(qs(selector), (element) => element.setAttribute("content", value));
+    };
+
+    meta('meta[name="description"]', description);
+    meta('meta[property="og:site_name"]', siteName);
+    meta('meta[property="og:title"]', document.title);
+    meta('meta[property="og:description"]', description);
+    meta('meta[name="twitter:title"]', document.title);
+    meta('meta[name="twitter:description"]', description);
+}
+
+
+/* ======================================================================
+ * ANNOUNCEMENT BAR  (version-based dismissal)
+ * ======================================================================
+ * The bar is shown when announcementStatus is "new" AND the visitor has
+ * not dismissed THIS announcementVersion.
+ *
+ * Dismissing stores the current announcementVersion in localStorage.
+ * Publishing a new announcement means changing announcementVersion — the
+ * stored value no longer matches, so the bar returns for everyone with
+ * nobody needing to clear their browser data.
+ *
+ * Nothing here rewrites the configuration; announcementStatus and
+ * announcementVersion are developer settings, edited by hand.
+ * ====================================================================== */
+
+/** Reads the announcement version this visitor last dismissed. */
+function getDismissedAnnouncementVersion() {
+    try {
+        return localStorage.getItem(ANNOUNCEMENT_STORAGE_KEY);
+    } catch (error) {
+        // Private mode or storage disabled — treat as "never dismissed".
+        return null;
+    }
+}
+
+function storeDismissedAnnouncementVersion(version) {
+    try {
+        localStorage.setItem(ANNOUNCEMENT_STORAGE_KEY, version);
+    } catch (error) {
+        /* storage unavailable — the dismissal simply will not persist */
+    }
+}
+
+function initAnnouncementBar() {
+    const bar = qs("#announcement-bar");
     if (!bar) {
         return;
     }
 
-    // Stay dismissed for the current page session only.
-    const DISMISS_KEY = "goldtrap:action-bar-dismissed";
-    let dismissed = false;
+    const isRetired = announcementStatus !== "new";
+    const alreadyDismissed = getDismissedAnnouncementVersion() === announcementVersion;
 
-    try {
-        dismissed = sessionStorage.getItem(DISMISS_KEY) === "1";
-    } catch (error) {
-        dismissed = false; // private mode / storage disabled — show the bar
-    }
-
-    if (dismissed) {
+    if (isRetired || alreadyDismissed) {
         bar.hidden = true;
         return;
     }
 
-    // The offer text and its destination are both configurable.
-    withElement(qs("#action-bar-link"), (link) => {
-        link.href = offerBarLink;
+    bar.hidden = false;
+    bar.dataset.announcementVersion = announcementVersion;
+
+    withElement(qs("#announcement-link", bar), (link) => {
+        link.href = announcementLink;
         link.innerHTML =
-            `<strong>${offerBarLead}</strong> ${offerBarBody} ` +
-            `<span class="highlight">${offerBarBroker}</span> ${offerBarTail}`;
+            `<strong>${announcementBoldText}</strong> ${announcementBodyText} ` +
+            `<span class="highlight">${announcementHighlightText}</span> ` +
+            `${announcementTailText}`;
     });
 
-    withElement(qs("#action-bar-close"), (closeButton) => {
+    withElement(qs("#announcement-close", bar), (closeButton) => {
         closeButton.addEventListener("click", () => {
             bar.hidden = true;
-            try {
-                sessionStorage.setItem(DISMISS_KEY, "1");
-            } catch (error) {
-                /* storage unavailable — dismissal simply won't persist */
-            }
+            storeDismissedAnnouncementVersion(announcementVersion);
         });
     });
 }
 
 
 /* ======================================================================
- * LANGUAGE SELECTOR  (CLAUDE.md §5.3)
+ * TRANSLATION — GTRANSLATE FREE
  * ======================================================================
- * Builds a searchable dropdown and drives the Google Translate widget.
- * The widget's own UI is hidden; we set its hidden <select> and dispatch a
- * change event, which is the supported way to translate programmatically.
- * If the widget cannot load (offline, blocked), the dropdown still opens,
- * searches and closes — it just cannot translate.
+ * The site's own gold dropdown is the visible interface. The free
+ * GTranslate widget runs hidden underneath and performs the translation.
+ *
+ * How the pieces fit together:
+ *   1. window.gtranslateSettings is assigned BEFORE GTranslate's script
+ *      loads — the script reads it as it parses.
+ *   2. dropdown.js is injected. It renders its own <select class=
+ *      "gt_selector"> into .gtranslate_wrapper, which the stylesheet
+ *      keeps hidden. That hidden switcher is the piece GTranslate needs
+ *      in order to be driven; our gold dropdown stays the visible UI.
+ *   3. GTranslate loads Google's engine lazily, when its own widget is
+ *      hovered or focused. Our panel therefore fires pointerenter and
+ *      focusin on that widget when it opens, so the engine is ready by
+ *      the time a language is chosen. Both are GTranslate's own hooks.
+ *   4. Choosing a language sets the hidden switcher's value to "en|xx"
+ *      and fires change — exactly what a visitor does on GTranslate's
+ *      widget. GTranslate then calls its own doGTranslate() internally.
+ *      We never talk to Google's engine directly.
+ *
+ * Returning to English selects "en|en" and only THEN clears the
+ * googtrans cookie. The order matters: GTranslate reads that cookie to
+ * decide whether the page is currently translated, so clearing it first
+ * makes the call a no-op and strands the visitor in the translated
+ * language. That is what the previous implementation got wrong. No page
+ * reload is involved.
  * ====================================================================== */
 
-function initLanguageSelector() {
+/** The shortlist plus the searchable extras, English always first. */
+function getAllTranslationLanguages() {
+    return [...translationLanguages, ...translationExtraLanguages];
+}
+
+/** Loads GTranslate's free widget once, after its settings are in place. */
+function loadGTranslate() {
+    if (qs("#gtranslate-script")) {
+        return;
+    }
+
+    // Read by the widget script as it parses; must be assigned first.
+    window.gtranslateSettings = {
+        default_language: translationDefaultLanguage,
+        languages: getAllTranslationLanguages().map((language) => language.code),
+        wrapper_selector: ".gtranslate_wrapper",
+        url_structure: "none",
+        horizontal_position: "inline",
+        detect_browser_language: false,
+        native_language_names: false
+    };
+
+    const script = document.createElement("script");
+    script.id = "gtranslate-script";
+    script.src = "https://cdn.gtranslate.net/widgets/latest/dropdown.js";
+    script.defer = true;
+    document.body.append(script);
+}
+
+/** GTranslate's hidden switcher, once its script has rendered it. */
+function getGTranslateSelector() {
+    return qs(".gtranslate_wrapper .gt_selector");
+}
+
+/**
+ * Asks GTranslate to load Google's engine.
+ * GTranslate loads it lazily on pointerenter/focusin over its own widget,
+ * so firing those is the documented way to warm it up ahead of a choice.
+ */
+function preloadTranslationEngine() {
+    const widget = qs(".gtranslate_wrapper");
+    if (!widget) {
+        return;
+    }
+
+    [widget, ...qsa("*", widget)].forEach((element) => {
+        element.dispatchEvent(new Event("pointerenter", { bubbles: false }));
+        element.dispatchEvent(new Event("focusin", { bubbles: true }));
+    });
+}
+
+/** Reads the language GTranslate currently has the page in. */
+function getActiveTranslationLanguage() {
+    const match = document.cookie.match("(^|;) ?googtrans=([^;]*)(;|$)");
+    const fromCookie = match ? decodeURIComponent(match[2]).split("/")[2] : null;
+    return fromCookie || translationDefaultLanguage;
+}
+
+/**
+ * Selects a language pair on GTranslate's hidden switcher and fires the
+ * change event it listens for — the same thing a visitor does on the
+ * widget itself. The script is deferred, so we retry until it exists.
+ */
+function callGTranslate(languagePair, attempt = 0) {
+    const selector = getGTranslateSelector();
+
+    if (selector) {
+        preloadTranslationEngine();
+        selector.value = languagePair;
+        selector.dispatchEvent(new Event("change", { bubbles: true }));
+        return;
+    }
+
+    if (attempt < 60) {
+        window.setTimeout(() => callGTranslate(languagePair, attempt + 1), 150);
+    }
+}
+
+/** Removes the googtrans cookie from every host/path it may be set on. */
+function clearTranslationCookie() {
+    const hostname = window.location.hostname;
+    const domains = ["", hostname, "." + hostname];
+
+    // A bare hostname like "localhost" has no parent domain to also clear.
+    const parts = hostname.split(".");
+    if (parts.length > 2) {
+        domains.push("." + parts.slice(-2).join("."));
+    }
+
+    domains.forEach((domain) => {
+        const suffix = domain ? "; domain=" + domain : "";
+        document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/" + suffix;
+    });
+}
+
+/**
+ * Switches the page language.
+ * Handles English → other, other → other, and other → English alike.
+ */
+function setSiteLanguage(languageCode) {
+    if (languageCode === translationDefaultLanguage) {
+        // Restore the original text FIRST, then forget the cookie.
+        callGTranslate(`${translationDefaultLanguage}|${translationDefaultLanguage}`);
+        window.setTimeout(clearTranslationCookie, 60);
+        return;
+    }
+
+    callGTranslate(`${translationDefaultLanguage}|${languageCode}`);
+}
+
+function initTranslation() {
     const root = qs("#lang-select");
     if (!root) {
         return;
@@ -359,12 +796,26 @@ function initLanguageSelector() {
         return;
     }
 
-    let activeCode = "en";
+    const allLanguages = getAllTranslationLanguages();
 
-    /** Renders the option list, filtered by the current search term. */
+    // Reflect the language the visitor is already in (cookie survives reloads).
+    let activeCode = getActiveTranslationLanguage();
+    const activeEntry = allLanguages.find((language) => language.code === activeCode);
+    if (activeEntry) {
+        label.textContent = activeEntry.label;
+    } else {
+        activeCode = translationDefaultLanguage;
+    }
+
+    /**
+     * Renders the option list.
+     * With no search term only the shortlist shows; typing searches the
+     * full set, so every supported language stays reachable.
+     */
     function renderOptions(filter = "") {
         const term = filter.trim().toLowerCase();
-        const matches = languages.filter((language) =>
+        const pool = term ? allLanguages : translationLanguages;
+        const matches = pool.filter((language) =>
             language.label.toLowerCase().includes(term)
         );
 
@@ -408,18 +859,19 @@ function initLanguageSelector() {
 
     const isOpen = () => !panel.hidden;
 
-    // Clicking the control toggles the dropdown.
     toggle.addEventListener("click", () => {
         if (isOpen()) {
             closePanel();
-        } else {
-            openPanel();
+            return;
         }
+        // Warm Google's engine up while the visitor is still choosing.
+        preloadTranslationEngine();
+        openPanel();
     });
 
     search.addEventListener("input", () => renderOptions(search.value));
 
-    // Event delegation keeps one listener regardless of how many options exist.
+    // Delegated: one listener however many options are rendered.
     list.addEventListener("click", (event) => {
         const option = event.target.closest(".lang-select__option");
         if (!option) {
@@ -428,18 +880,17 @@ function initLanguageSelector() {
 
         activeCode = option.dataset.code;
         label.textContent = option.textContent;
-        applyTranslation(activeCode);
+        setSiteLanguage(activeCode);
         closePanel({ restoreFocus: true });
     });
 
-    // Clicking anywhere outside closes the dropdown.
+    // Clicking anywhere outside closes the panel.
     document.addEventListener("click", (event) => {
         if (isOpen() && !root.contains(event.target)) {
             closePanel();
         }
     });
 
-    // Escape closes it too, and returns focus to the toggle.
     document.addEventListener("keydown", (event) => {
         if (event.key === "Escape" && isOpen()) {
             closePanel({ restoreFocus: true });
@@ -447,58 +898,152 @@ function initLanguageSelector() {
     });
 
     renderOptions();
-    loadGoogleTranslate();
+    loadGTranslate();
 }
 
-/**
- * Injects the Google Translate element script once. The library requires a
- * global callback, so it is assigned to window from inside this module.
- */
-function loadGoogleTranslate() {
-    if (qs("#google-translate-script") || !qs("#google_translate_element")) {
+
+/* ======================================================================
+ * LIVE CHART
+ * ======================================================================
+ * The hero's chart container is deliberately empty in the markup. The
+ * endpoint comes from homepageLiveChartApi so the URL is never written
+ * into the HTML, and the container already carries its final size and
+ * aspect ratio — injecting a chart cannot reflow the hero.
+ *
+ * Leave homepageLiveChartApi empty to keep the container blank.
+ * ====================================================================== */
+
+function initLiveChart() {
+    const container = qs("#live-chart-container");
+    if (!container || !homepageLiveChartApi) {
         return;
     }
 
-    window.googleTranslateElementInit = function googleTranslateElementInit() {
-        if (!window.google || !window.google.translate) {
-            return;
-        }
+    const frame = document.createElement("iframe");
+    frame.src = homepageLiveChartApi;
+    frame.title = `Live XAUUSD price chart`;
+    frame.loading = "lazy";
+    frame.setAttribute("frameborder", "0");
+    frame.setAttribute("scrolling", "no");
+    container.append(frame);
+}
 
-        // eslint-disable-next-line no-new
-        new window.google.translate.TranslateElement(
-            {
-                pageLanguage: "en",
-                autoDisplay: false
-            },
-            "google_translate_element"
-        );
+
+/* ======================================================================
+ * LIVE CHAT / PITCHBAR
+ * ======================================================================
+ * The launcher is the site's own element: a 68px avatar with a green
+ * online dot and a continuous gold pulse, plus a label that slides out
+ * on hover and on keyboard focus.
+ *
+ * ------------------------------------------------------------------
+ * PITCHBAR INTEGRATION POINT
+ * ------------------------------------------------------------------
+ * Pitchbar will eventually be self-hosted on a VPS and embedded here.
+ * It is NOT integrated yet and nothing below depends on it.
+ *
+ * When Pitchbar is deployed:
+ *   1. Load its script/widget inside openLiveChat() below (or from a
+ *      loader called there), using the URL of your own VPS instance.
+ *   2. Replace the Telegram fallback by setting
+ *      liveChatUsesTelegramFallback = false in the configuration.
+ *   3. Call Pitchbar's own open method in place of the fallback.
+ *
+ * Everything else — the launcher markup, its styling, the pulse, the
+ * hover label, the online dot and the accessibility behaviour — stays
+ * exactly as it is. No other part of the site needs restructuring.
+ *
+ * Do not add Pitchbar scripts or assume an API before it is purchased
+ * and its real documentation is available.
+ * ------------------------------------------------------------------
+ * ====================================================================== */
+
+/** Opens the chat. Today: Telegram. Later: Pitchbar. */
+function openLiveChat(event) {
+    // --- PITCHBAR INTEGRATION POINT -------------------------------
+    // if (window.Pitchbar) { event.preventDefault(); window.Pitchbar.open(); return; }
+    // --------------------------------------------------------------
+
+    if (!liveChatUsesTelegramFallback) {
+        event.preventDefault();
+    }
+    // Otherwise the anchor's configured Telegram href handles the click.
+}
+
+function initLiveChat() {
+    const launcher = qs("#live-chat-launcher");
+    if (!launcher) {
+        return;
+    }
+
+    // Hover/focus label text comes from configuration, not the markup.
+    withElement(qs("#live-chat-label", launcher), (labelElement) => {
+        labelElement.textContent = liveChatIconHoverText;
+    });
+
+    // The accessible name matches the visible label, plus the online state.
+    launcher.setAttribute("aria-label", `${liveChatIconHoverText} — online`);
+
+    launcher.addEventListener("click", openLiveChat);
+}
+
+
+/* ======================================================================
+ * MOBILE NAVIGATION (architecture only — not yet implemented)
+ * ======================================================================
+ * DESKTOP IS UNCHANGED by this function.
+ *
+ * The supplied mobile mockup shows no hamburger: it drops the nav links
+ * entirely, leaving only the logo and the language pill. A modern
+ * hamburger menu is nonetheless an intentional requirement for the
+ * mobile build, so the markup and behaviour are prepared here and the
+ * toggle stays hidden at desktop widths via CSS.
+ *
+ * The mobile phase only needs to reveal .nav-toggle in its media query
+ * and style .primary-nav's open state — the toggle, aria-expanded,
+ * Escape handling, outside-click handling, link-closes-menu behaviour
+ * and focus return are all already wired below.
+ * ====================================================================== */
+
+function initMobileNavigation() {
+    const toggle = qs("#nav-toggle");
+    const nav = qs("#primary-nav");
+
+    if (!toggle || !nav) {
+        return;
+    }
+
+    const setOpen = (open) => {
+        toggle.setAttribute("aria-expanded", String(open));
+        nav.classList.toggle("is-open", open);
+        document.body.classList.toggle("nav-is-open", open);
     };
 
-    const script = document.createElement("script");
-    script.id = "google-translate-script";
-    script.src =
-        "https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit";
-    script.async = true;
-    document.head.append(script);
-}
+    const isOpen = () => toggle.getAttribute("aria-expanded") === "true";
 
-/**
- * Switches the page language by driving the widget's hidden <select>.
- * Retries briefly because the widget may not have finished mounting when a
- * user picks a language immediately after load.
- */
-function applyTranslation(languageCode, attempt = 0) {
-    const combo = qs(".goog-te-combo");
+    toggle.addEventListener("click", () => setOpen(!isOpen()));
 
-    if (!combo) {
-        if (attempt < 20) {
-            window.setTimeout(() => applyTranslation(languageCode, attempt + 1), 250);
+    // Choosing a destination closes the menu.
+    nav.addEventListener("click", (event) => {
+        if (event.target.closest("a") && isOpen()) {
+            setOpen(false);
         }
-        return;
-    }
+    });
 
-    combo.value = languageCode === "en" ? "" : languageCode;
-    combo.dispatchEvent(new Event("change"));
+    // Escape closes it and returns focus to the toggle.
+    document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape" && isOpen()) {
+            setOpen(false);
+            toggle.focus();
+        }
+    });
+
+    // Clicking outside closes it.
+    document.addEventListener("click", (event) => {
+        if (isOpen() && !nav.contains(event.target) && !toggle.contains(event.target)) {
+            setOpen(false);
+        }
+    });
 }
 
 
@@ -735,9 +1280,8 @@ function renderPurchaseRow(row) {
  * Reads the EA title from the page rather than duplicating it (§12.1).
  * Falls back to the configured site name if the element is absent.
  */
-function getEaTitleFromPage() {
-    const source = qs("[data-ea-title]");
-    return source ? source.textContent.trim() : siteName;
+function getEaTitle() {
+    return `${siteName} ${eaCurrentVersion}`;
 }
 
 
@@ -841,7 +1385,7 @@ function renderPlanCard(plan, index) {
                  data-plan-index="${index}"
                  data-plan-name="${plan.planName}"
                  data-plan-price="${plan.price}"
-                 data-plan-currency="${plan.currency || amountSuffix}">
+                 data-plan-currency="${plan.currency || paymentAmountSuffix}">
             <p class="plan-card__eyebrow">${eyebrowIcon}<span>${plan.eyebrow}</span></p>
             <h3 class="plan-card__name">${plan.planName}</h3>
             <div class="plan-card__price-row">
@@ -880,7 +1424,8 @@ function setTimer(card, plan) {
         return;
     }
 
-    const shouldShow = plan.status === "show" && plan.timerTime > 0;
+    // Visibility is global (pricingTimerStatus); the countdown itself is per-plan.
+    const shouldShow = pricingTimerStatus === "show" && plan.timerTime > 0;
 
     /*
      * §9.4: when hidden the timer keeps its allocated space using
@@ -941,10 +1486,10 @@ function setTimer(card, plan) {
 function openPlanDialog(card) {
     const planName = card.dataset.planName;
     const price = Number(card.dataset.planPrice);
-    const currency = card.dataset.planCurrency || amountSuffix;
+    const currency = card.dataset.planCurrency || paymentAmountSuffix;
 
     purchaseDialog.open({
-        title: `Purchase ${getEaTitleFromPage()}`,
+        title: `Purchase ${getEaTitle()}`,
         subtitle: `Send ${currency} and confirm on Telegram.`,
         rows: [
             { label: "Plan", value: planName, variant: "gold" },
@@ -954,7 +1499,7 @@ function openPlanDialog(card) {
                 suffix: currency,
                 variant: "amount"
             },
-            { label: "Network", value: network, variant: "gold" },
+            { label: "Network", value: paymentNetwork, variant: "gold" },
             { type: "wallet", label: "Wallet Address", value: walletAddress }
         ],
         note: `After payment, send the transaction screenshot to ${siteOwner} on Telegram for license activation.`,
@@ -989,8 +1534,8 @@ function initSourceCode() {
         const currency = currencyElement ? currencyElement.textContent.trim() : "USD";
 
         purchaseDialog.open({
-            title: `${getEaTitleFromPage()} — ${headingText}`,
-            subtitle: `Send ${amountSuffix} and confirm on Telegram.`,
+            title: `${getEaTitle()} — ${headingText}`,
+            subtitle: `Send ${paymentAmountSuffix} and confirm on Telegram.`,
             rows: [
                 {
                     label: "Amount",
@@ -998,7 +1543,7 @@ function initSourceCode() {
                     suffix: currency,
                     variant: "amount"
                 },
-                { label: "Network", value: network, variant: "gold" },
+                { label: "Network", value: paymentNetwork, variant: "gold" },
                 { type: "wallet", label: "Wallet Address", value: walletAddress }
             ],
             note: `After payment, send the transaction screenshot to ${siteOwner} on Telegram for license activation.`,
@@ -1240,7 +1785,7 @@ function renderFaqItem(entry, key) {
                         id="${triggerId}"
                         aria-expanded="false"
                         aria-controls="${panelId}">
-                    <span>${entry.q}</span>
+                    <span>${fillTokens(entry.q)}</span>
                     <svg class="faq-item__chevron" width="20" height="20" viewBox="0 0 24 24"
                          fill="none" stroke="currentColor" stroke-width="2.5"
                          stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -1250,7 +1795,7 @@ function renderFaqItem(entry, key) {
             </h3>
             <div class="faq-item__panel" id="${panelId}" role="region"
                  aria-labelledby="${triggerId}" hidden>
-                ${entry.a}
+                ${fillTokens(entry.a)}
             </div>
         </div>
     `;
@@ -1271,7 +1816,7 @@ function initFooter() {
     const footerCaveatElement = document.getElementById("footer-caveat");
 
     if (footerCaveatElement) {
-        footerCaveatElement.textContent = footerCaveat;
+        footerCaveatElement.textContent = footerCaveatText;
     }
 
     // Terms and Conditions destination (§18.3).
@@ -1374,9 +1919,16 @@ function initScrollReveal() {
  * ====================================================================== */
 
 function init() {
+    // Theme and identity first: everything rendered later inherits them.
+    applySiteColors();
+    applySiteIdentity();
     initConfiguredLinks();
-    initActionBar();
-    initLanguageSelector();
+
+    initAnnouncementBar();
+    initTranslation();
+    initMobileNavigation();
+    initLiveChart();
+    initLiveChat();
     initLiveResults();
     purchaseDialog.init();
     initPricing();
