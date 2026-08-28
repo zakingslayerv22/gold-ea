@@ -137,7 +137,7 @@
      *   hero body cap 18px → 25px    section lead cap ~14px → 20px
      */
     --fs-display: clamp(3.5rem, 4.9vw, 5.875rem);   /* hero H1   ~56 → 94px */
-    --fs-h2: clamp(2.25rem, 3.39vw, 4.0625rem);     /* section   ~36 → 65px */
+    --fs-h2: clamp(2.25rem, 3vw, 3.625rem);         /* section   ~36 → 58px */
     --fs-h2-sm: clamp(1.875rem, 2.5vw, 3rem);       /* Download + FAQ ~30 → 48px */
     --fs-h3: clamp(1.25rem, 1.35vw, 1.625rem);      /* card      ~20 → 26px */
     --fs-hero-body: clamp(1.125rem, 1.3vw, 1.5625rem); /* hero body ~18 → 25px */
@@ -344,17 +344,13 @@ button {
 
 .section-heading {
     font-size: var(--fs-h2);
-    /* The mockup sets section headings very tight — a 2-line heading
-       occupies a 116px box at 65px, i.e. a line-height just under 0.9. */
-    line-height: 0.9;
-    letter-spacing: 0.007em;
     /*
-     * 894px sits inside the [825, 962) window that reproduces every line
-     * break in the mockup: "Why Traders Choose / GoldTrap EA" and
-     * "One repeating cycle. No / prediction. Pure structure." both wrap
-     * where the artwork wraps, and the one-line headings stay on one line.
+     * line-height and letter-spacing are deliberately NOT set here: these
+     * headings inherit 1.05 / -0.02em from the h1–h4 base rule, which is
+     * what they used before the typeface pass. 800px is the measure that
+     * reproduces the mockup's line breaks at this size.
      */
-    max-width: 894px;
+    max-width: 800px;
 }
 
 /*
@@ -368,7 +364,7 @@ button {
 .section-heading--center {
     margin-inline: auto;
     text-align: center;
-    max-width: 894px;
+    max-width: 800px;
 }
 
 /* Two-tone headings, e.g. "Get the <gold>Source Code</gold>".
@@ -733,12 +729,12 @@ button {
         animation: none;
     }
 
-    /* No perpetual animation for visitors who asked for reduced motion.
-       The launcher keeps its steady halo, so it still reads as active. */
-    .chat-widget__pulse,
-    .chat-widget__pulse::after {
+    /* No perpetual animation, and no static gold ring left behind either.
+       The launcher, its photo and its green online dot stay fully visible.
+       Restated after the .chat-widget rules further down, where it wins. */
+    .chat-widget__pulse {
         animation: none;
-        opacity: 0.32;
+        opacity: 0;
     }
 
     *,
@@ -1233,7 +1229,7 @@ button {
 }
 
 .live-results__copy {
-    max-width: 894px;
+    max-width: 800px;
 }
 
 /* The stats strip is a second band, separated by warm hairlines. */
@@ -1472,10 +1468,13 @@ button {
 .source-code {
     position: relative;
     /*
-     * The mockup sets the source-code card almost flush beneath the pricing
-     * grid: cards end at y4069, the card's top border is at y4076.
+     * Measured from the mockup: the pricing cards' bottom border sits at
+     * y4013 and the source-code card's top border at y4075 — a 62px gap.
+     * An earlier reading of 8px was wrong; it mistook the source card's
+     * large gold glow, which bleeds upward over the gap, for the cards
+     * themselves. Do not reduce this again.
      */
-    margin-top: 8px;
+    margin-top: 62px;
 }
 
 .source-code__card {
@@ -1988,35 +1987,33 @@ button {
     position: absolute;
     inset: 0;
     border-radius: 50%;
-    background: var(--site-primary-accent, #DDB954);
-    opacity: 0.55;
+    /*
+     * A thin ring with a soft outer glow rather than a filled disc, so the
+     * effect reads as energy radiating outward instead of a heavy gold
+     * plate behind the photo.
+     */
+    border: 2px solid var(--site-primary-accent, #DDB954);
+    box-shadow: 0 0 14px 0 var(--site-primary-accent, #DDB954);
+    opacity: 0;                    /* nothing at all shows at rest */
     animation: chat-pulse 2.6s ease-out infinite;
 }
 
-.chat-widget__pulse::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    border-radius: 50%;
-    background: inherit;
-    animation: chat-pulse 2.6s ease-out infinite;
-    animation-delay: 1.3s;
-}
+/*
+ * Deliberately a SINGLE ring. A second, offset ring meant one was always
+ * sitting close to the avatar, which read as a permanent gold outline —
+ * the opposite of the intent. One ring per cycle leaves a clear gap, so
+ * the glow is unmistakably an animation rather than a border.
+ */
 
+/*
+ * Starts fully transparent at the avatar's own size, fades in as it leaves
+ * the photo, then fades out as it expands. At no point in the cycle is
+ * there a resting ring sitting on the launcher.
+ */
 @keyframes chat-pulse {
-    0%   { transform: scale(1);    opacity: 0.5; }
-    70%  { transform: scale(1.45); opacity: 0; }
-    100% { transform: scale(1.45); opacity: 0; }
-}
-
-/* A steady halo underneath, so the launcher reads as "live" between pulses. */
-.chat-widget__avatar-wrap::after {
-    content: "";
-    position: absolute;
-    inset: -6px;
-    border-radius: 50%;
-    box-shadow: 0 0 24px -4px var(--site-primary-accent, #DDB954);
-    pointer-events: none;
+    0%   { transform: scale(1);    opacity: 0; }
+    18%  { opacity: 0.5; }
+    100% { transform: scale(1.7);  opacity: 0; }
 }
 
 /*
@@ -2032,8 +2029,8 @@ button {
     padding: 10px 16px;
     border-radius: var(--radius-pill);
     background: var(--surface);
-    border: 1px solid var(--border-gold);
-    color: var(--text);
+    border: 1px solid var(--border-subtle);
+    color: var(--text);            /* hover text stays white */
     font-family: var(--font-display);
     font-size: var(--fs-sm);
     font-weight: 700;
@@ -2073,10 +2070,9 @@ button {
  * otherwise be overridden by source order.
  */
 @media (prefers-reduced-motion: reduce) {
-    .chat-widget__pulse,
-    .chat-widget__pulse::after {
+    .chat-widget__pulse {
         animation: none;
-        opacity: 0.32;
+        opacity: 0;                /* no animation, and no static ring either */
     }
 
     .chat-widget:hover,

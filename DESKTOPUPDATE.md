@@ -1651,3 +1651,194 @@ motion), with no JavaScript errors and no horizontal overflow from
    mockup contains no hamburger and no nav links. The architecture is
    ready; the visual design of the open menu is a decision for the mobile
    phase.
+
+---
+
+# Final Desktop Correction Pass
+
+**Date:** 28 August 2026
+**Stage on completion:** DESKTOP APPROVED / READY FOR MOBILE IMPLEMENTATION
+
+Only the corrections requested were made. Nothing else was redesigned,
+tightened or "improved". Mobile and tablet were not started.
+
+## 1. Typography restored to the previous commit
+
+The five headings named in the brief — "Why Traders Choose GOLDTRAP EA",
+"One repeating cycle. No prediction. Pure structure.", "Real Results.
+Real Users.", "Get GOLDTRAP EA" and "How to Get Free Access" — are all
+`.section-heading` elements in the large tier. Their values were read out
+of git rather than guessed, from commit `a20b5ce`, the last commit before
+the typeface pass:
+
+| Property | Recent (wrong) | Restored (`a20b5ce`) |
+|---|---|---|
+| `--fs-h2` | `clamp(2.25rem, 3.39vw, 4.0625rem)` → 65px | `clamp(2.25rem, 3vw, 3.625rem)` → **58px** |
+| `line-height` | `0.9` set on `.section-heading` | removed → inherits **1.05** |
+| `letter-spacing` | `0.007em` set on `.section-heading` | removed → inherits **-0.02em** |
+| `max-width` | `894px` | **`800px`** |
+| `font-weight` | 800 | 800 (unchanged) |
+
+Verified in the browser: all five now render at 57.6px, weight 800,
+line-height 1.05, letter-spacing -1.152px, measure 800px, and they break
+onto the same number of lines as the mockup.
+
+Two notes for a future developer:
+
+- **The font family was not reverted.** `a20b5ce` used Figtree; the
+  current build uses Poppins, which was requested and approved in the
+  typeface pass. The brief listed font-size, font-weight, line-height and
+  letter-spacing as the properties to restore, not font-family. Poppins
+  at these restored metrics is what shipped.
+- **`--fs-h2-sm` (48px, Download and FAQ headings) was left alone.**
+  Those two were not among the five reported, and 48px was measured
+  directly against the mockup. Restoring `line-height: 1.05` does affect
+  them, and that is correct: with the size back at 58px, a two-line
+  heading's ink measures 113px against the mockup's 117px, whereas the
+  0.9 line-height only existed to compensate for the oversized 65px.
+
+The headings remain fully dynamic — the site name still comes from
+`siteName`, and no hard-coded name was reintroduced to achieve the visual
+restoration.
+
+## 2. Vertical spacing between "Get GOLDTRAP EA" and Source Code restored
+
+**This was a measurement error on my part, not a design choice.**
+
+The earlier pass set `.source-code { margin-top: 8px }` from a reading
+that put the pricing cards' bottom at y4069 and the source card's top
+border at y4076. That reading used a brightness threshold which counted
+the source-code card's large gold glow — which bleeds *upward* across the
+gap — as though it were the pricing cards.
+
+Re-measured by finding the actual card borders instead of a brightness
+threshold:
+
+- pricing card bottom border: **y = 4013** (`#584A26` at x=900)
+- source-code card top border: **y = 4075**
+- **true gap: 62px**
+
+`.source-code { margin-top: 62px }`. Verified in the browser: pricing
+grid bottom 4108, source card top 4170, gap **62px** exactly.
+
+A comment in `styles.css` records the measurement and warns against
+reducing it again.
+
+Nothing else was touched to achieve this: no typography, no card heights,
+no content, no section padding.
+
+**Related observation, deliberately not changed.** The pricing cards
+render 606px tall against the mockup's 540px. That difference is *not*
+from this pass — it was present in the approved baseline — and roughly
+38px of it is the countdown timer's reserved row, which CLAUDE.md §9.4
+and item 8 of this brief both explicitly require to keep its space while
+hidden. Since the brief says not to compensate through card heights and
+not to redesign cards, it was left as-is and is recorded here instead.
+
+## 3. Permanent gold ring around the live chat removed
+
+Three things were producing a ring that read as permanent:
+
+1. A static halo — `.chat-widget__avatar-wrap::after` with
+   `box-shadow: 0 0 24px -4px` in the accent colour. **Removed entirely.**
+2. The pulse was a **filled gold disc** at `opacity: 0.55`, which looked
+   like a heavy gold plate behind the photo rather than a glow. It is now
+   a thin ring: `border: 2px solid` the accent plus a soft
+   `box-shadow` glow, with no background fill.
+3. A **second, offset pulse ring** (`::after`, delayed 1.3s) meant one
+   ring was always sitting close to the avatar. **Removed** — a single
+   ring per cycle leaves a clear gap, so the effect is unmistakably an
+   animation rather than a border.
+
+The keyframes now begin fully transparent at the avatar's own size and
+fade in only as the ring leaves the photo:
+
+```css
+0%   { transform: scale(1);   opacity: 0; }
+18%  { opacity: 0.5; }
+100% { transform: scale(1.7); opacity: 0; }
+```
+
+The hover label's border was changed from `--border-gold` to
+`--border-subtle` so hovering introduces no gold near the launcher
+either. The label text remains white.
+
+**Verified two ways.** Sampling the live animation across a full 2.6s
+cycle: peak opacity 0.475, and **zero** frames show a ring at the avatar
+edge with visible opacity — there is never a resting outline. Pixel
+analysis of a captured frame: **0** gold pixels outside the avatar at
+rest, thousands mid-expansion. The 1px `#69655B` warm-grey edge on the
+photo itself is retained — it is part of the avatar in the mockup and is
+not a gold ring.
+
+## 4. The animated gold pulse was retained
+
+Still present, still continuous, still driven by
+`sitePrimaryAccentColor` through `var(--site-primary-accent)` — no
+separate hard-coded gold. The avatar image itself never scales, blurs or
+distorts; only the ring animates.
+
+Reduced motion now sets `animation: none; opacity: 0`, so those visitors
+get no perpetual animation **and** no static ring, while the launcher,
+photo and green online dot stay fully visible and usable. (The previous
+value left a `0.32` opacity ring behind, which would have contradicted
+this pass's intent.)
+
+## 5. Live-chat launcher size unchanged
+
+Still **68px × 68px** — confirmed in the browser. Not resized in this
+pass. The green online indicator remains a separate element from the gold
+pulse.
+
+## 6. Pricing timers remain hidden by default
+
+`const pricingTimerStatus = "hide";` — unchanged. Durations, increments,
+per-plan independence and the hidden timer's reserved space are all
+untouched and were re-verified, including a temporary `"show"` run
+confirming the countdowns still display, tick and remain independent.
+
+## 7. No mobile or tablet implementation was started
+
+No breakpoints added, no hamburger menu implemented, no responsive
+redesign. The hamburger architecture prepared in the previous pass is
+untouched and still hidden at desktop widths.
+
+## Verification
+
+All six suites re-run after the corrections:
+
+| Suite | Result |
+|---|---|
+| Translation (GTranslate round-trips) | all pass |
+| Update / configuration | 45 pass |
+| Announcement versioning + timers | 17 pass |
+| Functional | 46 pass |
+| Accessibility | 26 pass |
+| Motion / reduced motion / no-JS | 3 pass |
+| Four-plan pricing grid | passes |
+
+**137 automated checks passing**, no JavaScript errors, no horizontal
+overflow. Required searches: `GoldTrap EA` (case-insensitive) returns
+only the intended pre-JS fallbacks, `siteName` itself and comments;
+`v4.2.3` and `GoldTrap_v4_2_3.ex5` only their config lines; `BSC BEP20`
+and `translate_a/element.js` absent.
+
+Section heights against the mockup after the corrections:
+
+| Section | Mockup | Built | Δ |
+|---|---|---|---|
+| top bar | 50 | 51 | +1 |
+| hero | 873 | 871 | −2 |
+| quick benefits | 784 | 792 | +8 |
+| how it works | 986 | 989 | +3 |
+| live results | 394 | 400 | +6 |
+| stats strip | 130 | 131 | +1 |
+| pricing + source | 1313 | 1390 | +77 |
+| free access + download | 1759 | 1791 | +32 |
+| FAQ | 942 | 952 | +10 |
+| footer | 266 | 321 | +55 |
+
+The footer's +55 is the specification's Terms and Conditions line, which
+the mockup does not contain. The pricing band's +77 is the pre-existing
+card height discussed in §2 above, the larger part of it being the
+timer's mandated reserved space.
