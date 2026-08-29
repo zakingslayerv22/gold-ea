@@ -2529,17 +2529,6 @@ font {
         grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr));
     }
 
-    /* The source-code card's two columns stack. */
-    .source-code__layout {
-        flex-direction: column;
-        gap: 32px;
-    }
-
-    .source-code__actions {
-        width: 100%;
-        min-width: 0;
-    }
-
     .source-code__card {
         padding: 36px clamp(20px, 4vw, 40px);
     }
@@ -2578,6 +2567,32 @@ font {
 
     .nav-toggle {
         display: inline-flex;
+    }
+
+    /*
+     * The source-code card's two columns stack.
+     *
+     * This used to happen below 1024px, but the tablet mockup shows the
+     * card still as a row — copy on the left, the two buttons stacked on
+     * the right — at roughly 920px. Measured with the row forced on, the
+     * copy column is 452px at 920px and 436px at 900px, both comfortable;
+     * it is only further down that the column gets cramped. So the state
+     * change belongs at the same 900px boundary the navigation already
+     * uses, not at 1024px.
+     *
+     * A breakpoint rather than wrapping: the buttons have to be full width
+     * once they drop below the copy (the mobile mockup shows them that
+     * way), and a wrapped flex item cannot grow only on the line it
+     * wrapped onto.
+     */
+    .source-code__layout {
+        flex-direction: column;
+        gap: 32px;
+    }
+
+    .source-code__actions {
+        width: 100%;
+        min-width: 0;
     }
 
     .site-header__inner {

@@ -722,6 +722,169 @@ iPhone is still worth doing.
 
 ---
 
+## Tablet Responsive Audit
+
+Audit of the existing responsive implementation against `mockups/tablet.png`.
+Not a rebuild: the question was whether the responsive system already
+produces the tablet mockup's layout, and only genuine discrepancies were to
+be fixed.
+
+### Mockup dimensions
+
+`mockups/tablet.png` is **480 × 4931**, but that is an export scale, not a
+viewport. Four independent header anchors — whose CSS sizes are fixed and
+known from the desktop build — put the export at **≈0.52×, i.e. a viewport
+of roughly 918–928 CSS px**:
+
+| Anchor | Mockup (image px) | Our CSS px | Implied scale | Implied viewport |
+| ------ | ----------------- | ---------- | ------------- | ---------------- |
+| Logo disc | 24 | 48 | 0.500 | 960 |
+| Nav "Features" | 34 | 63.1 | 0.539 | 891 |
+| Nav "Downloads" | 43 | 79.2 | 0.543 | 884 |
+| Nav "Pricing" | 27 | 48.9 | 0.552 | 869 |
+| "English" | 29 | 57.8 | 0.502 | 957 |
+| **Total ink length** | 172 | 329 | **0.523** | **918** |
+
+Cross-checks confirming the method: `mockups/desktop.png` is a 1× export at
+1920 (its logo measures 50px against our 48px, its nav "Features" 66px
+against our 63.1px, its hero H1 cap 65px against our 94px font's 65.8px),
+and `mockups/mobile.png` is a 1× export at 360 (H1 cap 35px against our
+48px font's 33.6px).
+
+The page total therefore corresponds to ≈9460 CSS px against our 8904px —
+our build is shorter, which the typography note below accounts for.
+
+### Did the existing implementation already cover tablet?
+
+**Almost entirely, yes.** At the mockup's width the existing responsive
+system already produced its layout with no tablet-specific CSS:
+
+| Section | Mockup at ≈920px | Implementation | |
+| ------- | ---------------- | -------------- | - |
+| Announcement bar | 2-line wrap, dismiss × | same | ✓ |
+| Header / navigation | **full inline nav, no hamburger** | inline from 900px up | ✓ |
+| Language selector | "English ⌄" pill, full word | same | ✓ |
+| Hero | stacked, chart full width below | 1-column below 1024px | ✓ |
+| Live chart | full-width landscape panel | same | ✓ |
+| Quick benefits | 2 columns × 4 rows | 2 columns | ✓ |
+| How it works | 2 columns × 3 rows | 2 columns | ✓ |
+| Live results | heading + button on one row, stats row | same | ✓ |
+| Pricing | **1 column** | 1 column up to ~940px | ✓ |
+| Source code | **row: copy left, buttons right** | stacked | **✗** |
+| Free access | 2×2 steps, buttons on one row | same | ✓ |
+| Download | 2 cards + preset banner as a row | same | ✓ |
+| FAQ | 4 pills on one row, 2-column accordion | same | ✓ |
+| Footer | caveat, terms, telegram, copyright | same | ✓ |
+
+The hamburger appears **below** 900px, i.e. below the mockup's width, so
+the mockup does not contradict it. Pricing goes to 2 columns **above**
+~940px, again outside the mockup's width, and that is `auto-fit` doing what
+CLAUDE.md §9.1 requires — category B, left alone.
+
+### Discrepancy found, and the fix
+
+**One genuine discrepancy: the Source Code card.** The mockup shows it as a
+two-column row — heading, blurb, 2×2 feature ticks, price and timer on the
+left; the Purchase and Discuss on Telegram buttons stacked on the right.
+The implementation stacked the buttons underneath at any width below
+1024px, so at the mockup's width they ran full-width across the card.
+Category **C** — a desktop rule whose threshold was set too high.
+
+Measured with the row forced on, the copy column is **452px at 920px** and
+**436px at 900px** — both comfortable — and only becomes cramped further
+down. The stacking was therefore moved from `max-width: 1023.98px` to the
+**existing `max-width: 899.98px` breakpoint** that the navigation already
+uses. No new breakpoint was introduced, and no device-specific value
+(768/820/834/912) was invented.
+
+A breakpoint rather than intrinsic wrapping, deliberately: the buttons must
+be **full width** once they drop below the copy (the mobile mockup shows
+them that way, ~294px of a 360px viewport), and a wrapped flex item cannot
+be told to grow only on the line it wrapped onto. `flex-wrap` alone would
+have left them at their 268px content width, matching neither mockup.
+
+### Breakpoints changed
+
+One threshold moved; none added, none removed:
+
+```
+.source-code__layout { flex-direction: column }   1023.98px -> 899.98px
+.source-code__actions { width: 100% }             1023.98px -> 899.98px
+```
+
+### Noted, not changed: tablet type scale
+
+The mockup's hero and section headings are larger relative to the layout
+than the build's. Scale-free (both measured inside the same image, so no
+export-scale assumption):
+
+| | Mockup | Implementation |
+| --- | --- | --- |
+| H1 cap ÷ nav "Features" width | 0.82 | 0.62 |
+| H1 cap ÷ content width | 0.063 | 0.047 |
+
+The same ratio on desktop is 0.99 (mockup) against 1.04 (ours) — a match —
+so this is specific to the tablet band. The cause is simply that
+`--fs-display: clamp(3.5rem, 4.9vw, 5.875rem)` and
+`--fs-h2: clamp(2.25rem, 3vw, 3.625rem)` sit on their **floors** (56px and
+36px) from roughly 640px to 1143px, while the mockup uses larger display
+type there. In the mockup "Why Traders Choose GoldTrap EA" wraps to two
+lines; in the build it fits on one.
+
+This was classified **category B — an intentional difference produced by
+the approved fluid type scale** — and deliberately left alone, per §22
+(typography not to be altered) and §17 (do not modify working code merely
+because a mockup exists). It is recorded here rather than silently dropped:
+if the larger tablet display type is wanted, it is a change to those two
+clamp floors and nothing else.
+
+### Tests performed
+
+**Tablet audit — 36 checks in Chromium and 36 in WebKit, 0 failures each**,
+covering widths 744, 768, 800, 820, 834, 880, 900, 912, 920, 960, 1000 and
+1024:
+
+- no horizontal overflow at any width
+- header on one row, not clipped; inline nav never overlapping the brand or
+  the actions; the collapsed nav verified `visibility: hidden` rather than
+  merely off-screen
+- payment dialog and source-code dialog: open, fit inside the viewport, not
+  clipped, no page overflow, close on Escape, content filled dynamically
+  (plan, amount, network, wallet)
+- live chat launcher: 68px, `position: fixed`, on screen, pulse animating
+- scroll reveal: 58 elements wired, firing on scroll (16 → 33)
+- accessibility: `aria-expanded` / `aria-haspopup` / `aria-controls` on the
+  language toggle, 5 nav links, labelled dialog, skip link, keyboard reach
+  with a visible 2px focus outline
+- language panel opens inside the viewport, search filters, 16px field (the
+  iOS zoom fix still in place)
+
+**Translation regression at tablet widths** — **WebKit 51 checks, 0
+failures**; Chromium the same set, with the 1000px cases re-run and passing
+(three misses on the first Chromium pass were the test harness failing to
+warm Google's engine in time, not the page — WebKit passed the identical
+cases and the Chromium re-run passed all of them).
+
+Widths 820, 920 and 1000, against the real Google Translate engine, English
+→ French → English → Portuguese → Spanish → English at each: no horizontal
+overflow, and `visualViewport.scale`, `devicePixelRatio`, root font-size, H1
+and H2 font-size and the nav state all unchanged through every switch. The
+language selector still opens and filters afterwards. The `#goog-gt-tt` fix
+and the iOS zoom fix are both untouched.
+
+**Desktop and mobile regression** — full-page renders against the previous
+stylesheet:
+
+| Viewport | Result |
+| -------- | ------ |
+| 1920px | **0 differing pixels** |
+| 1440px | **0 differing pixels** |
+| 920px | height 8960 → 8904 (the source-code row, as intended) |
+| 390px | **0 differing pixels** |
+| 320px | **0 differing pixels** |
+
+---
+
 ## Known Limitations
 
 1. **The tablet mockup shows no hamburger**, and neither does the mobile
