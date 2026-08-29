@@ -1057,6 +1057,30 @@ button {
     border-color: var(--gold-400);
 }
 
+/*
+ * iOS Safari zooms the whole page in whenever a focused form control's
+ * font-size is under 16px, and it does NOT zoom back out when the field is
+ * blurred — only a reload or a manual pinch clears it.
+ *
+ * openPanel() in main.js focuses this field the moment the language
+ * dropdown opens, so on an iPhone every single language change zoomed the
+ * page: text looked larger, the layout looked enlarged, and the page
+ * gained horizontal scroll. It read as "translation broke the layout",
+ * but the zoom happens when the dropdown opens, before Google Translate
+ * has done anything at all.
+ *
+ * 16px is the threshold, so the field is given exactly that on touch
+ * devices. The desktop dropdown keeps its 14px from the mockup. The
+ * alternative — user-scalable=no / maximum-scale=1 in the viewport meta —
+ * would also stop the zoom but at the cost of blocking pinch-zoom for
+ * everyone, which is not acceptable.
+ */
+@media (hover: none), (pointer: coarse) {
+    .lang-select__search {
+        font-size: 16px;
+    }
+}
+
 .lang-select__list {
     max-height: 280px;
     overflow-y: auto;
@@ -1223,6 +1247,17 @@ button {
     font-family: var(--font-display);
     font-size: 1.0625rem;
     font-weight: 700;
+    /*
+     * As a flex item this defaults to min-width: auto, so its minimum
+     * width is its longest word. German compounds are long enough to blow
+     * the card past the screen — "Warenkorbverwaltungssystem" measured
+     * 242px against 280px of usable width at 320px. Letting the box
+     * shrink and the word break keeps the card inside the viewport.
+     * `anywhere` rather than `break-word` because only `anywhere` also
+     * lowers the min-content size that was forcing the card wide.
+     */
+    min-width: 0;
+    overflow-wrap: anywhere;
 }
 
 /*
@@ -2998,8 +3033,16 @@ font {
         font-size: 0.8125rem;
     }
 
+    /*
+     * The link sits on its own row, indented to line up under the copy
+     * rather than under the icon. The basis has to leave room for that
+     * indent: flex-basis: 100% plus a 46px margin is 46px wider than the
+     * row, and the base rule's flex-shrink: 0 stops it shrinking back, so
+     * it used to push 9-13px past the viewport at every mobile width — in
+     * English as well as every translation.
+     */
     .preset-banner__link {
-        flex-basis: 100%;
+        flex-basis: calc(100% - 46px);
         margin-left: 46px;         /* aligns under the copy, not the icon */
     }
 

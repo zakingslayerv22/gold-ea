@@ -541,6 +541,187 @@ doing before release.
 
 ---
 
+## Google Translate Mobile Layout Fix
+
+### 1. The symptom
+
+On iPhone/Safari, after changing the site language the page appeared
+**enlarged** — text looked larger, the layout looked zoomed, and the page
+gained horizontal scrolling. Reloading cleared it.
+
+### 2. The actual root cause
+
+**iOS Safari's automatic zoom-on-focus, triggered by the language search
+field.** It is not a Google Translate bug at all.
+
+iOS Safari zooms the whole page in whenever a focused form control has a
+computed `font-size` under **16px**, and it does **not** zoom back out when
+the field is blurred — only a reload or a manual pinch clears it.
+
+`openPanel()` in `main.js` focuses the search field the moment the language
+dropdown opens:
+
+```js
+function openPanel() {
+    panel.hidden = false;
+    ...
+    search.focus();      // <- iOS zooms here
+}
+```
+
+and `.lang-select__search` computed **14px**. So on an iPhone the sequence
+is: tap the language button → the field is focused → Safari zooms the page
+in → pick a language → the panel closes but **the zoom stays**. The page is
+now genuinely scaled up and scrolls sideways.
+
+Because the visitor only ever sees this right after switching language, it
+reads as "translating broke the layout" — but the zoom happens when the
+dropdown *opens*, before Google Translate has done anything.
+
+### 3. The evidence
+
+Measured with the real Google Translate engine in both WebKit and Chromium,
+before and after translation at 390px:
+
+| Measurement | Before | After |
+| ----------- | ------ | ----- |
+| `visualViewport.scale` | 1 | **1 — unchanged** |
+| `devicePixelRatio` | 3 | **3 — unchanged** |
+| `window.innerWidth` / `documentElement.clientWidth` | 390 | **390 — unchanged** |
+| computed `font-size`, all 22 control elements | — | **unchanged** |
+| `documentElement.scrollWidth` | 390 | **390 — unchanged** |
+
+Nothing Google does changes the page's scale or typography. The 22 elements
+checked included body, page wrapper, header, logo, site name, navigation,
+hero heading, hero paragraph, primary CTA, quick benefits, benefit card,
+section headings, pricing grid, pricing card, pricing button, FAQ, FAQ
+question, footer, announcement bar and the language selector. Google's own
+`<font>` wrappers inherit correctly — measured `font-size: 36px`,
+`line-height: 37.8px`, `font-family: Poppins` on a translated `<h2>`,
+identical to the untranslated element.
+
+What Google *does* change, measured:
+
+- `<html>` gains `class="translated-ltr"`, `lang="fr"` and inline `height: 100%`
+- `<body>` gains inline `position: relative; min-height: 100%; top: 40px`
+  (the site's existing `body { top: 0 !important }` already neutralises the
+  40px offset — computed `top` stayed `0px`)
+
+Neither changes width, scale or type size, so neither was touched.
+
+The zoom trigger itself was confirmed directly: the site has exactly **one**
+form control on either page, `#lang-select-search`, and it computed
+**14px — under the 16px threshold — at 320, 360, 375, 390, 414, 768 and
+1440px, on both `index.html` and `frequently-asked-questions.html`**, with
+`document.activeElement` confirmed as that field after opening the panel.
+
+### 4. Why the previous `#goog-gt-tt` theory was insufficient
+
+It was not wrong, but it was a *different* bug. `#goog-gt-tt` is Google's
+"original text" bubble: `position: absolute`, a hard `width: 420px`,
+appended to `<body>` outside `.page-wrapper`. It genuinely does add 7–147px
+of horizontal overflow when displayed, which was measured and fixed.
+
+But it only appears when a visitor taps a translated phrase, and it can
+never change the page's *scale* or make text larger. It could not produce
+the reported symptom. **That fix is correct and has been kept** — it
+addresses real overflow — it simply was not the cause of the zoom.
+
+### 5. The fixes
+
+Three changes, all in `assets/styles/styles.css`.
+
+**a. The root cause — the iOS zoom trigger.** The search field is given
+16px on touch devices, which is the threshold below which Safari zooms:
+
+```css
+@media (hover: none), (pointer: coarse) {
+    .lang-select__search {
+        font-size: 16px;
+    }
+}
+```
+
+Desktop keeps the mockup's 14px (verified: 14px at 1440px with no touch,
+16px on every touch viewport). The alternative — `user-scalable=no` or
+`maximum-scale=1` in the viewport meta — would also stop the zoom, but by
+blocking pinch-zoom for everyone. It was not used.
+
+**b. `.preset-banner__link` — real overflow at every mobile width.** On
+mobile the link takes its own row with `flex-basis: 100%` and
+`margin-left: 46px`, and the base rule sets `flex-shrink: 0`. 100% plus a
+46px margin is 46px wider than the row, and it could not shrink back — so
+it pushed **9–13px past the viewport at every mobile width, in English as
+well as every translation**. `.page-wrapper { overflow-x: clip }` was
+hiding it; on Safari 15 and older, where `overflow: clip` is not supported
+and the declaration is dropped, it is a real horizontal scrollbar. Fixed by
+sizing the basis to leave room for the indent:
+
+```css
+.preset-banner__link { flex-basis: calc(100% - 46px); }
+```
+
+**c. `.benefit-card__label` — long translated words forcing the card wide.**
+As a flex item it defaulted to `min-width: auto`, so its minimum width was
+its longest word. German compounds broke it: `Warenkorbverwaltungssystem`
+measured 242px against 280px of usable width at 320px, pushing the card to
+327px on a 320px screen. Fixed by letting the box shrink and the word
+break:
+
+```css
+.benefit-card__label { min-width: 0; overflow-wrap: anywhere; }
+```
+
+`anywhere` rather than `break-word` because only `anywhere` also lowers the
+min-content size that was forcing the card wide. No text is truncated and
+no English dimension is hard-coded.
+
+### 6–8. Testing
+
+**True layout width, with `.page-wrapper`'s clip neutralised** — i.e. what a
+browser without `overflow: clip` support actually lays out. This is the
+measurement that exposes overflow the backstop was masking:
+
+| | Before the fix | After |
+| --- | --- | --- |
+| 320px, EN / FR / DE / RU | 13px over | **0** |
+| 360px, EN / FR / DE / RU | 13px over | **0** |
+| 375px, EN / FR / DE / RU | 9–13px over | **0** |
+| 390px, EN / FR / DE / RU | 9px over | **0** |
+| 414px, EN / FR / DE / RU | 9px over | **0** |
+
+20 measurements, all zero. The mobile layout no longer depends on the
+`overflow-x: clip` backstop at all.
+
+**Full suite, against the real Google Translate engine:**
+
+- **WebKit (Safari's engine), iPhone 14 profile — 46 checks, 0 failures**
+- **Chromium, iPhone 14 profile — 46 checks, 0 failures**
+
+Translation combinations: English → French, French → English, English →
+Portuguese, English → Spanish, English → German, English → Russian, and six
+consecutive switches ending back at English. Widths: 320, 360, 375, 390,
+414, 768, 820, 1024, 1280, 1440, 1920 — each in English, in French, and in
+French with Google's bubble displayed. Also the language dropdown open and
+closed, the hamburger open and closed, the payment dialog and the
+source-code dialog, all while translated.
+
+**No visual change.** `index.html` rendered full-page at 1440px, 820px and
+390px with the patched stylesheet and with the previous one: **0 differing
+pixels** at all three widths.
+
+### Caveat
+
+iOS Safari's zoom-on-focus is a behaviour of Safari on iOS, not of the
+WebKit engine build available here, so the zoom itself could not be
+reproduced in this environment. What *was* verified directly is the trigger
+condition and its removal: the focused field measured 14px (below the 16px
+threshold) before the fix and 16px after, on every mobile viewport in both
+engines, with desktop unchanged at 14px. A confirmation pass on a physical
+iPhone is still worth doing.
+
+---
+
 ## Known Limitations
 
 1. **The tablet mockup shows no hamburger**, and neither does the mobile
