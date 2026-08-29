@@ -1,6 +1,6 @@
 # Mobile Implementation
 
-**Date:** 28 August 2026
+**Date:** 29 August 2026
 **Scope:** responsive mobile + tablet layout, built on the approved desktop
 implementation as the content and functional baseline.
 
@@ -409,6 +409,138 @@ build — unchanged.
 
 ---
 
+## Google Translate Mobile Overflow Fix
+
+A horizontal scrollbar appeared on some phones — iPhone/Safari especially —
+after the visitor changed the site language, and went away again on reload.
+
+### The cause
+
+Google Translate appends its own UI **directly to `<body>`**. Every element
+it injects therefore sits outside `.page-wrapper`, which carries this
+site's only `overflow-x: clip`. Nothing on the page constrained them.
+
+The offending element is **`div#goog-gt-tt`** — Google's "original text"
+bubble, classes `VIpgJd-suEOdc VIpgJd-yAWNEb-L7lbkb skiptranslate`. Google
+gives it:
+
+```
+position: absolute;
+width: 420px;            /* from Google's el_main.css */
+margin: 0 0 0 -23px;     /* inline, set by Google's script */
+display: none;           /* until a phrase is tapped or hovered */
+```
+
+420px is wider than every phone viewport the site supports (320–414px), and
+the bubble has no clipping ancestor, so the moment Google displays it the
+document's scrollable width grows past the screen. Translating also flips
+`<body>` to `position: relative`, which makes `<body>` the containing block
+for that absolutely positioned bubble — so its box lands in the page's
+scroll area rather than being resolved against the viewport.
+
+That also explains the reload behaviour: the bubble is rebuilt hidden on
+every page load, so refreshing clears it even though the page stays
+translated.
+
+The other elements Google injects were checked and ruled out rather than
+assumed. `iframe.VIpgJd-ZVi9od-ORHb-OEVmcd` (the banner) and the two
+`iframe.VIpgJd-ZVi9od-xl07Ob-OEVmcd` popups are already suppressed by the
+existing `iframe.skiptranslate { display: none }` rule; the spinner
+`div.VIpgJd-ZVi9od-aZ2wEe-wOHMyf` is `position: fixed` at `left: -1000px`
+(then `-14px`), which is off to the left and measurably adds nothing to the
+scrollable width. They were left alone — `.skiptranslate` was not blanket
+hidden, because some of it is load-bearing for translation.
+
+### Measured, before and after
+
+Real Google Translate engine, iPhone 14 viewport (390px), English → French,
+then the bubble displayed:
+
+| Engine   | Stylesheet | `documentElement.scrollWidth` | Overflow |
+| -------- | ---------- | ----------------------------- | -------- |
+| WebKit   | before     | 537px                         | **147px** |
+| WebKit   | after      | 390px                         | 0 |
+| Chromium | before     | 397px                         | **7px** |
+| Chromium | after      | 390px                         | 0 |
+
+The two engines differ only in where Google happened to place the bubble on
+that run; isolated runs measured WebKit at +111px and Chromium at +157px.
+Either way the page scrolled sideways before the fix and does not after.
+
+### The fix
+
+`assets/styles/styles.css`, section 20 — the bubble is **constrained, not
+hidden**, so it still works as part of Google's translation UI:
+
+```css
+#goog-gt-tt {
+    box-sizing: border-box !important;
+    left: 12px !important;
+    right: 12px !important;
+    width: auto !important;
+    max-width: 420px !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+}
+```
+
+With both offsets set and `width: auto`, the bubble fills the viewport
+minus a 12px gutter on phones and keeps Google's own 420px wherever the
+screen is wide enough for it — so it can never be wider than the screen it
+is drawn on. Google's vertical placement is left alone. Measured results:
+
+| Viewport | Bubble width | Right edge |
+| -------- | ------------ | ---------- |
+| 320px    | 296px        | 308px |
+| 360px    | 336px        | 348px |
+| 390px    | 366px        | 378px |
+| 414px    | 390px        | 402px |
+| 768px+   | 420px        | 432px |
+
+Two supporting rules cap the same bubble addressed by its class (in case
+Google renders a second instance without the id) and stop anything Google
+lays out inside it from pushing past its edges.
+
+### Defensive rule
+
+`html { overflow-x: clip; }` was added next to the existing `.page-wrapper`
+clip — **as a backstop, not as the fix**. Google can append UI anywhere in
+`<body>`, which the wrapper's clip cannot reach. `clip` rather than
+`hidden`: `overflow-x: hidden` would leave the page a horizontally
+scrollable container that merely hides its scrollbar and still pans under a
+swipe on iOS, whereas `clip` refuses the scroll outright. On the root
+element the value propagates to the viewport, so vertical scrolling is
+unaffected and no new scroll container is created — `position: sticky` and
+`position: fixed` still behave.
+
+### Tested
+
+Both suites ran against **the real Google Translate engine** — Google's own
+`element.js`, `el_main.js` and `el_main.css` fetched live, and real
+translation responses, so the injected DOM measured here is the DOM a
+visitor gets.
+
+- **WebKit (Safari's engine), iPhone 14 profile — 46 checks, 0 failures**
+- **Chromium, iPhone 14 profile — 46 checks, 0 failures**
+
+Covering, in both engines: fresh load; English → French, Portuguese,
+Spanish; French → English; six consecutive switches; the bubble displayed
+after translating; language dropdown opened and closed; hamburger opened
+and closed; the payment dialog; the source-code dialog; widths 320, 360,
+375, 390, 414, 768, 820, 1024, 1280, 1440 and 1920, each in English, in
+French, and in French with the bubble displayed. Zero horizontal overflow
+in every case.
+
+**No visual change.** index.html rendered full-page at 1440px, 820px and
+390px with the patched stylesheet and with the previous one: **0 differing
+pixels** at all three widths.
+
+The Safari-engine testing is WebKit via Playwright, not a physical iPhone.
+It is the same engine, but a device check on real hardware is still worth
+doing before release.
+
+---
+
 ## Known Limitations
 
 1. **The tablet mockup shows no hamburger**, and neither does the mobile
@@ -418,10 +550,13 @@ build — unchanged.
    inline nav the tablet mockup shows, and portrait tablets and phones get
    the hamburger.
 
-2. **Live translation still has not been exercised against Google's
-   servers** in this environment, for the reason recorded in
-   `DESKTOPUPDATE.md`. The mobile language switching was verified through
-   the same harness, using GTranslate's real `dropdown.js`.
+2. **Live translation has now been exercised against Google's servers.**
+   This supersedes the limitation recorded here and in `DESKTOPUPDATE.md`:
+   during the overflow fix above, Chromium and WebKit were driven against
+   Google's live `element.js`/`el_main.js` and real translation responses,
+   and English → French/Portuguese/Spanish/German/Russian and back to
+   English all round-tripped correctly. A check on physical hardware is
+   still worth doing before release.
 
 3. **`termsAndConditionsLink` remains `"#"`** — no terms URL has been
    supplied.

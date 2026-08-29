@@ -191,6 +191,24 @@ body {
     background-color: var(--bg-black);
 }
 
+/*
+ * Defensive backstop, NOT the fix. Google Translate appends its UI to
+ * <body>, outside .page-wrapper above, so the wrapper's clip cannot reach
+ * it; the actual offender is constrained in section 20. This is here so
+ * that anything else Google decides to inject at body level can never turn
+ * into a horizontal scrollbar either.
+ *
+ * clip rather than hidden: `overflow-x: hidden` would make the page a
+ * horizontally scrollable container that merely hides its scrollbar (and
+ * would still scroll under a swipe on iOS), whereas `clip` refuses the
+ * scroll outright. On the root element the value propagates to the
+ * viewport, so overflow-y stays scrollable and no new scroll container is
+ * created — position: sticky and position: fixed are unaffected.
+ */
+html {
+    overflow-x: clip;
+}
+
 h1, h2, h3, h4 {
     margin: 0;
     font-family: var(--font-display);
@@ -2330,6 +2348,68 @@ iframe.skiptranslate {
 
 body {
     top: 0 !important;
+}
+
+/*
+ * ----------------------------------------------------------------------
+ * Translation-induced horizontal overflow
+ * ----------------------------------------------------------------------
+ * Google appends its own UI directly to <body>, which is OUTSIDE
+ * .page-wrapper — the element that carries this site's only overflow-x
+ * clip. Anything Google injects therefore sits in the document's
+ * scrollable area with nothing to constrain it.
+ *
+ * The offending element is #goog-gt-tt (Google's "original text" bubble,
+ * classes VIpgJd-suEOdc VIpgJd-yAWNEb-L7lbkb skiptranslate). Google gives
+ * it position: absolute, a hard width: 420px and an inline
+ * margin: 0 0 0 -23px, then shows it when a visitor taps or hovers a
+ * translated phrase. Measured on a 390px-wide phone with the real Google
+ * engine running, the moment that bubble is displayed:
+ *
+ *     WebKit   documentElement.scrollWidth 390px -> 537px  (+147px)
+ *     Chromium documentElement.scrollWidth 390px -> 397px  (+7px)
+ *
+ * How far it overflows depends on where Google places the bubble, which
+ * follows the phrase the visitor touched — isolated runs measured +111px
+ * in WebKit and +157px in Chromium. Any placement overflows, because the
+ * bubble alone is wider than the screen.
+ *
+ * That is the horizontal scrollbar, and it is why reloading clears it:
+ * the bubble is rebuilt hidden on every page load. Translating also flips
+ * <body> to position: relative, which makes <body> the containing block
+ * for that absolutely positioned bubble, so its 420px box lands in the
+ * page's scroll area rather than being resolved against the viewport.
+ *
+ * The bubble is CONSTRAINED, not hidden: it is still a working part of
+ * Google's translation UI. It is pinned inside a 12px gutter, sized to the
+ * viewport, and capped at Google's own 420px where the screen is wide
+ * enough — so it can never be wider than the screen it is drawn on.
+ */
+#goog-gt-tt {
+    box-sizing: border-box !important;
+    left: 12px !important;
+    right: 12px !important;
+    width: auto !important;
+    max-width: 420px !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+}
+
+/*
+ * Same bubble addressed by its class, in case Google renders a second
+ * instance without the id, and for any nested copy: cap the width only,
+ * so a nested bubble keeps the placement Google gave it.
+ */
+.VIpgJd-yAWNEb-L7lbkb {
+    box-sizing: border-box !important;
+    max-width: min(420px, calc(100vw - 24px)) !important;
+}
+
+/* Nothing Google lays out inside the bubble may push past its edges. */
+#goog-gt-tt *,
+.VIpgJd-yAWNEb-L7lbkb * {
+    box-sizing: border-box !important;
+    max-width: 100% !important;
 }
 
 /* Google wraps translated runs in <font>; keep them inheriting our styles. */
