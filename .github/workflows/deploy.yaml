@@ -34,8 +34,7 @@ jobs:
             **/.git*/**
             **/node_modules/**
             **/.github/**
-            .cpanel.yml
-            README.md
+            mockups/**
+            **/*.md
             .gitignore
             .DS_Store
-            **/*.md
