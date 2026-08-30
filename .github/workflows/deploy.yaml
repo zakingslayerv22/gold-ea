@@ -1,17 +1,4 @@
-name: Deploy to Namecheap
-
-on:
-  push:
-    branches: [main]
-  workflow_dispatch:
-
-concurrency:
-  group: deploy-production
-  cancel-in-progress: true
-
-jobs:
-  web-deploy:
-    # ============================================================================
+# ============================================================================
 #  FALLBACK DEPLOY: lftp instead of FTP-Deploy-Action
 #  Save at: .github/workflows/deploy.yml   (replace your existing one)
 #
@@ -26,7 +13,7 @@ name: Deploy to Namecheap (lftp)
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   workflow_dispatch:
 
 concurrency:
@@ -114,4 +101,4 @@ jobs:
 #    connections per IP; high parallelism causes disconnects.
 #  * If lftp ALSO fails, run it with -d for full protocol debug output:
 #      lftp -d -c " ... "
-# 
+#
