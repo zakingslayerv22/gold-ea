@@ -34,8 +34,8 @@ jobs:
             **/.git*/**
             **/node_modules/**
             **/.github/**
-            mockups/**
-            **/*.md
+            .cpanel.yml
+            README.md
             .gitignore
             .DS_Store
-          timeout: 120000
+            **/*.md
