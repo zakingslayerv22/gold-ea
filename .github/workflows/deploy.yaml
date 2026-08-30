@@ -1,0 +1,42 @@
+name: Deploy to Namecheap
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: true
+
+jobs:
+  web-deploy:
+    name: Sync files over FTPS
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Sync to cPanel via FTPS
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.6
+        with:
+          server: ${{ secrets.FTP_SERVER }} # e.g. server123.web-hosting.com
+          username: ${{ secrets.FTP_USERNAME }} # e.g. deploy@yourdomain.com
+          password: ${{ secrets.FTP_PASSWORD }}
+          port: 21
+          protocol: ftps # explicit FTPS on port 21
+          local-dir: ./ # trailing slash required
+          server-dir: public_html/ # trailing slash required
+          dangerous-clean-slate: false
+          log-level: standard
+          exclude: |
+            **/.git*
+            **/.git*/**
+            **/node_modules/**
+            **/.github/**
+            .cpanel.yml
+            README.md
+            .gitignore
+            .DS_Store
+            **/*.md
+          dry-run: true
