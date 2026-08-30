@@ -39,4 +39,3 @@ jobs:
             .gitignore
             .DS_Store
             **/*.md
-          dry-run: true
