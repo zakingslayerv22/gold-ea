@@ -38,3 +38,4 @@ jobs:
             **/*.md
             .gitignore
             .DS_Store
+          timeout: 120000
