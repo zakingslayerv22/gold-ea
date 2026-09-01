@@ -1,8 +1,8 @@
 /* ======================================================================
  * HOMEPAGE FAQ SERVICE
  * ======================================================================
- * The homepage FAQ section (index.html) shows a small, curated selection
- * of the site's FAQs behind four filter pills.
+ * The homepage FAQ section (index.html) shows 24 approved questions
+ * behind four filter pills.
  *
  * THIS FILE HOLDS NO FAQ TEXT.
  * ----------------------------
@@ -10,12 +10,14 @@
  *
  *     assets/scripts/faq-page-content.js      <- the canonical database
  *
- * This file only decides WHICH of those entries the homepage features,
- * how they are grouped, and in what order. It then hands main.js the same
- * shape it has always consumed, so the homepage markup, styling and
- * behaviour are unchanged.
+ * That file holds two collections: `faqPageContent`, the 72 entries the
+ * full FAQ page renders, and `homepageFaqContent`, the 24 approved entries
+ * the homepage shows. This file only decides WHICH of them the homepage
+ * features, how they are grouped and in what order. It then hands main.js
+ * the same shape it has always consumed, so the homepage markup, styling
+ * and behaviour are unchanged.
  *
- *          faq-page-content.js  (all categories, all questions, all answers)
+ *          faq-page-content.js  (all FAQ text on the site)
  *                   |
  *          ┌────────┴─────────┐
  *          |                  |
@@ -30,10 +32,13 @@
  * `questionRefs` lists the questions it shows, in display order, by their
  * stable reference:
  *
- *     "<categoryId>/<questionId>"     e.g. "vps-running/do-i-need-a-vps"
+ *     "<categoryId>/<questionId>"     e.g. "homepage/which-pair"
  *
- * Those ids come from faq-page-content.js. Nothing here needs the question
- * or answer text — change the wording there and the homepage follows.
+ * Those ids come from faq-page-content.js. A ref may point at either
+ * collection — "homepage/..." for the homepage's own approved copy, or
+ * "<faqPageCategory>/..." to feature an entry written for the full FAQ
+ * page. Nothing here needs the question or answer text: change the wording
+ * in faq-page-content.js and the homepage follows.
  *
  * A reference that no longer resolves is skipped rather than throwing, so
  * renaming an id in the database degrades to a missing entry rather than a
@@ -42,10 +47,12 @@
  * ----------------------------------------------------------------------
  * HOW TO ADD A NEW FAQ
  * ----------------------------------------------------------------------
- * 1. Add it to faq-page-content.js (it appears on the full FAQ page, and
- *    the counts, hero total and category badges all follow automatically).
- * 2. Only if it should also appear on the homepage, add its ref to one of
- *    the sections below.
+ * 1. Decide where it belongs. A question for the full FAQ page goes into
+ *    `faqPageContent`, where it joins the counts, the hero total and the
+ *    category badges automatically. A question written specifically for
+ *    the homepage goes into `homepageFaqContent`.
+ * 2. Add its ref to one of the sections below if the homepage should
+ *    show it.
  *
  * The homepage shows the first `data-faq-limit` questions of the selected
  * section — see index.html — so a section may safely list more than that.
@@ -53,63 +60,63 @@
 
 import {
     getQuestionByRef,
-    getAllQuestions
+    getHomepageQuestions
 } from "./faq-page-content.js";
 
 /**
  * The homepage's four filter pills and the questions each one features.
  *
- * The pill names are homepage presentation, not content: they group the
- * canonical questions into the broader headings the homepage mockup shows,
- * which is why they may differ from the full FAQ page's category names.
+ * The pill names are homepage presentation, not content: they are the
+ * headings the homepage mockup shows, which is why they differ from the
+ * full FAQ page's eight category names.
  */
 const homepageFaqSections = [
     {
         id: "basics",
         name: "Basics",
         questionRefs: [
-            "getting-started/what-is-goldtrap",
-            "getting-started/suitable-for-beginners",
-            "getting-started/mt4-or-mt5",
-            "getting-started/run-on-phone",
-            "getting-started/what-do-i-need",
-            "strategy-performance/how-strategy-works"
+            "homepage/what-is-goldtrap",
+            "homepage/who-is-it-for",
+            "homepage/mt4-and-mt5",
+            "homepage/run-on-mobile",
+            "homepage/which-pair",
+            "homepage/what-strategy"
         ]
     },
     {
         id: "account-broker",
         name: "Account & Broker",
         questionRefs: [
-            "brokers-accounts/which-brokers",
-            "brokers-accounts/cent-or-standard",
-            "pricing-licensing/account-tiers",
-            "pricing-licensing/activate-license-key",
-            "pricing-licensing/customer-portal",
-            "capital-risk/what-leverage"
+            "homepage/any-broker",
+            "homepage/cent-and-standard",
+            "homepage/accounts-per-licence",
+            "homepage/licence-binding",
+            "homepage/move-licence",
+            "homepage/what-leverage"
         ]
     },
     {
         id: "capital-risk",
         name: "Capital & Risk",
         questionRefs: [
-            "capital-risk/how-much-capital",
-            "capital-risk/is-capital-safe",
-            "capital-risk/biggest-risk",
-            "strategy-performance/floating-positions",
-            "strategy-performance/profit-per-day",
-            "pricing-licensing/do-keys-expire"
+            "homepage/how-much-capital",
+            "homepage/can-it-lose-money",
+            "homepage/risk-controls",
+            "homepage/stop-loss",
+            "homepage/daily-profit-target",
+            "homepage/refund"
         ]
     },
     {
         id: "setup-help",
         name: "Setup & Help",
         questionRefs: [
-            "setup-installation/install-on-mt4-mt5",
-            "setup-installation/webrequest-prompt",
-            "pricing-licensing/how-do-i-pay",
-            "setup-installation/where-to-get-presets",
-            "vps-running/do-i-need-a-vps",
-            "troubleshooting-support/updated-version-and-support"
+            "homepage/how-to-install",
+            "homepage/whitelist-url",
+            "homepage/licence-key",
+            "homepage/preset-files",
+            "homepage/need-a-vps",
+            "homepage/get-support"
         ]
     }
 ];
@@ -208,7 +215,7 @@ class FaqServiceHomepage {
      * @returns {string[]}
      */
     getUnresolvedRefs() {
-        const known = new Set(getAllQuestions().map((entry) => entry.ref));
+        const known = new Set(getHomepageQuestions().map((entry) => entry.ref));
         return homepageFaqSections
             .flatMap((section) => section.questionRefs)
             .filter((ref) => !known.has(ref));
