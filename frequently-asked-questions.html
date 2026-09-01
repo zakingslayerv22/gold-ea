@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en" data-title-template="Frequently Asked Questions — {siteName}"
+      data-description="The complete {siteName} FAQ: basics, account and broker questions, capital and risk, plus setup and support.">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Title and meta tags are rewritten from `siteName` in main.js; the
+         patterns live on the <html> element above. -->
+    <title>Frequently Asked Questions — GOLDTRAP EA</title>
+    <meta name="description" content="">
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="">
+    <meta property="og:title" content="">
+    <meta property="og:description" content="">
+    <meta property="og:image" content="assets/images/logo-gb.svg">
+
+    <!-- Twitter / social -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="">
+    <meta name="twitter:description" content="">
+    <meta name="twitter:image" content="assets/images/logo-gb.svg">
+
+    <link rel="icon" href="assets/images/favicon.svg" type="image/svg+xml">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&family=Roboto:wght@400;500;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="assets/styles/styles.css">
+</head>
+
+<body>
+    <a class="skip-link" href="#main-content">Skip to main content</a>
+
+    <div class="page-wrapper">
+
+        <!-- Same version-based announcement bar as the homepage -->
+        <div class="action-bar" id="announcement-bar" hidden>
+            <div class="container action-bar__inner">
+                <span class="action-bar__icon" aria-hidden="true">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg>
+                </span>
+
+                <a class="action-bar__link" id="announcement-link" href="#"></a>
+
+                <button type="button" class="action-bar__close" id="announcement-close"
+                        aria-label="Dismiss announcement">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
+            </div>
+        </div>
+
+        <div class="hero">
+            <header class="site-header">
+                <div class="container site-header__inner">
+
+                    <a class="brand" href="index.html">
+                        <img class="brand__mark" src="assets/images/logo-gb.svg"
+                             alt="" width="48" height="48">
+                        <span class="brand__name" data-site-name>GOLDTRAP EA</span>
+                    </a>
+
+                    <!-- Inline at wide widths; the hamburger's panel below it. -->
+                    <nav class="primary-nav" id="primary-nav" aria-label="Primary">
+                        <ul class="primary-nav__list">
+                            <li><a class="primary-nav__link" href="index.html#how-it-works">How It Trades</a></li>
+                            <li><a class="primary-nav__link" href="index.html#benefits">Features</a></li>
+                            <li><a class="primary-nav__link" href="index.html#pricing">Pricing</a></li>
+                            <li><a class="primary-nav__link" href="index.html#downloads">Downloads</a></li>
+                            <li><a class="primary-nav__link" href="index.html#faq">FAQ</a></li>
+                        </ul>
+                    </nav>
+
+                    <!--
+                        Header actions. The language control and the hamburger are
+                        deliberately grouped so they stay side by side on mobile,
+                        where horizontal space is scarce. The brand sits at the far
+                        left and this group at the far right; the space between them
+                        is what justify-content: space-between distributes.
+                    -->
+                    <div class="site-header__actions">
+
+                        <!-- §5.3 Translation / language selector -->
+                        <div class="lang-select" id="lang-select">
+                            <button type="button" class="lang-select__toggle" id="lang-select-toggle"
+                                    aria-expanded="false" aria-haspopup="listbox"
+                                    aria-controls="lang-select-panel">
+                                <!--
+                                    Two labels, one visible at a time. Desktop and
+                                    tablet show the full language name; mobile shows
+                                    only the two-letter abbreviation of the CURRENT
+                                    language. main.js keeps both in sync — neither is
+                                    hard-coded.
+                                -->
+                                <span class="lang-select__name" id="lang-select-label">English</span>
+                                <span class="lang-select__code" id="lang-select-code">EN</span>
+                                <svg class="lang-select__chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+                            </button>
+
+                            <div class="lang-select__panel" id="lang-select-panel" hidden>
+                                <label class="visually-hidden" for="lang-select-search">Search languages</label>
+                                <input type="search" class="lang-select__search" id="lang-select-search"
+                                       placeholder="Search languages…" autocomplete="off">
+                                <div class="lang-select__list" id="lang-select-list"
+                                     role="listbox" aria-label="Languages"></div>
+                            </div>
+                        </div>
+
+                        <!--
+                            Hamburger. Hidden while the inline navigation still fits;
+                            revealed below the nav breakpoint. Behaviour lives in
+                            initMobileNavigation() in main.js.
+                        -->
+                        <button type="button" class="nav-toggle" id="nav-toggle"
+                                aria-label="Open navigation menu" aria-expanded="false"
+                                aria-controls="primary-nav">
+                            <span class="nav-toggle__box" aria-hidden="true">
+                                <span class="nav-toggle__bar"></span>
+                                <span class="nav-toggle__bar"></span>
+                                <span class="nav-toggle__bar"></span>
+                            </span>
+                        </button>
+
+                    </div>
+
+                </div>
+            </header>
+
+            <main id="main-content">
+
+                <!--
+                    FAQ HERO
+                    Everything textual here is filled by faq-page.js: the
+                    answer count is derived from the FAQ data, and the site
+                    name comes from the global configuration (§12, §25).
+                -->
+                <section class="faq-page__hero" aria-labelledby="faq-page-title">
+                    <div class="container faq-page__hero-inner">
+                        <p class="eyebrow-pill scroll-reveal">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15.5 14"/></svg>
+                            Help Center
+                        </p>
+
+                        <h1 class="faq-page__title scroll-reveal" id="faq-page-title">
+                            How can we help?
+                        </h1>
+
+                        <p class="faq-page__lead scroll-reveal" id="faq-page-lead"></p>
+
+                        <!-- §8 Live search. No submit button: results update as you type. -->
+                        <form class="faq-search scroll-reveal" id="faq-search-form" role="search"
+                              aria-label="Search the frequently asked questions">
+                            <label class="visually-hidden" for="faq-search-input">
+                                Search the frequently asked questions
+                            </label>
+                            <svg class="faq-search__icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.6-3.6"/></svg>
+                            <input class="faq-search__input" id="faq-search-input" type="search"
+                                   placeholder="Search for an answer…" autocomplete="off"
+                                   spellcheck="false">
+                            <!-- Hint for the "/" shortcut wired up in faq-page.js -->
+                            <kbd class="faq-search__hint" aria-hidden="true">/</kbd>
+                            <button type="button" class="faq-search__clear" id="faq-search-clear"
+                                    aria-label="Clear search" hidden>
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                            </button>
+                        </form>
+
+                        <!-- Shortcut chips; hidden while a search is active. -->
+                        <div class="faq-popular scroll-reveal" id="faq-popular">
+                            <p class="faq-popular__label">Popular:</p>
+                            <div class="faq-popular__list" id="faq-popular-list"></div>
+                        </div>
+                    </div>
+                </section>
+
+                <!--
+                    §13 Sticky category navigation. The bar sticks, the pills
+                    and their counts are rendered from the FAQ data, and the
+                    compact search (§14) opens from the end of the same bar
+                    once the hero search has scrolled away.
+                -->
+                <div class="faq-sticky-bar" id="faq-sticky-bar">
+                    <div class="container faq-sticky-bar__inner">
+                        <div class="faq-category-navigation" id="faq-category-navigation"
+                             role="group" aria-label="Filter questions by category"></div>
+
+                        <button type="button" class="faq-sticky-search-button"
+                                id="faq-sticky-search-toggle"
+                                aria-expanded="false" aria-controls="faq-sticky-search-panel"
+                                hidden>
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.6-3.6"/></svg>
+                            Search
+                        </button>
+                    </div>
+
+                    <div class="faq-sticky-search-panel" id="faq-sticky-search-panel" hidden>
+                        <div class="container faq-sticky-search-panel__inner">
+                            <form class="faq-search faq-search--compact" id="faq-sticky-search-form"
+                                  role="search" aria-label="Search the frequently asked questions">
+                                <label class="visually-hidden" for="faq-sticky-search-input">
+                                    Search the frequently asked questions
+                                </label>
+                                <svg class="faq-search__icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.6-3.6"/></svg>
+                                <input class="faq-search__input" id="faq-sticky-search-input"
+                                       type="search" placeholder="Search for an answer…"
+                                       autocomplete="off" spellcheck="false">
+                                <button type="button" class="faq-search__clear"
+                                        id="faq-sticky-search-close" aria-label="Close search">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!--
+                    FAQ CONTENT
+                    #faq-page-results is filled by faq-page.js from
+                    faq-page-content.js — there is deliberately no question
+                    or answer written into this file (§4).
+                -->
+                <section class="faq-page__content" id="faq-page">
+                    <div class="container faq-page__content-inner">
+
+                        <div class="faq-page__toolbar" id="faq-page-toolbar">
+                            <p class="faq-page__count" id="faq-result-count"
+                               aria-live="polite"></p>
+                            <button type="button" class="faq-page__expand-all"
+                                    id="faq-expand-all" aria-expanded="false">Expand all</button>
+                        </div>
+
+                        <div id="faq-page-results"></div>
+
+                        <!-- §10 No-results state; the term is the visitor's own query. -->
+                        <div class="faq-no-results" id="faq-no-results" hidden>
+                            <svg class="faq-no-results__icon" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.6-3.6"/></svg>
+                            <h2 class="faq-no-results__title">No answers found</h2>
+                            <p class="faq-no-results__text">
+                                We couldn't find anything matching
+                                “<strong id="faq-no-results-term"></strong>”.
+                                Try a different keyword or ask us directly.
+                            </p>
+                            <div class="faq-no-results__actions">
+                                <button type="button" class="btn btn--dark"
+                                        id="faq-no-results-clear">Clear search</button>
+                                <a class="btn btn--gold" data-faq-telegram href="#"
+                                   target="_blank" rel="noopener noreferrer">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                                    Ask on Telegram
+                                </a>
+                            </div>
+                        </div>
+
+                        <!-- §16 Still have a question? Telegram link stays configurable. -->
+                        <section class="faq-support scroll-reveal"
+                                 aria-labelledby="faq-support-title">
+                            <svg class="faq-support__icon" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3.6"/><path d="M5.6 5.6l3.9 3.9M14.5 14.5l3.9 3.9M18.4 5.6l-3.9 3.9M9.5 14.5l-3.9 3.9"/></svg>
+                            <h2 class="faq-support__title" id="faq-support-title">
+                                Still have a question?
+                            </h2>
+                            <p class="faq-support__text">
+                                Can't find what you're looking for? Our team is ready to
+                                help you on Telegram.
+                            </p>
+                            <a class="btn btn--gold btn--lg faq-support__action"
+                               data-faq-telegram href="#" target="_blank" rel="noopener noreferrer">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                                Contact Support
+                            </a>
+                            <p class="faq-support__version" id="faq-support-version"></p>
+                        </section>
+
+                        <!-- §17 Back to homepage stays below the support card. -->
+                        <div class="faq-page__back scroll-reveal">
+                            <a class="btn btn--dark btn--lg" href="index.html">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+                                Back to homepage
+                            </a>
+                        </div>
+                    </div>
+                </section>
+            </main>
+
+            <footer class="site-footer">
+                <div class="container site-footer__inner">
+                    <p id="footer-caveat" class="scroll-reveal"></p>
+
+                    <p class="terms-notice scroll-reveal">
+                        Using this site and/or any of its products puts you under its
+                        <a id="terms-and-conditions-link" href="#">Terms and Conditions</a>
+                    </p>
+
+                    <a class="footer-telegram scroll-reveal" data-telegram="channel"
+                       href="#" aria-label="Telegram" target="_blank" rel="noopener noreferrer">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                    </a>
+
+                    <p class="site-footer__copyright scroll-reveal" id="footer-copyright"></p>
+                </div>
+            </footer>
+        </div>
+    </div>
+
+    <a class="chat-widget" id="live-chat-launcher" data-telegram="personal" href="#"
+       target="_blank" rel="noopener noreferrer">
+        <span class="chat-widget__label" id="live-chat-label" aria-hidden="true"></span>
+        <span class="chat-widget__avatar-wrap">
+            <span class="chat-widget__pulse" aria-hidden="true"></span>
+            <img class="chat-widget__avatar" src="assets/images/chat-avatar.png"
+                 alt="" width="68" height="68">
+            <span class="chat-widget__status" aria-hidden="true"></span>
+        </span>
+    </a>
+
+    <!-- GTranslate Free mount point; kept hidden by the stylesheet. -->
+    <div class="gtranslate_wrapper" aria-hidden="true"></div>
+
+    <script type="module" src="assets/scripts/main.js"></script>
+</body>
+</html>
