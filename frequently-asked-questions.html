@@ -130,29 +130,151 @@
             </header>
 
             <main id="main-content">
+
                 <!--
-                    The complete FAQ collection, generated from the same FAQ
-                    service the homepage uses. data-faq-mode="all" renders every
-                    category with no question limit.
+                    FAQ HERO
+                    Everything textual here is filled by faq-page.js: the
+                    answer count is derived from the FAQ data, and the site
+                    name comes from the global configuration (§12, §25).
                 -->
-                <section class="section section--zinc" id="faq" aria-labelledby="faq-title"
-                         data-faq-mode="all">
-                    <div class="container container--md section__inner faq__inner">
-                        <p class="eyebrow scroll-reveal">FAQ</p>
-                        <h1 class="section-heading section-heading--sm section-heading--center scroll-reveal" id="faq-title">
-                            Frequently Asked Questions
-                        </h1>
-                        <p class="section-lead section-lead--center scroll-reveal">
-                            <span data-site-name-in>Everything you need to know about
-                            {siteName}.</span>
+                <section class="faq-page__hero" aria-labelledby="faq-page-title">
+                    <div class="container faq-page__hero-inner">
+                        <p class="eyebrow-pill scroll-reveal">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15.5 14"/></svg>
+                            Help Center
                         </p>
 
-                        <div class="faq__categories" id="faq-categories" role="tablist"
-                             aria-label="FAQ categories"></div>
+                        <h1 class="faq-page__title scroll-reveal" id="faq-page-title">
+                            How can we help?
+                        </h1>
 
-                        <div id="faq-panels"></div>
+                        <p class="faq-page__lead scroll-reveal" id="faq-page-lead"></p>
 
-                        <div class="faq__browse scroll-reveal">
+                        <!-- §8 Live search. No submit button: results update as you type. -->
+                        <form class="faq-search scroll-reveal" id="faq-search-form" role="search"
+                              aria-label="Search the frequently asked questions">
+                            <label class="visually-hidden" for="faq-search-input">
+                                Search the frequently asked questions
+                            </label>
+                            <svg class="faq-search__icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.6-3.6"/></svg>
+                            <input class="faq-search__input" id="faq-search-input" type="search"
+                                   placeholder="Search for an answer…" autocomplete="off"
+                                   spellcheck="false">
+                            <!-- Hint for the "/" shortcut wired up in faq-page.js -->
+                            <kbd class="faq-search__hint" aria-hidden="true">/</kbd>
+                            <button type="button" class="faq-search__clear" id="faq-search-clear"
+                                    aria-label="Clear search" hidden>
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                            </button>
+                        </form>
+
+                        <!-- Shortcut chips; hidden while a search is active. -->
+                        <div class="faq-popular scroll-reveal" id="faq-popular">
+                            <p class="faq-popular__label">Popular:</p>
+                            <div class="faq-popular__list" id="faq-popular-list"></div>
+                        </div>
+                    </div>
+                </section>
+
+                <!--
+                    §13 Sticky category navigation. The bar sticks, the pills
+                    and their counts are rendered from the FAQ data, and the
+                    compact search (§14) opens from the end of the same bar
+                    once the hero search has scrolled away.
+                -->
+                <div class="faq-sticky-bar" id="faq-sticky-bar">
+                    <div class="container faq-sticky-bar__inner">
+                        <div class="faq-category-navigation" id="faq-category-navigation"
+                             role="group" aria-label="Filter questions by category"></div>
+
+                        <button type="button" class="faq-sticky-search-button"
+                                id="faq-sticky-search-toggle"
+                                aria-expanded="false" aria-controls="faq-sticky-search-panel"
+                                hidden>
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.6-3.6"/></svg>
+                            Search
+                        </button>
+                    </div>
+
+                    <div class="faq-sticky-search-panel" id="faq-sticky-search-panel" hidden>
+                        <div class="container faq-sticky-search-panel__inner">
+                            <form class="faq-search faq-search--compact" id="faq-sticky-search-form"
+                                  role="search" aria-label="Search the frequently asked questions">
+                                <label class="visually-hidden" for="faq-sticky-search-input">
+                                    Search the frequently asked questions
+                                </label>
+                                <svg class="faq-search__icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.6-3.6"/></svg>
+                                <input class="faq-search__input" id="faq-sticky-search-input"
+                                       type="search" placeholder="Search for an answer…"
+                                       autocomplete="off" spellcheck="false">
+                                <button type="button" class="faq-search__clear"
+                                        id="faq-sticky-search-close" aria-label="Close search">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!--
+                    FAQ CONTENT
+                    #faq-page-results is filled by faq-page.js from
+                    faq-page-content.js — there is deliberately no question
+                    or answer written into this file (§4).
+                -->
+                <section class="faq-page__content" id="faq-page">
+                    <div class="container faq-page__content-inner">
+
+                        <div class="faq-page__toolbar" id="faq-page-toolbar">
+                            <p class="faq-page__count" id="faq-result-count"
+                               aria-live="polite"></p>
+                            <button type="button" class="faq-page__expand-all"
+                                    id="faq-expand-all" aria-expanded="false">Expand all</button>
+                        </div>
+
+                        <div id="faq-page-results"></div>
+
+                        <!-- §10 No-results state; the term is the visitor's own query. -->
+                        <div class="faq-no-results" id="faq-no-results" hidden>
+                            <svg class="faq-no-results__icon" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.6-3.6"/></svg>
+                            <h2 class="faq-no-results__title">No answers found</h2>
+                            <p class="faq-no-results__text">
+                                We couldn't find anything matching
+                                “<strong id="faq-no-results-term"></strong>”.
+                                Try a different keyword or ask us directly.
+                            </p>
+                            <div class="faq-no-results__actions">
+                                <button type="button" class="btn btn--dark"
+                                        id="faq-no-results-clear">Clear search</button>
+                                <a class="btn btn--gold" data-faq-telegram href="#"
+                                   target="_blank" rel="noopener noreferrer">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                                    Ask on Telegram
+                                </a>
+                            </div>
+                        </div>
+
+                        <!-- §16 Still have a question? Telegram link stays configurable. -->
+                        <section class="faq-support scroll-reveal"
+                                 aria-labelledby="faq-support-title">
+                            <svg class="faq-support__icon" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3.6"/><path d="M5.6 5.6l3.9 3.9M14.5 14.5l3.9 3.9M18.4 5.6l-3.9 3.9M9.5 14.5l-3.9 3.9"/></svg>
+                            <h2 class="faq-support__title" id="faq-support-title">
+                                Still have a question?
+                            </h2>
+                            <p class="faq-support__text">
+                                Can't find what you're looking for? Our team is ready to
+                                help you on Telegram.
+                            </p>
+                            <a class="btn btn--gold btn--lg faq-support__action"
+                               data-faq-telegram href="#" target="_blank" rel="noopener noreferrer">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                                Contact Support
+                            </a>
+                            <p class="faq-support__version" id="faq-support-version"></p>
+                        </section>
+
+                        <!-- §17 Back to homepage stays below the support card. -->
+                        <div class="faq-page__back scroll-reveal">
                             <a class="btn btn--dark btn--lg" href="index.html">
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
                                 Back to homepage

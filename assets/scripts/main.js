@@ -458,6 +458,7 @@ const ANNOUNCEMENT_STORAGE_KEY = "goldtrap:announcement-dismissed-version";
  * ====================================================================== */
 
 import { faqServiceInstance } from "./faq-index-page.js";
+import { initFaqPage } from "./faq-page.js";
 
 
 /* ----------------------------------------------------------------------
@@ -1990,6 +1991,20 @@ function init() {
     initSourceCode();
     initDownload();
     initFaq();
+
+    /*
+     * The complete FAQ page. Returns immediately on any page without the
+     * FAQ root, so the homepage is unaffected. Configuration is passed in
+     * rather than re-declared, so there is still one source of truth (§18).
+     */
+    initFaqPage({
+        siteName,
+        siteOwner,
+        eaVersion: eaCurrentVersion,
+        telegramPersonal,
+        telegramChannel
+    });
+
     initFooter();
 
     // Runs last so dynamically rendered cards are observed too.
