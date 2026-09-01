@@ -1,6 +1,6 @@
 # FAQ Page — Desktop Implementation
 
-**Date:** 2 September 2026
+**Date:** 3 September 2026
 **Scope:** desktop only. The mobile and tablet passes are deliberately not
 started — no mobile-specific CSS or interpretation has been added.
 
@@ -405,6 +405,130 @@ results, category changes and popular-question shortcuts.
 
 **Homepage regression** (required because `main.js` is shared): full-page
 renders against the previous `main.js` and `styles.css` — **0 differing
+pixels** at 1920, 1440, 920 and 390px.
+
+---
+
+## No-results state bug — 3 September 2026
+
+### Reported
+
+Searching a term that *does* match — `recomm` — showed the matching results
+**and** the "No answers found" card underneath them at the same time.
+
+### Root cause
+
+Not the search, and not the state logic: the controller's `hidden` flags
+were correct in every case. The cause was **CSS specificity**.
+
+Browsers implement the `hidden` attribute as `[hidden] { display: none }`
+in the user-agent stylesheet. That selector has specificity (0,1,0), so
+**any class rule that sets `display` silently defeats it.** Four FAQ
+components did exactly that:
+
+| Element | Rule | `hidden` honoured? |
+| ------- | ---- | ------------------ |
+| `#faq-no-results` | `.faq-no-results { display: flex }` | **No — always rendered** |
+| `#faq-page-toolbar` | `.faq-page__toolbar { display: flex }` | **No** |
+| `#faq-sticky-search-toggle` | `.faq-sticky-search-button { display: inline-flex }` | **No** |
+| `#faq-search-clear` | `.faq-search__clear { display: inline-flex }` | **No** |
+
+Measured on a fresh load with all 72 questions showing: `#faq-no-results`
+had `hidden === true` and `display: flex`, occupying 334px. It had been
+rendering the entire time — the reported search merely made it obvious.
+
+The same measurement explained two things dismissed as screenshot
+artefacts in the first pass: the sticky Search pill visible at rest, and
+the × clear button visible beside the `/` hint. Both were real, and both
+were this bug.
+
+Elements *without* a class-level `display` — the results container, the
+popular block, the expand-all button, the sticky search panel and the
+answer panels — honoured `hidden` correctly all along, which is why only
+some things misbehaved.
+
+Two older components had already been patched individually further down
+the stylesheet (`.action-bar[hidden]`, `.lang-select__panel[hidden]`).
+Per-component opt-outs are precisely the fragile pattern that let this
+through.
+
+### Fix
+
+**`styles.css`** — one authoritative rule in the reset layer:
+
+```css
+[hidden] {
+    display: none !important;
+}
+```
+
+This fixes the actual cause for every component, present and future,
+rather than patching four of them and waiting for the fifth. It cannot
+make anything visible that was previously hidden — it can only make
+`hidden` work.
+
+**`faq-page.js`** — `renderResults()` was restructured so the two states
+are mutually exclusive *by construction* rather than by three independent
+assignments:
+
+```js
+const groups = visibleGroups();          // the one filtered collection
+const hasResults = shown > 0;
+
+if (hasResults) {  render list; toolbar shown; no-results hidden;  }
+else            {  results.replaceChildren(); results hidden;
+                   toolbar hidden; no-results shown;  }
+```
+
+There is deliberately no separate "showNoResults" flag that could drift
+out of step. The empty branch also **empties** the container rather than
+only hiding it, so a stale question could not sit above the card even if
+the element were ever styled to ignore `hidden` again.
+
+### Note on the earlier passes' testing
+
+The first pass asserted on `element.hidden` — the property — which was
+always correct, and on `querySelectorAll(...).length`, which counts
+invisible elements. Both are why two suites passed over a page that did
+not work. **Every assertion in this pass reads computed `display`,
+computed `opacity` and measured height.**
+
+### Testing performed
+
+**27 checks, 0 failures**, all measured from rendered output.
+
+- **State 1 — no query:** all 72 rendered, no-results not rendered,
+  clear button not rendered, sticky Search button not rendered. (On a
+  fresh load the list is still behind the site's scroll-reveal — the first
+  group sits below the fold — so this also verifies scrolling reveals it.)
+- **State 2 — matching query:** `recomm` (3 results) plus `mt5` (11),
+  `broker` (29), `vps` (13), `license` (30), `preset` (17), `Telegram`
+  (17), `XAUUSD` (12) — results shown, **no-results never rendered**.
+- **State 3 — zero matches:** no-results rendered, results container
+  collapsed to **0px**, toolbar not rendered, the visitor's actual query
+  quoted.
+- **State 4 — zero → matching:** results appear, no-results disappears.
+- **State 5 — matching → zero:** results disappear, no-results appears.
+- **State 6 — cleared:** normal content returns; the hidden no-results
+  card leaves **0px** of ghost space.
+- **State 7 — every category:** all 9 categories × 5 queries
+  (`""`, `a`, `license`, `xyzzy123nonexistent`, `recomm`) = **45
+  combinations**, each holding the invariant.
+- **Rapid typing:** the invariant asserted after every one of the 14
+  keystrokes of "recommendation".
+- No console or page errors.
+
+**Regression:** the 44-check bug-fix suite and the original 52-check
+desktop suite both still pass.
+
+**Homepage** (required — the `[hidden]` rule is global): the announcement
+bar still shows and dismisses, the language panel opens and closes and
+lists languages, the homepage FAQ accordion still opens with correct ARIA,
+the purchase dialog still opens, and the configured-hidden pricing timer
+still reserves its row (`display: flex; visibility: hidden`, 24px) as
+CLAUDE.md §9.4 requires — that uses a class, not the `hidden` attribute,
+so the new rule does not touch it. 10 checks, 0 failures, and full-page
+renders against the previous stylesheet and script show **0 differing
 pixels** at 1920, 1440, 920 and 390px.
 
 ---

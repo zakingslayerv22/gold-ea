@@ -301,59 +301,84 @@ export function initFaqPage(config = {}) {
             </div>`;
     }
 
+    /**
+     * Renders the one authoritative result state.
+     *
+     * `groups` is the single filtered collection: the list, the counts, the
+     * toolbar and the no-results card are all derived from it inside one
+     * branch. There is deliberately no separate "showNoResults" flag that
+     * could drift out of step with what was actually rendered, and the two
+     * states are mutually exclusive by construction — the else branch also
+     * empties the results container, so a stale question can never sit
+     * above the no-results card.
+     */
     function renderResults() {
         const groups = visibleGroups();
         const shown = groups.reduce(
             (sum, group) => sum + group.questions.length,
             0
         );
+        const hasResults = shown > 0;
 
-        // The count / expand-all row belongs to a populated list; the
-        // mockup's no-results state shows the card on its own.
-        if (toolbar) {
-            toolbar.hidden = shown === 0;
-        }
         if (resultCount) {
             resultCount.textContent =
                 shown === 1 ? "1 question" : `${shown} questions`;
         }
         if (expandAll) {
-            expandAll.hidden = shown === 0;
             expandAll.textContent = allExpanded ? "Collapse all" : "Expand all";
             expandAll.setAttribute("aria-expanded", String(allExpanded));
         }
 
-        if (results) {
-            results.innerHTML = groups
-                .map(
-                    (group) => `
-                        <section class="faq-group scroll-reveal"
-                                 data-category-id="${group.id}"
-                                 aria-labelledby="faq-group-${group.id}">
-                            <h2 class="faq-group__heading" id="faq-group-${group.id}">
-                                <span class="faq-group__icon">${icon(group.icon, 18)}</span>
-                                ${escapeHtml(group.name)}
-                            </h2>
-                            <div class="faq-group__list">
-                                ${group.questions.map((entry) => renderQuestion(entry)).join("")}
-                            </div>
-                        </section>`
-                )
-                .join("");
-            results.hidden = shown === 0;
+        if (hasResults) {
+            if (results) {
+                results.innerHTML = groups
+                    .map(
+                        (group) => `
+                            <section class="faq-group scroll-reveal"
+                                     data-category-id="${group.id}"
+                                     aria-labelledby="faq-group-${group.id}">
+                                <h2 class="faq-group__heading" id="faq-group-${group.id}">
+                                    <span class="faq-group__icon">${icon(group.icon, 18)}</span>
+                                    ${escapeHtml(group.name)}
+                                </h2>
+                                <div class="faq-group__list">
+                                    ${group.questions.map((entry) => renderQuestion(entry)).join("")}
+                                </div>
+                            </section>`
+                    )
+                    .join("");
+                results.hidden = false;
 
-            // Every re-render produces brand new .scroll-reveal sections. They
-            // must be handed back to the observer or they stay at opacity 0.
-            observeReveal(results);
-            revealRenderedGroups();
-        }
-
-        // §10: the no-results panel quotes the visitor's actual query.
-        if (noResults) {
-            noResults.hidden = shown !== 0;
-        }
-        if (noResultsTerm) {
-            noResultsTerm.textContent = query;
+                // Every re-render produces brand new .scroll-reveal sections.
+                // They must be handed back to the observer or they stay at
+                // opacity 0.
+                observeReveal(results);
+                revealRenderedGroups();
+            }
+            // The count / expand-all row belongs to a populated list.
+            if (toolbar) {
+                toolbar.hidden = false;
+            }
+            if (noResults) {
+                noResults.hidden = true;
+            }
+        } else {
+            // Empty the container as well as hiding it, so nothing is left
+            // to render if the element is ever styled to ignore [hidden].
+            if (results) {
+                results.replaceChildren();
+                results.hidden = true;
+            }
+            if (toolbar) {
+                toolbar.hidden = true;
+            }
+            if (noResults) {
+                noResults.hidden = false;
+            }
+            // §10: the card quotes the visitor's actual query.
+            if (noResultsTerm) {
+                noResultsTerm.textContent = query;
+            }
         }
     }
 

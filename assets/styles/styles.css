@@ -164,6 +164,28 @@
     box-sizing: border-box;
 }
 
+/*
+ * The `hidden` attribute must always win.
+ *
+ * Browsers implement it as `[hidden] { display: none }` in the user-agent
+ * stylesheet, which is only specificity (0,1,0) — so ANY class rule that
+ * sets `display` silently defeats it. That is not theoretical: four FAQ
+ * components (.faq-no-results, .faq-page__toolbar,
+ * .faq-sticky-search-button and .faq-search__clear) each set a display
+ * value, and every one of them kept rendering while its `hidden` property
+ * was true. That is why the FAQ page showed "No answers found" underneath
+ * perfectly good search results.
+ *
+ * Two components had already been patched individually further down this
+ * file (.action-bar[hidden], .lang-select__panel[hidden]). Per-component
+ * opt-outs are the fragile pattern that let this through, so one
+ * authoritative rule closes the trap for every component, present and
+ * future.
+ */
+[hidden] {
+    display: none !important;
+}
+
 html {
     -webkit-text-size-adjust: 100%;
     scroll-behavior: smooth;
