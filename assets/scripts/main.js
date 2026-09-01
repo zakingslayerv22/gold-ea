@@ -1918,8 +1918,63 @@ function initConfiguredLinks() {
  * visible; distance, duration, easing and stagger live in styles.css.
  * ====================================================================== */
 
+let revealObserver = null;
+let revealIsReady = false;
+
+/**
+ * Hands elements to the reveal observer.
+ *
+ * Anything rendered AFTER page load — the FAQ page re-renders its list on
+ * every search, category change and shortcut — has to be registered here,
+ * or it keeps the .scroll-reveal starting state (opacity: 0) forever and
+ * the visitor sees a blank column. Safe to call repeatedly: elements that
+ * are already revealed are skipped.
+ *
+ * @param {ParentNode} [scope] where to look; defaults to the document.
+ */
+function observeReveal(scope = document) {
+    if (!revealIsReady) {
+        // initScrollReveal() has not run yet — it will collect these itself.
+        return;
+    }
+
+    const elements = qsa(".scroll-reveal", scope).filter(
+        (element) => !element.classList.contains("is-visible")
+    );
+
+    if (elements.length === 0) {
+        return;
+    }
+
+    // No IntersectionObserver: everything is shown immediately (§20.6).
+    if (!revealObserver) {
+        elements.forEach((element) => element.classList.add("is-visible"));
+        return;
+    }
+
+    assignRevealIndexes(elements);
+    elements.forEach((element) => revealObserver.observe(element));
+}
+
+/** Stagger index of each element within its own parent group. */
+function assignRevealIndexes(elements) {
+    elements.forEach((element) => {
+        if (element.style.getPropertyValue("--reveal-index")) {
+            return;
+        }
+
+        const siblings = Array.from(element.parentElement?.children || []).filter(
+            (child) => child.classList.contains("scroll-reveal")
+        );
+
+        element.style.setProperty("--reveal-index", String(siblings.indexOf(element)));
+    });
+}
+
 function initScrollReveal() {
     const revealElements = qsa(".scroll-reveal");
+
+    revealIsReady = true;
 
     if (revealElements.length === 0) {
         return;
@@ -1931,20 +1986,9 @@ function initScrollReveal() {
         return;
     }
 
-    // Assign a stagger index to each element within its own parent group.
-    revealElements.forEach((element) => {
-        if (element.style.getPropertyValue("--reveal-index")) {
-            return;
-        }
+    assignRevealIndexes(revealElements);
 
-        const siblings = Array.from(element.parentElement?.children || []).filter(
-            (child) => child.classList.contains("scroll-reveal")
-        );
-
-        element.style.setProperty("--reveal-index", String(siblings.indexOf(element)));
-    });
-
-    const revealObserver = new IntersectionObserver(
+    revealObserver = new IntersectionObserver(
         (entries, observer) => {
             entries.forEach((entry) => {
                 if (!entry.isIntersecting) {
@@ -2002,7 +2046,9 @@ function init() {
         siteOwner,
         eaVersion: eaCurrentVersion,
         telegramPersonal,
-        telegramChannel
+        telegramChannel,
+        // Lets the FAQ page register list content it renders after load.
+        observeReveal
     });
 
     initFooter();

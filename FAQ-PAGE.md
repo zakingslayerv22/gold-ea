@@ -1,6 +1,6 @@
 # FAQ Page — Desktop Implementation
 
-**Date:** 1 September 2026
+**Date:** 2 September 2026
 **Scope:** desktop only. The mobile and tablet passes are deliberately not
 started — no mobile-specific CSS or interpretation has been added.
 
@@ -284,6 +284,128 @@ class, so no separate animation system was introduced.
 **Homepage regression (§29):** rendered full-page against the previous
 `styles.css` and `main.js` — **0 differing pixels** at 1920, 1440, 920 and
 390px.
+
+---
+
+## Bug-fix pass — 2 September 2026
+
+Two functional bugs were reported after the first pass. Both turned out to
+have **one root cause**.
+
+### Reported
+
+1. **Search appeared not to work.** Typing a query left a large blank area
+   instead of results.
+2. **Popular questions did not open.** Clicking a chip selected the category
+   and scrolled, but no answer appeared.
+
+### Root cause
+
+`.faq-group` sections carry the site's `scroll-reveal` class, whose starting
+state is `opacity: 0; transform: translateY(30px)`. `initScrollReveal()` in
+`main.js` builds its `IntersectionObserver` **once at page load and observes
+only the elements that exist at that moment**.
+
+Every search keystroke, category change and popular-question click replaces
+`#faq-page-results`' innerHTML. The new sections were `.scroll-reveal` but
+were never handed to the observer, so they stayed at `opacity: 0`
+**permanently — scrolling did not help.**
+
+Measured before the fix, searching `broker`:
+
+| | |
+| --- | --- |
+| Questions matched and rendered into the DOM | 29 |
+| `.faq-group` sections carrying `is-visible` | **0 of 8** |
+| Section opacity at scrollY 0 / 900 / 1400 / 2000 | **0 at every position** |
+| Height of the invisible results column | **3496px** |
+
+So the filtering was correct all along — the results were rendered,
+counted, and completely invisible. That 3496px of empty column is the
+"large blank area". The popular-question click had the same cause: the
+target answer was open in the DOM (`hidden` false, 101px tall, inside the
+viewport) inside a section at `opacity: 0`.
+
+This also explains why the first pass's tests missed it: they asserted on
+`document.querySelectorAll('.faq-question').length`, which counts elements
+that are rendered but invisible. **Every check in this pass asserts on what
+is actually visible** — computed opacity and measured height — not on DOM
+presence.
+
+### Fix
+
+**`main.js`** — the reveal system now accepts nodes rendered after load. The
+observer and the stagger-index helper were lifted to module scope and a new
+`observeReveal(scope)` registers late-arriving `.scroll-reveal` elements. It
+is safe to call repeatedly, skips elements already revealed, and falls back
+to showing them immediately where `IntersectionObserver` is unavailable.
+`initScrollReveal()` itself behaves exactly as before. The hook is passed
+into `initFaqPage({ …, observeReveal })`.
+
+**`faq-page.js`** — after every render the new sections are registered with
+that observer, and:
+
+- **The first render is left to animate in on scroll**, exactly as before —
+  it is part of the page the visitor is arriving at.
+- **Every later render is revealed immediately.** A list redrawn in response
+  to a keystroke, a category or a shortcut is the answer to something the
+  visitor just did; making them scroll to reveal it is what the bug looked
+  like in the first place.
+- The popular-question handler additionally reveals the target's section
+  before the smooth scroll starts, so the answer is guaranteed visible when
+  the scroll lands rather than depending on observer timing.
+
+No CSS changed, and no visual design changed.
+
+### Two related state fixes
+
+- **§10** — an open answer that still matches after the query changes now
+  stays open; one that no longer matches is closed, so no key points at a
+  removed element.
+- **§11** — changing category keeps an open answer only if it belongs to the
+  newly selected category, otherwise closes it.
+
+### Accordion behaviour confirmed
+
+Clicking a question opens it; clicking the same one closes it; clicking
+another closes the previous and opens the new; **clicking outside the FAQ
+does not close it**; **clicking unrelated page content does not close it**;
+**scrolling does not close it**; only one answer is open at a time. There
+is no outside-click or scroll handler bound to the accordion — this was
+verified by test rather than assumed. The same rules hold for search
+results, category changes and popular-question shortcuts.
+
+### Testing performed in this pass
+
+**44 checks, 0 failures**, all asserting on visible state.
+
+- **Search on 12 real terms taken from the FAQ data** — `mt5`, `MT5`, `Mt5`,
+  `"  mt5  "`, `broker`, `refund`, `martingale`, `leverag` (partial),
+  `Strategy Tester` (answer-only), `Troubleshooting` (category name),
+  `XAUUSD`, `whitelist` — each returning visible results, with the visible
+  count equal to the rendered count in every case (11, 11, 11, 11, 29, 1, 1,
+  11, 2, 8, 12, 6).
+- Case-insensitivity and whitespace tolerance confirmed by equal counts.
+- A genuinely nonexistent query shows the no-results card only, with the
+  results container collapsed to **0px** and the count/expand row hidden.
+- Category + search: scoped correctly; changing category re-filters with the
+  query still applied; clearing restores all 72 **visible**.
+- Accordion: all eight behaviours above, including the click-outside,
+  click-unrelated and scroll cases.
+- Search results behave as normal accordion items, and the opened answer is
+  genuinely visible (126px tall, section opacity 1).
+- **All six popular chips** individually: correct category becomes active,
+  the correct question opens, the section is at opacity 1, the answer is not
+  hidden and is 101–152px tall, it is inside the viewport, and exactly one
+  question is open.
+- No console or page errors after load, searching, clearing, category
+  changes, accordion use or popular clicks.
+- Regression: the original 52-check desktop suite still passes; the shell,
+  sticky bar, sticky Search button and compact search all still work.
+
+**Homepage regression** (required because `main.js` is shared): full-page
+renders against the previous `main.js` and `styles.css` — **0 differing
+pixels** at 1920, 1440, 920 and 390px.
 
 ---
 

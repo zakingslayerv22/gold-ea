@@ -102,7 +102,11 @@ export function initFaqPage(config = {}) {
         siteName = "",
         siteOwner = "",
         eaVersion = "",
-        telegramPersonal = "#"
+        telegramPersonal = "#",
+        // Registers content rendered after page load with the site's own
+        // scroll-reveal observer. Without it, re-rendered groups keep the
+        // .scroll-reveal starting state and the list is invisible.
+        observeReveal = () => {}
     } = config;
 
     /** The same token substitution the rest of the site uses (§18, §25). */
@@ -171,6 +175,7 @@ export function initFaqPage(config = {}) {
     let query = "";
     let openKey = null;
     let allExpanded = false;
+    let hasRendered = false;   // see revealRenderedGroups()
 
     /* ------------------------------------------------------------------
      * Derived data
@@ -323,18 +328,24 @@ export function initFaqPage(config = {}) {
                 .map(
                     (group) => `
                         <section class="faq-group scroll-reveal"
+                                 data-category-id="${group.id}"
                                  aria-labelledby="faq-group-${group.id}">
                             <h2 class="faq-group__heading" id="faq-group-${group.id}">
                                 <span class="faq-group__icon">${icon(group.icon, 18)}</span>
                                 ${escapeHtml(group.name)}
                             </h2>
                             <div class="faq-group__list">
-                                ${group.questions.map(renderQuestion).join("")}
+                                ${group.questions.map((entry) => renderQuestion(entry)).join("")}
                             </div>
                         </section>`
                 )
                 .join("");
             results.hidden = shown === 0;
+
+            // Every re-render produces brand new .scroll-reveal sections. They
+            // must be handed back to the observer or they stay at opacity 0.
+            observeReveal(results);
+            revealRenderedGroups();
         }
 
         // §10: the no-results panel quotes the visitor's actual query.
@@ -344,6 +355,28 @@ export function initFaqPage(config = {}) {
         if (noResultsTerm) {
             noResultsTerm.textContent = query;
         }
+    }
+
+    /**
+     * Reveals the freshly rendered list.
+     *
+     * On the FIRST render the sections are left alone: they are part of the
+     * page the visitor is arriving at, so they animate in on scroll like
+     * every other section, and initScrollReveal() picks them up.
+     *
+     * Every render AFTER that is the answer to something the visitor just
+     * did — a keystroke, a category, a shortcut — and has to be readable
+     * immediately. Waiting for a scroll would leave them looking at a blank
+     * column, which is precisely the bug this replaced.
+     */
+    function revealRenderedGroups() {
+        if (!hasRendered) {
+            hasRendered = true;
+            return;
+        }
+        qsa(".faq-group", results).forEach((group) =>
+            group.classList.add("is-visible")
+        );
     }
 
     /** Re-renders everything that depends on the query or active category. */
@@ -375,10 +408,21 @@ export function initFaqPage(config = {}) {
         }
     }
 
+    /** True when `openKey` is still on screen under the current filters. */
+    function openQuestionStillVisible() {
+        return visibleGroups().some((group) =>
+            group.questions.some((question) => question.key === openKey)
+        );
+    }
+
     function setQuery(value, { silent = false } = {}) {
         query = normalise(value);
         allExpanded = false;
-        openKey = null;
+        // §10: an answer that survives the new filter stays open; one that
+        // does not is dropped so no stale key points at a removed element.
+        if (openKey && !openQuestionStillVisible()) {
+            openKey = null;
+        }
         if (!silent) {
             update();
         }
@@ -535,8 +579,12 @@ export function initFaqPage(config = {}) {
             return;
         }
         activeCategoryId = button.dataset.categoryId;
-        openKey = null;
         allExpanded = false;
+        // §11: close an answer that does not belong to the chosen category,
+        // rather than leaving an expanded panel that is no longer rendered.
+        if (openKey && !openQuestionStillVisible()) {
+            openKey = null;
+        }
         update();
     });
 
@@ -557,8 +605,23 @@ export function initFaqPage(config = {}) {
         allExpanded = false;
         openKey = question.key;
         update();
-        qs(`.faq-question[data-question-key="${question.key}"]`, results)
-            ?.scrollIntoView({ block: "center", behavior: "smooth" });
+
+        const target = qs(
+            `.faq-question[data-question-key="${question.key}"]`,
+            results
+        );
+        if (!target) {
+            return;
+        }
+
+        /*
+         * Reveal the target's section immediately. The scroll-reveal
+         * observer would otherwise not have fired by the time the smooth
+         * scroll lands, and the visitor would arrive at an answer that is
+         * open in the DOM but still at opacity 0.
+         */
+        target.closest(".faq-group")?.classList.add("is-visible");
+        target.scrollIntoView({ block: "center", behavior: "smooth" });
     });
 
     results?.addEventListener("click", (event) => {
