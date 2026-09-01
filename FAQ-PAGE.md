@@ -43,7 +43,9 @@ configuration exists.
 
 ## FAQ data architecture
 
-`faq-page-content.js` exports a plain array:
+`faq-page-content.js` is the single source of truth for every FAQ on the
+site — this page and the homepage section both read from it. It exports a
+plain array:
 
 ```js
 export const faqPageContent = [
@@ -287,7 +289,7 @@ class, so no separate animation system was introduced.
 
 ---
 
-## Bug-fix pass — 2 September 2026
+## Bug-fix pass — 1 September 2026
 
 Two functional bugs were reported after the first pass. Both turned out to
 have **one root cause**.
@@ -409,7 +411,7 @@ pixels** at 1920, 1440, 920 and 390px.
 
 ---
 
-## No-results state bug — 3 September 2026
+## No-results state bug — 1 September 2026
 
 ### Reported
 
@@ -533,6 +535,199 @@ pixels** at 1920, 1440, 920 and 390px.
 
 ---
 
+## Single source of truth — 1 September 2026
+
+### Brief
+
+`faq-page-content.js` becomes the one place FAQ content lives.
+`faq-index-page.js` keeps driving the homepage FAQ section but must hold no
+copy of any question or answer — it references the central database by
+stable id instead. The homepage's styling, layout, interactions, category
+behaviour, Browse All Questions button, animations and responsive behaviour
+all stay as they are.
+
+### What the two files are now
+
+| file | role |
+| --- | --- |
+| `assets/scripts/faq-page-content.js` | **The canonical FAQ database.** All 8 categories, all 72 questions and answers, the popular-question list, and the lookup helpers. Data only — no markup, no DOM, no presentation. |
+| `assets/scripts/faq-index-page.js` | **The homepage FAQ service.** No FAQ text at all. It declares the homepage's four filter pills and, for each, an ordered list of *references* into the database. It resolves them on demand and hands `main.js` the exact shape it has always consumed. |
+
+```
+        faq-page-content.js   (all categories, all questions, all answers)
+                 |
+        ┌────────┴─────────┐
+        |                  |
+ full FAQ page      faq-index-page.js   (selection + order only)
+ (faq-page.js)              |
+                        homepage  (main.js initFaq)
+```
+
+### Lookup helpers added to the database
+
+```js
+getCategoryById(categoryId)               // one category, or null
+getQuestionById(categoryId, questionId)   // one question, or null
+getQuestionByRef("<categoryId>/<questionId>")  // { category, question } | null
+getAllQuestions()                         // flattened, each with .ref/.categoryId/.categoryName
+getQuestionCount()                        // 72
+```
+
+A **ref** is the stable string `"<categoryId>/<questionId>"`, e.g.
+`"vps-running/do-i-need-a-vps"`. Both halves are the slugs already used for
+element ids and `aria-controls` on the FAQ page, so there is no second id
+scheme to maintain.
+
+### How the homepage selects its questions
+
+```js
+const homepageFaqSections = [
+    {
+        id: "basics",
+        name: "Basics",
+        questionRefs: [
+            "getting-started/what-is-goldtrap",
+            "getting-started/suitable-for-beginners",
+            …
+        ]
+    },
+    …
+];
+```
+
+`FaqServiceHomepage` resolves those refs and returns
+`{ name, questions: { <id>: { q, a } } }` — the shape `main.js` already
+renders — so **the homepage renderer, markup and CSS were not touched**.
+Public methods: `getFaqData()`, `getCategory(id)`, `getCategoryList()`,
+`getFeaturedQuestions()`, `getUnresolvedRefs()`.
+
+A ref that no longer resolves is skipped rather than thrown, so renaming an
+id in the database degrades to one missing card instead of an empty
+homepage section. `getUnresolvedRefs()` lists any such refs and currently
+returns `[]`.
+
+The pill names (`Basics`, `Account & Broker`, `Capital & Risk`,
+`Setup & Help`) are homepage presentation, not content — they group
+canonical questions under the broader headings the homepage mockup shows,
+which is why they differ from the FAQ page's eight category names.
+
+### How to add a new FAQ
+
+1. Add it to the right category in `faq-page-content.js`. It appears on the
+   FAQ page immediately, and the hero total, the "N questions" line, the
+   category badges and the search index all follow automatically.
+2. **Only if it should also appear on the homepage**, add its ref to one of
+   the four sections in `faq-index-page.js`.
+
+Never add question or answer text to `faq-index-page.js`, to `main.js`, or
+to either HTML file.
+
+### How to change what the homepage features
+
+Edit the `questionRefs` arrays in `faq-index-page.js`. The array order is
+the display order. The homepage shows the first `data-faq-limit` entries of
+the selected section (see `index.html`), so a section may safely list more
+than it displays. Changing the wording of a featured question is done in
+`faq-page-content.js` — the homepage follows.
+
+### ⚠️ The homepage FAQ wording changed
+
+This is the one visible consequence, and it is unavoidable given the brief:
+if the text exists **only** in `faq-page-content.js`, the homepage must show
+whatever that file says. Of the 24 homepage slots, only 1 question and 2
+answers were already byte-identical to their canonical counterparts. Each
+slot was mapped to the closest canonical entry:
+
+**Basics**
+
+| was | now | ref |
+| --- | --- | --- |
+| What is {siteName}? | What is {siteName} and what does it do? | `getting-started/what-is-goldtrap` |
+| Who is {siteName} for? | Is {siteName} suitable for beginners? | `getting-started/suitable-for-beginners` |
+| Can {siteName} be used on MT4 and MT5? | Does {siteName} work on MetaTrader 4 or MetaTrader 5? | `getting-started/mt4-or-mt5` |
+| Can I run {siteName} on a mobile phone? | Can I run {siteName} on my phone (Android or iPhone)? | `getting-started/run-on-phone` |
+| Which pair does {siteName} trade? | What do I need to get started with {siteName}? | `getting-started/what-do-i-need` |
+| What strategy does {siteName} use? | How does the {siteName} strategy actually work? | `strategy-performance/how-strategy-works` |
+
+**Account & Broker**
+
+| was | now | ref |
+| --- | --- | --- |
+| Can I use {siteName} with any broker? | Which brokers can I use with {siteName}? | `brokers-accounts/which-brokers` |
+| Does {siteName} work on cent and standard accounts? | Should I use a cent account or a standard account? | `brokers-accounts/cent-or-standard` |
+| How many accounts does each licence cover? | What do the account tiers (such as 5 Accounts and Unlimited) mean? | `pricing-licensing/account-tiers` |
+| How is my licence bound to my account? | How do I activate my license key? | `pricing-licensing/activate-license-key` |
+| Can I move my licence to a different account? | How does the customer portal work, and how do I add more MT accounts? | `pricing-licensing/customer-portal` |
+| What leverage should I use? | *unchanged* | `capital-risk/what-leverage` |
+
+**Capital & Risk**
+
+| was | now | ref |
+| --- | --- | --- |
+| How much capital do I need to start? | How much capital do I need to start {siteName}? | `capital-risk/how-much-capital` |
+| Can {siteName} lose money? | Is any amount of capital 100% safe? | `capital-risk/is-capital-safe` |
+| What risk controls are built in? | What is the biggest risk when running {siteName}? | `capital-risk/biggest-risk` |
+| Does the EA use a stop loss? | Why does the EA sometimes hold floating (losing) positions instead of closing them? | `strategy-performance/floating-positions` |
+| What is the daily profit target option? | How much profit can I make per day with the EA? | `strategy-performance/profit-per-day` |
+| Is there a refund if I change my mind? | Do license keys expire? Do I have to pay again later? | `pricing-licensing/do-keys-expire` |
+
+**Setup & Help**
+
+| was | now | ref |
+| --- | --- | --- |
+| How do I install {siteName}? | How do I install {siteName} on MT4 or MT5? | `setup-installation/install-on-mt4-mt5` |
+| Why do I need to add a URL to the MetaTrader whitelist? | The EA asks me to allow a WebRequest URL. What do I do? | `setup-installation/webrequest-prompt` |
+| Where do I get my licence key? | How do I pay for the {siteName} license? | `pricing-licensing/how-do-i-pay` |
+| Do I need preset .set files? | Where do I get or download the preset (.set) files? | `setup-installation/where-to-get-presets` |
+| Do I need a VPS? | Do I need a VPS to run {siteName}? | `vps-running/do-i-need-a-vps` |
+| How do I get support? | I just updated to a new EA version. What should I do, and how do I get support? | `troubleshooting-support/updated-version-and-support` |
+
+Where the old homepage question had no canonical counterpart at all
+("Which pair does GoldTrap EA trade?", "Is there a refund if I change my
+mind?"), the slot was filled with the nearest canonical question in the same
+theme rather than adding a 73rd entry to the database for the homepage's
+sake. **23 of 24 questions and 22 of 24 answers now read differently from
+before.** Nothing else about the section changed.
+
+If you want a particular old wording back, the fix is in
+`faq-page-content.js` — edit that entry's text and both pages update. If you
+want a different question in a slot, swap its ref; the file is only a list
+of ids.
+
+### Verification
+
+**Duplication audit** — no FAQ prose exists outside `faq-page-content.js`:
+
+- `faq-index-page.js` contains 0 `q:` / `a:` content keys, 24 refs, and its
+  longest string literal is 53 characters (a ref).
+- Grepping the served `index.html` and `frequently-asked-questions.html` for
+  answer text finds nothing.
+
+**Homepage unchanged, structurally** — via Playwright against the served
+page: the four pills read `Basics | Account & Broker | Capital & Risk |
+Setup & Help`, one is selected at a time, each renders 6 questions in 2
+columns, the first is open on load, the accordion still allows one open
+answer, and Browse All Questions still navigates to
+`frequently-asked-questions.html`.
+
+**Scoped pixel regression** — the homepage was captured before and after at
+1920, 1440 and 390 and diffed with the FAQ section excluded:
+
+| width | differing pixels above the FAQ section | page height |
+| --- | --- | --- |
+| 1920 | 0 | 7688 → 7688 |
+| 1440 | 0 | 6966 → 6966 |
+| 390 | 0 | 10883 → 10910 |
+
+Nothing outside the FAQ section moved by a pixel. Inside it, pixels differ
+because the wording differs, and at 390 the column is 27px taller because
+some canonical answers are longer.
+
+**Suites re-run, all green:** FAQ desktop 52, FAQ fix pass 44, no-results
+states 27, homepage 10, homepage FAQ 12 — **145 assertions, 0 failures**, no
+console or page errors on either page.
+---
+
 ## Decisions worth reviewing
 
 **1. The mockup's top strip was not implemented.** The mockup opens with a
@@ -561,7 +756,8 @@ support with `{siteOwner}`. Where a question asks something the site does
 not establish — "Which VPS do you recommend?", exact capital figures — the
 answer gives the requirement and points to Telegram rather than inventing a
 specific. **These answers are new copy and should be reviewed before the
-page goes live.**
+page goes live.** (Since the *Single source of truth* pass below, they are
+the copy the homepage shows too.)
 
 ---
 
@@ -571,10 +767,10 @@ page goes live.**
    The existing responsive breakpoints do not target any of the new
    classes, so the page currently renders its desktop layout at every
    width. That is the next stage.
-2. **The homepage FAQ section is unchanged.** It still renders from
-   `faq-index-page.js` through `initFaq()` in `main.js`. There are now two
-   FAQ datasets: the 24-question homepage set and this 72-question page
-   set. Consolidating them was outside this brief; if you want the homepage
-   to draw from `faq-page-content.js` too, that is a small follow-up.
+2. **The homepage FAQ section is fed from the same database.** It still
+   renders from `faq-index-page.js` through `initFaq()` in `main.js`, but
+   that file now holds only references into `faq-page-content.js` — see
+   *Single source of truth* above, including the wording change that
+   followed from it.
 3. **The `/` keyboard hint** is a desktop affordance and will be reviewed in
    the mobile pass.

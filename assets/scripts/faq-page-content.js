@@ -578,3 +578,72 @@ export const faqPopularQuestionIds = [
     "troubleshooting-support/not-opening-trades",
     "brokers-accounts/cent-or-standard"
 ];
+
+
+/* ======================================================================
+ * LOOKUP HELPERS
+ * ======================================================================
+ * This file is the canonical FAQ database for the whole site. The full FAQ
+ * page renders `faqPageContent` directly; the homepage picks a handful of
+ * entries out of it through `faq-index-page.js`. These helpers are what
+ * that selection is built on.
+ *
+ * A "ref" is the stable pair that identifies one question anywhere on the
+ * site:
+ *
+ *     "<categoryId>/<questionId>"      e.g. "getting-started/mt4-or-mt5"
+ *
+ * Deliberately small — resolving a reference is all any caller needs.
+ * ====================================================================== */
+
+/** @returns {object|null} one category, or null when the id is unknown. */
+export function getCategoryById(categoryId) {
+    return (
+        faqPageContent.find((category) => category.id === categoryId) || null
+    );
+}
+
+/** @returns {object|null} one question, or null when either id is unknown. */
+export function getQuestionById(categoryId, questionId) {
+    const category = getCategoryById(categoryId);
+    if (!category) {
+        return null;
+    }
+    return category.questions.find((entry) => entry.id === questionId) || null;
+}
+
+/**
+ * Resolves a "<categoryId>/<questionId>" reference.
+ *
+ * Returns null rather than throwing, so one stale reference in a featured
+ * list can be skipped instead of taking a page down with it.
+ *
+ * @param {string} ref
+ * @returns {{category: object, question: object}|null}
+ */
+export function getQuestionByRef(ref) {
+    const [categoryId, questionId] = String(ref).split("/");
+    const category = getCategoryById(categoryId);
+    const question = getQuestionById(categoryId, questionId);
+    return category && question ? { category, question } : null;
+}
+
+/** Every question, flattened, each carrying its category and ref. */
+export function getAllQuestions() {
+    return faqPageContent.flatMap((category) =>
+        category.questions.map((question) => ({
+            ...question,
+            ref: `${category.id}/${question.id}`,
+            categoryId: category.id,
+            categoryName: category.name
+        }))
+    );
+}
+
+/** Total number of questions in the database — never hard-code this. */
+export function getQuestionCount() {
+    return faqPageContent.reduce(
+        (total, category) => total + category.questions.length,
+        0
+    );
+}
