@@ -1,0 +1,104 @@
+# ============================================================================
+#  FALLBACK DEPLOY: lftp instead of FTP-Deploy-Action
+#  Save at: .github/workflows/deploy.yml   (replace your existing one)
+#
+#  WHY: FTP-Deploy-Action's underlying library (basic-ftp) opens a NEW TLS
+#  session for the data connection. cPanel FTP servers often REQUIRE that the
+#  data connection reuse the control connection's TLS session, and reject it
+#  otherwise -> the server closes the socket -> "FIN packet unexpectedly".
+#  lftp handles this correctly and lets you control data-channel encryption.
+# ============================================================================
+
+name: Deploy to Namecheap (lftp)
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install lftp
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq lftp
+
+      # ---- ATTEMPT 1: full FTPS (control + data encrypted) -----------------
+      # If this is the step that fails, comment it out and use ATTEMPT 2.
+      - name: Deploy via FTPS
+        env:
+          FTP_HOST: ${{ secrets.FTP_SERVER }}
+          FTP_USER: ${{ secrets.FTP_USERNAME }}
+          FTP_PASS: ${{ secrets.FTP_PASSWORD }}
+        run: |
+          lftp -c "
+            set ftp:ssl-allow yes;
+            set ftp:ssl-force yes;
+            set ftp:ssl-protect-data yes;
+            set ssl:verify-certificate no;
+            set ftp:passive-mode yes;
+            set net:timeout 30;
+            set net:max-retries 5;
+            set net:reconnect-interval-base 5;
+            open -u \"$FTP_USER\",\"$FTP_PASS\" \"$FTP_HOST\";
+            mirror --reverse --verbose --only-newer --parallel=2 \
+              --exclude-glob .git/ \
+              --exclude-glob .git* \
+              --exclude-glob .github/ \
+              --exclude-glob node_modules/ \
+              --exclude-glob mockups/ \
+              --exclude-glob '*.md' \
+              ./ public_html/;
+            bye
+          "
+
+      # ---- ATTEMPT 2: encrypted login, PLAIN data channel ------------------
+      # Password stays encrypted (ssl-force yes). Only the file BYTES travel
+      # unencrypted. For a public static site that's an acceptable trade-off,
+      # and it completely avoids the data-channel TLS session reuse problem.
+      #
+      # To use: delete/comment the "Deploy via FTPS" step above, uncomment this.
+      #
+      # - name: Deploy via FTPS (plain data channel)
+      #   env:
+      #     FTP_HOST: ${{ secrets.FTP_SERVER }}
+      #     FTP_USER: ${{ secrets.FTP_USERNAME }}
+      #     FTP_PASS: ${{ secrets.FTP_PASSWORD }}
+      #   run: |
+      #     lftp -c "
+      #       set ftp:ssl-allow yes;
+      #       set ftp:ssl-force yes;
+      #       set ftp:ssl-protect-data no;
+      #       set ssl:verify-certificate no;
+      #       set ftp:passive-mode yes;
+      #       set net:timeout 30;
+      #       set net:max-retries 5;
+      #       open -u \"$FTP_USER\",\"$FTP_PASS\" \"$FTP_HOST\";
+      #       mirror --reverse --verbose --only-newer --parallel=2 \
+      #         --exclude-glob .git/ --exclude-glob .git* \
+      #         --exclude-glob .github/ --exclude-glob node_modules/ \
+      #         --exclude-glob mockups/ --exclude-glob '*.md' \
+      #         ./ public_html/;
+      #       bye
+      #     "
+
+# ---------------------------------------------------------------------------
+# NOTES
+#  * Add --dry-run to the mirror line to preview without uploading.
+#  * Add --delete to remove server files not present locally (CAREFUL).
+#  * mirror --only-newer compares timestamps, so no state file is needed;
+#    the "first publish" full re-upload problem disappears entirely.
+#  * --parallel=2 is deliberately low. Shared hosts cap simultaneous FTP
+#    connections per IP; high parallelism causes disconnects.
+#  * If lftp ALSO fails, run it with -d for full protocol debug output:
+#      lftp -d -c " ... "
+#
