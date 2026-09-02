@@ -9,7 +9,6 @@
  * Each setting says what it controls and where it shows up.
  * ====================================================================== */
 
-
 /* ======================================================================
  * SITE INFORMATION
  * ======================================================================
@@ -24,8 +23,8 @@
  *           copyright, the purchase dialogs and the live-chat label.
  * ====================================================================== */
 
-const siteName = "GOLDTRAP EA";
-const siteOwner = "Abang Rimba";
+const siteName = "GOLDENBOX EA";
+const siteOwner = "Richie Gold";
 
 /*
  * The current Expert Advisor version, e.g. "v4.2.3".
@@ -52,10 +51,9 @@ const siteTagline = "Automated MT4/MT5 Gold Trading";
  * "{siteName}" is replaced with the value of siteName above.
  */
 const siteDescription =
-    "{siteName} automates trade execution and basket management for XAUUSD " +
-    "on MetaTrader 4 and MetaTrader 5, using a structured trading approach " +
-    "built for consistency.";
-
+  "{siteName} automates trade execution and basket management for XAUUSD " +
+  "on MetaTrader 4 and MetaTrader 5, using a structured trading approach " +
+  "built for consistency.";
 
 /* ======================================================================
  * SITE COLORS
@@ -95,7 +93,6 @@ const siteBorderColor = "#232019";
 /* Green used by the live/online indicators and the free-plan accents. */
 const siteSuccessColor = "#00D492";
 
-
 /* ======================================================================
  * LIVE CHAT / PITCHBAR
  * ======================================================================
@@ -120,7 +117,6 @@ const liveChatIconHoverText = `Chat with ${siteOwner}`;
  */
 const liveChatUsesTelegramFallback = true;
 
-
 /* ======================================================================
  * LIVE CHART
  * ======================================================================
@@ -135,8 +131,7 @@ const liveChatUsesTelegramFallback = true;
  * ====================================================================== */
 
 const homepageLiveChartApi =
-    "https://s.tradingview.com/widgetembed/?symbol=OANDA%3AXAUUSD&interval=15&theme=dark&style=1&timezone=Etc%2FUTC&hide_side_toolbar=0&withdateranges=1&studies=Volume%40tv-basicstudies";
-
+  "https://s.tradingview.com/widgetembed/?symbol=OANDA%3AXAUUSD&interval=15&theme=dark&style=1&timezone=Etc%2FUTC&hide_side_toolbar=0&withdateranges=1&studies=Volume%40tv-basicstudies";
 
 /* ======================================================================
  * PAYMENT
@@ -154,7 +149,6 @@ const paymentNetwork = "TRC20 (TRON)";
 
 /* The currency printed beside the amount, e.g. "$299 USDT". */
 const paymentAmountSuffix = "USDT";
-
 
 /* ======================================================================
  * PRICING TIMERS
@@ -174,7 +168,6 @@ const paymentAmountSuffix = "USDT";
  * ====================================================================== */
 
 const pricingTimerStatus = "hide";
-
 
 /* ======================================================================
  * ANNOUNCEMENT BAR
@@ -218,7 +211,6 @@ const announcementTailText = "via our IB link. No payment needed.";
 /* Where the announcement text links to. */
 const announcementLink = "https://a689.link";
 
-
 /* ======================================================================
  * TELEGRAM LINKS
  * ======================================================================
@@ -232,7 +224,6 @@ const announcementLink = "https://a689.link";
 const telegramPersonal = "https://t.me/abangrimba";
 const telegramChannel = "https://t.me/goldtrapea";
 
-
 /* ======================================================================
  * DOWNLOAD / WHITELIST
  * ======================================================================
@@ -241,7 +232,6 @@ const telegramChannel = "https://t.me/goldtrapea";
  * ====================================================================== */
 
 const metaTraderWhitelist = "https://a689.link";
-
 
 /* ======================================================================
  * LIVE ACTIVITY + STATISTICS
@@ -255,7 +245,6 @@ const liveActivityColor = "green";
 const licenseKeysGeneratedToday = "24";
 const easRunningToday = "2,371";
 
-
 /* ======================================================================
  * FOOTER
  * ======================================================================
@@ -266,13 +255,12 @@ const easRunningToday = "2,371";
 
 /* The editable risk disclaimer at the foot of every page. */
 const footerCaveatText =
-    "Trading XAUUSD involves substantial risk. Past performance does not " +
-    "guarantee future results. The EA, like any automated system, can lose " +
-    "money. Use only capital you can afford to lose.";
+  "Trading XAUUSD involves substantial risk. Past performance does not " +
+  "guarantee future results. The EA, like any automated system, can lose " +
+  "money. Use only capital you can afford to lose.";
 
 /* Where the "Terms and Conditions" link in the footer points. */
 const termsAndConditionsLink = "#";
-
 
 /* ======================================================================
  * TRANSLATION LANGUAGES
@@ -337,44 +325,58 @@ const translationDefaultLanguage = "en";
 const translationDiagnostics = true;
 
 const translationLanguages = [
-    { code: "en", name: "English" },
-    { code: "es", name: "Spanish" },
-    { code: "pt", name: "Portuguese" },
-    { code: "fr", name: "French" },
-    { code: "de", name: "German" },
-    { code: "zh-CN", name: "Chinese (Simplified)" },
-    { code: "hi", name: "Hindi" },
-    { code: "ar", name: "Arabic" },
-    { code: "ru", name: "Russian" },
-    { code: "ja", name: "Japanese" },
-    { code: "ko", name: "Korean" },
-    { code: "it", name: "Italian" },
-    { code: "tr", name: "Turkish" },
-    { code: "id", name: "Indonesian" },
-    { code: "ms", name: "Malay" },
-    { code: "vi", name: "Vietnamese" },
-    { code: "th", name: "Thai" }
+  { code: "en", name: "English" },
+  { code: "es", name: "Spanish" },
+  { code: "pt", name: "Portuguese" },
+  { code: "fr", name: "French" },
+  { code: "de", name: "German" },
+  { code: "zh-CN", name: "Chinese (Simplified)" },
+  { code: "hi", name: "Hindi" },
+  { code: "ar", name: "Arabic" },
+  { code: "ru", name: "Russian" },
+  { code: "ja", name: "Japanese" },
+  { code: "ko", name: "Korean" },
+  { code: "it", name: "Italian" },
+  { code: "tr", name: "Turkish" },
+  { code: "id", name: "Indonesian" },
+  { code: "ms", name: "Malay" },
+  { code: "vi", name: "Vietnamese" },
+  { code: "th", name: "Thai" },
 ];
 
 /* Also selectable, but only once searched for. */
 const translationExtraLanguages = [
-    { code: "nl", name: "Dutch" }, { code: "pl", name: "Polish" },
-    { code: "uk", name: "Ukrainian" }, { code: "ro", name: "Romanian" },
-    { code: "el", name: "Greek" }, { code: "cs", name: "Czech" },
-    { code: "sv", name: "Swedish" }, { code: "da", name: "Danish" },
-    { code: "fi", name: "Finnish" }, { code: "no", name: "Norwegian" },
-    { code: "hu", name: "Hungarian" }, { code: "he", name: "Hebrew" },
-    { code: "bn", name: "Bengali" }, { code: "ta", name: "Tamil" },
-    { code: "te", name: "Telugu" }, { code: "ur", name: "Urdu" },
-    { code: "fa", name: "Persian" }, { code: "sw", name: "Swahili" },
-    { code: "tl", name: "Filipino" }, { code: "zh-TW", name: "Chinese (Traditional)" },
-    { code: "bg", name: "Bulgarian" }, { code: "sr", name: "Serbian" },
-    { code: "hr", name: "Croatian" }, { code: "sk", name: "Slovak" },
-    { code: "af", name: "Afrikaans" }, { code: "ha", name: "Hausa" },
-    { code: "yo", name: "Yoruba" }, { code: "ig", name: "Igbo" },
-    { code: "zu", name: "Zulu" }, { code: "am", name: "Amharic" }
+  { code: "nl", name: "Dutch" },
+  { code: "pl", name: "Polish" },
+  { code: "uk", name: "Ukrainian" },
+  { code: "ro", name: "Romanian" },
+  { code: "el", name: "Greek" },
+  { code: "cs", name: "Czech" },
+  { code: "sv", name: "Swedish" },
+  { code: "da", name: "Danish" },
+  { code: "fi", name: "Finnish" },
+  { code: "no", name: "Norwegian" },
+  { code: "hu", name: "Hungarian" },
+  { code: "he", name: "Hebrew" },
+  { code: "bn", name: "Bengali" },
+  { code: "ta", name: "Tamil" },
+  { code: "te", name: "Telugu" },
+  { code: "ur", name: "Urdu" },
+  { code: "fa", name: "Persian" },
+  { code: "sw", name: "Swahili" },
+  { code: "tl", name: "Filipino" },
+  { code: "zh-TW", name: "Chinese (Traditional)" },
+  { code: "bg", name: "Bulgarian" },
+  { code: "sr", name: "Serbian" },
+  { code: "hr", name: "Croatian" },
+  { code: "sk", name: "Slovak" },
+  { code: "af", name: "Afrikaans" },
+  { code: "ha", name: "Hausa" },
+  { code: "yo", name: "Yoruba" },
+  { code: "ig", name: "Igbo" },
+  { code: "zu", name: "Zulu" },
+  { code: "am", name: "Amharic" },
 ];
-
 
 /* ======================================================================
  * PRICING PLANS
@@ -403,78 +405,79 @@ const translationExtraLanguages = [
  * ====================================================================== */
 
 const pricingPlans = [
-    {
-        planName: "Free Access",
-        price: 0,
-        increment: 0,
-        timerTime: 0,
-        currency: "",
-        eyebrow: "Free Option",
-        eyebrowIcon: "dot",
-        accent: "green",
-        caption: "Via VT Markets IB registration · 1 account only",
-        steps: [
-            "Register under my link",
-            "Full verify your account",
-            "Create an MT5 trading account",
-            "Submit MT5/MT4 ID + email for instant access"
-        ],
-        note: 'Free option is locked to <strong>1 MT5 account ID</strong> only.',
-        cta: { label: "Free Access", type: "green", href: announcementLink, icon: "arrow" }
+  {
+    planName: "Free Access",
+    price: 0,
+    increment: 0,
+    timerTime: 0,
+    currency: "",
+    eyebrow: "Free Option",
+    eyebrowIcon: "dot",
+    accent: "green",
+    caption: "Via VT Markets IB registration · 1 account only",
+    steps: [
+      "Register under my link",
+      "Full verify your account",
+      "Create an MT5 trading account",
+      "Submit MT5/MT4 ID + email for instant access",
+    ],
+    note: "Free option is locked to <strong>1 MT5 account ID</strong> only.",
+    cta: {
+      label: "Free Access",
+      type: "green",
+      href: announcementLink,
+      icon: "arrow",
     },
-    {
-        planName: "5 Accounts",
-        price: 299,
-        increment: 20,
-        timerTime: 3600,
-        currency: "USDT",
-        eyebrow: "Most Popular",
-        eyebrowIcon: "flame",
-        accent: "gold",
-        caption: "Perfect for most traders",
-        features: [
-            "Lifetime license",
-            "Up to 5 MT5/MT4 accounts",
-            "Use with any broker",
-            "Free upgrades to all future versions",
-            "Priority reply message"
-        ],
-        cta: { label: "Buy Now", type: "gold", icon: "wallet" }
-    },
-    {
-        planName: "Unlimited",
-        price: 740,
-        increment: 20,
-        timerTime: 3600,
-        currency: "USDT",
-        eyebrow: "Unlimited Access",
-        eyebrowIcon: "crown",
-        accent: "gold",
-        caption: "For traders managing multiple accounts",
-        hot: true,
-        features: [
-            "Lifetime license",
-            "Unlimited MT5/MT4 accounts",
-            "Use with any broker",
-            "Free upgrades to all future versions",
-            "Priority reply message"
-        ],
-        cta: { label: "Buy Now", type: "gold", icon: "wallet" }
-    }
+  },
+  {
+    planName: "5 Accounts",
+    price: 299,
+    increment: 20,
+    timerTime: 3600,
+    currency: "USDT",
+    eyebrow: "Most Popular",
+    eyebrowIcon: "flame",
+    accent: "gold",
+    caption: "Perfect for most traders",
+    features: [
+      "Lifetime license",
+      "Up to 5 MT5/MT4 accounts",
+      "Use with any broker",
+      "Free upgrades to all future versions",
+      "Priority reply message",
+    ],
+    cta: { label: "Buy Now", type: "gold", icon: "wallet" },
+  },
+  {
+    planName: "Unlimited",
+    price: 740,
+    increment: 20,
+    timerTime: 3600,
+    currency: "USDT",
+    eyebrow: "Unlimited Access",
+    eyebrowIcon: "crown",
+    accent: "gold",
+    caption: "For traders managing multiple accounts",
+    hot: true,
+    features: [
+      "Lifetime license",
+      "Unlimited MT5/MT4 accounts",
+      "Use with any broker",
+      "Free upgrades to all future versions",
+      "Priority reply message",
+    ],
+    cta: { label: "Buy Now", type: "gold", icon: "wallet" },
+  },
 ];
-
 
 /* ======================================================================
  * BEHAVIOUR CONSTANTS
  * ====================================================================== */
 
-const COPY_FEEDBACK_MS = 5000;   // how long a "copied" confirmation persists
-const REVEAL_THRESHOLD = 0.15;   // how much of an element must be visible
+const COPY_FEEDBACK_MS = 5000; // how long a "copied" confirmation persists
+const REVEAL_THRESHOLD = 0.15; // how much of an element must be visible
 const TIMER_TICK_MS = 1000;
 const ANNOUNCEMENT_STORAGE_KEY = "goldtrap:announcement-dismissed-version";
-
-
-
 
 /* ======================================================================
  * ============  IMPLEMENTATION — no configuration below here  ==========
@@ -483,7 +486,6 @@ const ANNOUNCEMENT_STORAGE_KEY = "goldtrap:announcement-dismissed-version";
 import { faqServiceInstance } from "./faq-index-page.js";
 import { initFaqPage } from "./faq-page.js";
 
-
 /* ----------------------------------------------------------------------
  * Small DOM helpers. Every lookup is guarded so a page that legitimately
  * lacks an optional element (e.g. the FAQ page has no pricing grid) never
@@ -491,31 +493,38 @@ import { initFaqPage } from "./faq-page.js";
  * -------------------------------------------------------------------- */
 
 const qs = (selector, scope = document) => scope.querySelector(selector);
-const qsa = (selector, scope = document) => Array.from(scope.querySelectorAll(selector));
+const qsa = (selector, scope = document) =>
+  Array.from(scope.querySelectorAll(selector));
 
 /** Runs `callback` only when `element` actually exists. */
 function withElement(element, callback) {
-    if (element) {
-        callback(element);
-    }
+  if (element) {
+    callback(element);
+  }
 }
 
 /** Formats a number with thousands separators, e.g. 9650 → "9,650". */
 function formatPrice(value) {
-    return Number(value).toLocaleString("en-US");
+  return Number(value).toLocaleString("en-US");
 }
 
 /** Reusable inline SVG icons, kept in one place so markup stays readable. */
 const icons = {
-    check: '<svg class="check" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>',
-    arrow: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>',
-    wallet: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="6" width="18" height="14" rx="2"/><path d="M3 10h18"/><circle cx="17" cy="15" r="1.2"/></svg>',
-    flame: '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2c1 4-3 5-3 9a3 3 0 0 0 6 0c0-1-.4-2-1-3 2 1 4 3.5 4 6a6 6 0 1 1-12 0c0-4.5 4-7 6-12z"/></svg>',
-    crown: '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3 8l4 3 5-6 5 6 4-3-2 11H5L3 8z"/></svg>',
-    telegram: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>',
-    clock: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 14"/></svg>'
+  check:
+    '<svg class="check" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>',
+  arrow:
+    '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>',
+  wallet:
+    '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="6" width="18" height="14" rx="2"/><path d="M3 10h18"/><circle cx="17" cy="15" r="1.2"/></svg>',
+  flame:
+    '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2c1 4-3 5-3 9a3 3 0 0 0 6 0c0-1-.4-2-1-3 2 1 4 3.5 4 6a6 6 0 1 1-12 0c0-4.5 4-7 6-12z"/></svg>',
+  crown:
+    '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3 8l4 3 5-6 5 6 4-3-2 11H5L3 8z"/></svg>',
+  telegram:
+    '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>',
+  clock:
+    '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 14"/></svg>',
 };
-
 
 /* ======================================================================
  * SITE COLORS → CSS CUSTOM PROPERTIES
@@ -528,26 +537,25 @@ const icons = {
  * ====================================================================== */
 
 function applySiteColors() {
-    const root = document.documentElement;
+  const root = document.documentElement;
 
-    const palette = {
-        "--site-background": siteBackgroundColor,
-        "--site-surface": siteSurfaceColor,
-        "--site-primary-accent": sitePrimaryAccentColor,
-        "--site-primary-accent-hover": sitePrimaryAccentHoverColor,
-        "--site-text": siteTextColor,
-        "--site-muted-text": siteMutedTextColor,
-        "--site-border": siteBorderColor,
-        "--site-success": siteSuccessColor
-    };
+  const palette = {
+    "--site-background": siteBackgroundColor,
+    "--site-surface": siteSurfaceColor,
+    "--site-primary-accent": sitePrimaryAccentColor,
+    "--site-primary-accent-hover": sitePrimaryAccentHoverColor,
+    "--site-text": siteTextColor,
+    "--site-muted-text": siteMutedTextColor,
+    "--site-border": siteBorderColor,
+    "--site-success": siteSuccessColor,
+  };
 
-    Object.entries(palette).forEach(([property, value]) => {
-        if (value) {
-            root.style.setProperty(property, value);
-        }
-    });
+  Object.entries(palette).forEach(([property, value]) => {
+    if (value) {
+      root.style.setProperty(property, value);
+    }
+  });
 }
-
 
 /* ======================================================================
  * SITE IDENTITY → PAGE
@@ -600,12 +608,12 @@ function applySiteColors() {
 
 /** Applies both non-translatable markers to one element. */
 function markNotTranslatable(element) {
-    if (!element) {
-        return element;
-    }
-    element.setAttribute("translate", "no");
-    element.classList.add("notranslate");
+  if (!element) {
     return element;
+  }
+  element.setAttribute("translate", "no");
+  element.classList.add("notranslate");
+  return element;
 }
 
 /**
@@ -618,12 +626,12 @@ function markNotTranslatable(element) {
  * @returns {Element|null} the element, for chaining
  */
 function protectIdentityText(element, value) {
-    if (!element) {
-        return null;
-    }
-    markNotTranslatable(element);
-    element.textContent = value;
-    return element;
+  if (!element) {
+    return null;
+  }
+  markNotTranslatable(element);
+  element.textContent = value;
+  return element;
 }
 
 /**
@@ -635,24 +643,26 @@ function protectIdentityText(element, value) {
  * value, since they are configurable per plan.
  */
 function getIdentityTerms() {
-    return [
-        siteName,
-        siteOwner,
-        eaCurrentVersion,
-        eaCurrentFileName,
-        eaFileNameFor("mt4"),
-        walletAddress,
-        paymentNetwork,
-        paymentAmountSuffix,
-        metaTraderWhitelist,
-        "MetaTrader 4",
-        "MetaTrader 5",
-        "MetaTrader",
-        "MT4",
-        "MT5",
-        "XAUUSD",
-        "Telegram"
-    ].filter(Boolean).sort((a, b) => b.length - a.length);
+  return [
+    siteName,
+    siteOwner,
+    eaCurrentVersion,
+    eaCurrentFileName,
+    eaFileNameFor("mt4"),
+    walletAddress,
+    paymentNetwork,
+    paymentAmountSuffix,
+    metaTraderWhitelist,
+    "MetaTrader 4",
+    "MetaTrader 5",
+    "MetaTrader",
+    "MT4",
+    "MT5",
+    "XAUUSD",
+    "Telegram",
+  ]
+    .filter(Boolean)
+    .sort((a, b) => b.length - a.length);
 }
 
 /** Prices and money figures: $299, $9,650, $1.50. */
@@ -660,8 +670,8 @@ const identityPricePattern = /\$\d[\d,]*(?:\.\d+)?/;
 
 /** Elements whose subtree must never be walked or rewritten. */
 const identitySkipSelector =
-    "script, style, textarea, .notranslate, [translate='no'], " +
-    ".gtranslate_wrapper, #goog-gt-tt, .skiptranslate";
+  "script, style, textarea, .notranslate, [translate='no'], " +
+  ".gtranslate_wrapper, #goog-gt-tt, .skiptranslate";
 
 /**
  * Wraps every identity term found in the text under `root` in a marked
@@ -675,155 +685,161 @@ const identitySkipSelector =
  * @param {Node} [root=document.body]
  */
 function protectIdentityTerms(root = document.body) {
-    if (!root) {
-        return;
+  if (!root) {
+    return;
+  }
+
+  const terms = getIdentityTerms();
+  // One pattern: the identifiers, plus the price shape, in one pass.
+  const escaped = terms.map((term) =>
+    term.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"),
+  );
+  const pattern = new RegExp(
+    `(${escaped.join("|")}|${identityPricePattern.source})`,
+    "g",
+  );
+
+  const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
+    acceptNode(node) {
+      if (!node.nodeValue || !node.nodeValue.trim()) {
+        return NodeFilter.FILTER_REJECT;
+      }
+      if (
+        node.parentElement &&
+        node.parentElement.closest(identitySkipSelector)
+      ) {
+        return NodeFilter.FILTER_REJECT;
+      }
+      return NodeFilter.FILTER_ACCEPT;
+    },
+  });
+
+  // Collect first: rewriting while walking would invalidate the walker.
+  const targets = [];
+  let current = walker.nextNode();
+
+  while (current) {
+    pattern.lastIndex = 0;
+    if (pattern.test(current.nodeValue)) {
+      targets.push(current);
+    }
+    current = walker.nextNode();
+  }
+
+  targets.forEach((textNode) => {
+    const fragment = document.createDocumentFragment();
+    const text = textNode.nodeValue;
+    let index = 0;
+
+    pattern.lastIndex = 0;
+    let match = pattern.exec(text);
+
+    while (match) {
+      /*
+       * The spaces either side of the term are pulled INSIDE the
+       * protected span. Google replaces each translatable text node
+       * wholesale and trims its edges, so a space left outside is
+       * silently eaten and the line renders as
+       * "© 2026 GOLDTRAP EAporAbang Rimba". Inside the span it is
+       * untouchable. `index` clamps the start so two adjacent terms
+       * cannot both claim the same space.
+       */
+      let start = match.index;
+      if (start > index && text[start - 1] === " ") {
+        start -= 1;
+      }
+
+      let end = match.index + match[0].length;
+      if (text[end] === " ") {
+        end += 1;
+      }
+
+      if (start > index) {
+        fragment.append(text.slice(index, start));
+      }
+
+      const span = document.createElement("span");
+      markNotTranslatable(span);
+      span.textContent = text.slice(start, end);
+      fragment.append(span);
+      index = end;
+      match = pattern.exec(text);
+      // A match already swallowed by the space above is skipped.
+      while (match && match.index < index) {
+        match = pattern.exec(text);
+      }
     }
 
-    const terms = getIdentityTerms();
-    // One pattern: the identifiers, plus the price shape, in one pass.
-    const escaped = terms.map((term) => term.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"));
-    const pattern = new RegExp(
-        `(${escaped.join("|")}|${identityPricePattern.source})`,
-        "g"
-    );
-
-    const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
-        acceptNode(node) {
-            if (!node.nodeValue || !node.nodeValue.trim()) {
-                return NodeFilter.FILTER_REJECT;
-            }
-            if (node.parentElement && node.parentElement.closest(identitySkipSelector)) {
-                return NodeFilter.FILTER_REJECT;
-            }
-            return NodeFilter.FILTER_ACCEPT;
-        }
-    });
-
-    // Collect first: rewriting while walking would invalidate the walker.
-    const targets = [];
-    let current = walker.nextNode();
-
-    while (current) {
-        pattern.lastIndex = 0;
-        if (pattern.test(current.nodeValue)) {
-            targets.push(current);
-        }
-        current = walker.nextNode();
+    if (index < text.length) {
+      fragment.append(text.slice(index));
     }
 
-    targets.forEach((textNode) => {
-        const fragment = document.createDocumentFragment();
-        const text = textNode.nodeValue;
-        let index = 0;
-
-        pattern.lastIndex = 0;
-        let match = pattern.exec(text);
-
-        while (match) {
-            /*
-             * The spaces either side of the term are pulled INSIDE the
-             * protected span. Google replaces each translatable text node
-             * wholesale and trims its edges, so a space left outside is
-             * silently eaten and the line renders as
-             * "© 2026 GOLDTRAP EAporAbang Rimba". Inside the span it is
-             * untouchable. `index` clamps the start so two adjacent terms
-             * cannot both claim the same space.
-             */
-            let start = match.index;
-            if (start > index && text[start - 1] === " ") {
-                start -= 1;
-            }
-
-            let end = match.index + match[0].length;
-            if (text[end] === " ") {
-                end += 1;
-            }
-
-            if (start > index) {
-                fragment.append(text.slice(index, start));
-            }
-
-            const span = document.createElement("span");
-            markNotTranslatable(span);
-            span.textContent = text.slice(start, end);
-            fragment.append(span);
-            index = end;
-            match = pattern.exec(text);
-            // A match already swallowed by the space above is skipped.
-            while (match && match.index < index) {
-                match = pattern.exec(text);
-            }
-        }
-
-        if (index < text.length) {
-            fragment.append(text.slice(index));
-        }
-
-        textNode.parentNode.replaceChild(fragment, textNode);
-    });
+    textNode.parentNode.replaceChild(fragment, textNode);
+  });
 }
-
 
 /** Replaces the {siteName} / {eaVersion} placeholders in a string. */
 function fillTokens(text) {
-    return text
-        .replace(/\{siteName\}/g, siteName)
-        .replace(/\{eaVersion\}/g, eaCurrentVersion)
-        .replace(/\{siteOwner\}/g, siteOwner);
+  return text
+    .replace(/\{siteName\}/g, siteName)
+    .replace(/\{eaVersion\}/g, eaCurrentVersion)
+    .replace(/\{siteOwner\}/g, siteOwner);
 }
 
 /** MetaTrader 4 uses the same filename with an .ex4 extension. */
 function eaFileNameFor(platform) {
-    if (platform === "mt4") {
-        return eaCurrentFileName.replace(/\.ex5$/i, ".ex4");
-    }
-    return eaCurrentFileName;
+  if (platform === "mt4") {
+    return eaCurrentFileName.replace(/\.ex5$/i, ".ex4");
+  }
+  return eaCurrentFileName;
 }
 
 function applySiteIdentity() {
-    // The element IS the identifier: marked and written in one step.
-    qsa("[data-site-name]").forEach((element) => {
-        protectIdentityText(element, siteName);
-    });
+  // The element IS the identifier: marked and written in one step.
+  qsa("[data-site-name]").forEach((element) => {
+    protectIdentityText(element, siteName);
+  });
 
-    qsa("[data-ea-version]").forEach((element) => {
-        protectIdentityText(element, eaCurrentVersion);
-    });
+  qsa("[data-ea-version]").forEach((element) => {
+    protectIdentityText(element, eaCurrentVersion);
+  });
 
-    qsa("[data-ea-filename]").forEach((element) => {
-        protectIdentityText(element, eaFileNameFor(element.dataset.eaFilename));
-    });
+  qsa("[data-ea-filename]").forEach((element) => {
+    protectIdentityText(element, eaFileNameFor(element.dataset.eaFilename));
+  });
 
-    /*
-     * These carry the name INSIDE a sentence, so the element itself stays
-     * translatable and only the substituted identifier is protected —
-     * protectIdentityTerms() at the end of init() wraps it.
-     */
-    qsa("[data-site-name-in]").forEach((element) => {
-        element.textContent = fillTokens(element.textContent);
-    });
+  /*
+   * These carry the name INSIDE a sentence, so the element itself stays
+   * translatable and only the substituted identifier is protected —
+   * protectIdentityTerms() at the end of init() wraps it.
+   */
+  qsa("[data-site-name-in]").forEach((element) => {
+    element.textContent = fillTokens(element.textContent);
+  });
 
-    // Metadata — the title pattern is supplied by the page itself.
-    const titleTemplate = document.documentElement.dataset.titleTemplate
-        || "{siteName} — " + siteTagline;
-    document.title = fillTokens(titleTemplate);
+  // Metadata — the title pattern is supplied by the page itself.
+  const titleTemplate =
+    document.documentElement.dataset.titleTemplate ||
+    "{siteName} — " + siteTagline;
+  document.title = fillTokens(titleTemplate);
 
-    const description = fillTokens(
-        document.documentElement.dataset.description || siteDescription
+  const description = fillTokens(
+    document.documentElement.dataset.description || siteDescription,
+  );
+
+  const meta = (selector, value) => {
+    withElement(qs(selector), (element) =>
+      element.setAttribute("content", value),
     );
+  };
 
-    const meta = (selector, value) => {
-        withElement(qs(selector), (element) => element.setAttribute("content", value));
-    };
-
-    meta('meta[name="description"]', description);
-    meta('meta[property="og:site_name"]', siteName);
-    meta('meta[property="og:title"]', document.title);
-    meta('meta[property="og:description"]', description);
-    meta('meta[name="twitter:title"]', document.title);
-    meta('meta[name="twitter:description"]', description);
+  meta('meta[name="description"]', description);
+  meta('meta[property="og:site_name"]', siteName);
+  meta('meta[property="og:title"]', document.title);
+  meta('meta[property="og:description"]', description);
+  meta('meta[name="twitter:title"]', document.title);
+  meta('meta[name="twitter:description"]', description);
 }
-
 
 /* ======================================================================
  * ANNOUNCEMENT BAR  (version-based dismissal)
@@ -842,55 +858,55 @@ function applySiteIdentity() {
 
 /** Reads the announcement version this visitor last dismissed. */
 function getDismissedAnnouncementVersion() {
-    try {
-        return localStorage.getItem(ANNOUNCEMENT_STORAGE_KEY);
-    } catch (error) {
-        // Private mode or storage disabled — treat as "never dismissed".
-        return null;
-    }
+  try {
+    return localStorage.getItem(ANNOUNCEMENT_STORAGE_KEY);
+  } catch (error) {
+    // Private mode or storage disabled — treat as "never dismissed".
+    return null;
+  }
 }
 
 function storeDismissedAnnouncementVersion(version) {
-    try {
-        localStorage.setItem(ANNOUNCEMENT_STORAGE_KEY, version);
-    } catch (error) {
-        /* storage unavailable — the dismissal simply will not persist */
-    }
+  try {
+    localStorage.setItem(ANNOUNCEMENT_STORAGE_KEY, version);
+  } catch (error) {
+    /* storage unavailable — the dismissal simply will not persist */
+  }
 }
 
 function initAnnouncementBar() {
-    const bar = qs("#announcement-bar");
-    if (!bar) {
-        return;
-    }
+  const bar = qs("#announcement-bar");
+  if (!bar) {
+    return;
+  }
 
-    const isRetired = announcementStatus !== "new";
-    const alreadyDismissed = getDismissedAnnouncementVersion() === announcementVersion;
+  const isRetired = announcementStatus !== "new";
+  const alreadyDismissed =
+    getDismissedAnnouncementVersion() === announcementVersion;
 
-    if (isRetired || alreadyDismissed) {
-        bar.hidden = true;
-        return;
-    }
+  if (isRetired || alreadyDismissed) {
+    bar.hidden = true;
+    return;
+  }
 
-    bar.hidden = false;
-    bar.dataset.announcementVersion = announcementVersion;
+  bar.hidden = false;
+  bar.dataset.announcementVersion = announcementVersion;
 
-    withElement(qs("#announcement-link", bar), (link) => {
-        link.href = announcementLink;
-        link.innerHTML =
-            `<strong>${announcementBoldText}</strong> ${announcementBodyText} ` +
-            `<span class="highlight">${announcementHighlightText}</span> ` +
-            `${announcementTailText}`;
+  withElement(qs("#announcement-link", bar), (link) => {
+    link.href = announcementLink;
+    link.innerHTML =
+      `<strong>${announcementBoldText}</strong> ${announcementBodyText} ` +
+      `<span class="highlight">${announcementHighlightText}</span> ` +
+      `${announcementTailText}`;
+  });
+
+  withElement(qs("#announcement-close", bar), (closeButton) => {
+    closeButton.addEventListener("click", () => {
+      bar.hidden = true;
+      storeDismissedAnnouncementVersion(announcementVersion);
     });
-
-    withElement(qs("#announcement-close", bar), (closeButton) => {
-        closeButton.addEventListener("click", () => {
-            bar.hidden = true;
-            storeDismissedAnnouncementVersion(announcementVersion);
-        });
-    });
+  });
 }
-
 
 /* ======================================================================
  * TRANSLATION — GTRANSLATE FREE
@@ -924,7 +940,7 @@ function initAnnouncementBar() {
 
 /** The shortlist plus the searchable extras, English always first. */
 function getAllTranslationLanguages() {
-    return [...translationLanguages, ...translationExtraLanguages];
+  return [...translationLanguages, ...translationExtraLanguages];
 }
 
 /**
@@ -933,41 +949,43 @@ function getAllTranslationLanguages() {
  * "pt" → PT, "zh-CN" → ZH.
  */
 function languageAbbreviation(code) {
-    return String(code).split("-")[0].slice(0, 2).toUpperCase();
+  return String(code).split("-")[0].slice(0, 2).toUpperCase();
 }
 
 /** Loads GTranslate's free widget once, after its settings are in place. */
 function loadGTranslate() {
-    if (qs("#gtranslate-script")) {
-        return;
-    }
+  if (qs("#gtranslate-script")) {
+    return;
+  }
 
-    // Read by the widget script as it parses; must be assigned first.
-    window.gtranslateSettings = {
-        default_language: translationDefaultLanguage,
-        languages: getAllTranslationLanguages().map((language) => language.code),
-        wrapper_selector: ".gtranslate_wrapper",
-        url_structure: "none",
-        horizontal_position: "inline",
-        detect_browser_language: false,
-        native_language_names: false
-    };
+  // Read by the widget script as it parses; must be assigned first.
+  window.gtranslateSettings = {
+    default_language: translationDefaultLanguage,
+    languages: getAllTranslationLanguages().map((language) => language.code),
+    wrapper_selector: ".gtranslate_wrapper",
+    url_structure: "none",
+    horizontal_position: "inline",
+    detect_browser_language: false,
+    native_language_names: false,
+  };
 
-    const script = document.createElement("script");
-    script.id = "gtranslate-script";
-    script.src = "https://cdn.gtranslate.net/widgets/latest/dropdown.js";
-    script.addEventListener("load", () => translationLog("script loaded"));
-    script.addEventListener("error", () =>
-        translationLog("script FAILED to load — the request was blocked or offline")
-    );
-    translationLog("script requested", script.src);
-    script.defer = true;
-    document.body.append(script);
+  const script = document.createElement("script");
+  script.id = "gtranslate-script";
+  script.src = "https://cdn.gtranslate.net/widgets/latest/dropdown.js";
+  script.addEventListener("load", () => translationLog("script loaded"));
+  script.addEventListener("error", () =>
+    translationLog(
+      "script FAILED to load — the request was blocked or offline",
+    ),
+  );
+  translationLog("script requested", script.src);
+  script.defer = true;
+  document.body.append(script);
 }
 
 /** GTranslate's hidden switcher, once its script has rendered it. */
 function getGTranslateSelector() {
-    return qs(".gtranslate_wrapper .gt_selector");
+  return qs(".gtranslate_wrapper .gt_selector");
 }
 
 /**
@@ -976,22 +994,22 @@ function getGTranslateSelector() {
  * so firing those is the documented way to warm it up ahead of a choice.
  */
 function preloadTranslationEngine() {
-    const widget = qs(".gtranslate_wrapper");
-    if (!widget) {
-        return;
-    }
+  const widget = qs(".gtranslate_wrapper");
+  if (!widget) {
+    return;
+  }
 
-    [widget, ...qsa("*", widget)].forEach((element) => {
-        element.dispatchEvent(new Event("pointerenter", { bubbles: false }));
-        element.dispatchEvent(new Event("focusin", { bubbles: true }));
-    });
+  [widget, ...qsa("*", widget)].forEach((element) => {
+    element.dispatchEvent(new Event("pointerenter", { bubbles: false }));
+    element.dispatchEvent(new Event("focusin", { bubbles: true }));
+  });
 }
 
 /** Reads the language GTranslate currently has the page in. */
 function getActiveTranslationLanguage() {
-    const match = document.cookie.match("(^|;) ?googtrans=([^;]*)(;|$)");
-    const fromCookie = match ? decodeURIComponent(match[2]).split("/")[2] : null;
-    return fromCookie || translationDefaultLanguage;
+  const match = document.cookie.match("(^|;) ?googtrans=([^;]*)(;|$)");
+  const fromCookie = match ? decodeURIComponent(match[2]).split("/")[2] : null;
+  return fromCookie || translationDefaultLanguage;
 }
 
 /**
@@ -1000,38 +1018,38 @@ function getActiveTranslationLanguage() {
  * widget itself. The script is deferred, so we retry until it exists.
  */
 function callGTranslate(languagePair, attempt = 0) {
-    const selector = getGTranslateSelector();
+  const selector = getGTranslateSelector();
 
-    if (selector) {
-        preloadTranslationEngine();
-        selector.value = languagePair;
-        selector.dispatchEvent(new Event("change", { bubbles: true }));
-        translationLog("apply", { pair: languagePair, afterAttempts: attempt });
-        return;
-    }
+  if (selector) {
+    preloadTranslationEngine();
+    selector.value = languagePair;
+    selector.dispatchEvent(new Event("change", { bubbles: true }));
+    translationLog("apply", { pair: languagePair, afterAttempts: attempt });
+    return;
+  }
 
-    if (attempt < 60) {
-        window.setTimeout(() => callGTranslate(languagePair, attempt + 1), 150);
-        return;
-    }
+  if (attempt < 60) {
+    window.setTimeout(() => callGTranslate(languagePair, attempt + 1), 150);
+    return;
+  }
 
-    translationLog("engine missing — the hidden switcher never appeared", {
-        pair: languagePair
-    });
+  translationLog("engine missing — the hidden switcher never appeared", {
+    pair: languagePair,
+  });
 }
 
 /** Reads the raw googtrans cookie, or null. Used by the diagnostics. */
 function readTranslationCookie() {
-    const match = document.cookie.match("(^|;) ?googtrans=([^;]*)(;|$)");
-    return match ? decodeURIComponent(match[2]) : null;
+  const match = document.cookie.match("(^|;) ?googtrans=([^;]*)(;|$)");
+  return match ? decodeURIComponent(match[2]) : null;
 }
 
 /** Console tracing for the translation flow. See translationDiagnostics. */
 function translationLog(step, detail) {
-    if (!translationDiagnostics) {
-        return;
-    }
-    window.console.log(`[translate] ${step}`, detail === undefined ? "" : detail);
+  if (!translationDiagnostics) {
+    return;
+  }
+  window.console.log(`[translate] ${step}`, detail === undefined ? "" : detail);
 }
 
 /**
@@ -1050,36 +1068,37 @@ function translationLog(step, detail) {
  * @returns {string[]} the variants that were cleared, for the log.
  */
 function clearTranslationCookie() {
-    const hostname = window.location.hostname;
-    const domains = ["", hostname, "." + hostname];
+  const hostname = window.location.hostname;
+  const domains = ["", hostname, "." + hostname];
 
-    // A bare hostname like "localhost" has no parent domain to also clear.
-    const parts = hostname.split(".");
-    if (parts.length > 2) {
-        domains.push("." + parts.slice(-2).join("."));
-    }
+  // A bare hostname like "localhost" has no parent domain to also clear.
+  const parts = hostname.split(".");
+  if (parts.length > 2) {
+    domains.push("." + parts.slice(-2).join("."));
+  }
 
-    // Both the root path and the current directory: a cookie written at a
-    // deeper path shadows the one at "/" and is not cleared by expiring "/".
-    const paths = new Set(["/", window.location.pathname]);
-    const directory = window.location.pathname.replace(/[^/]*$/, "");
-    if (directory) {
-        paths.add(directory);
-    }
+  // Both the root path and the current directory: a cookie written at a
+  // deeper path shadows the one at "/" and is not cleared by expiring "/".
+  const paths = new Set(["/", window.location.pathname]);
+  const directory = window.location.pathname.replace(/[^/]*$/, "");
+  if (directory) {
+    paths.add(directory);
+  }
 
-    const cleared = [];
+  const cleared = [];
 
-    domains.forEach((domain) => {
-        paths.forEach((path) => {
-            const suffix = domain ? "; domain=" + domain : "";
-            document.cookie =
-                "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=" +
-                path + suffix;
-            cleared.push(`${domain || "(host)"}${path}`);
-        });
+  domains.forEach((domain) => {
+    paths.forEach((path) => {
+      const suffix = domain ? "; domain=" + domain : "";
+      document.cookie =
+        "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=" +
+        path +
+        suffix;
+      cleared.push(`${domain || "(host)"}${path}`);
     });
+  });
 
-    return cleared;
+  return cleared;
 }
 
 /**
@@ -1094,46 +1113,49 @@ function clearTranslationCookie() {
  * Google's in-memory state.
  */
 function resetSiteLanguageToDefault() {
-    const before = readTranslationCookie();
-    translationLog("reset requested", { cookieBefore: before });
+  const before = readTranslationCookie();
+  translationLog("reset requested", { cookieBefore: before });
 
-    // Restore the original text FIRST, then forget the cookie: clearing it
-    // first makes the widget treat the call as a no-op and the visitor is
-    // stranded in the translated page.
-    callGTranslate(`${translationDefaultLanguage}|${translationDefaultLanguage}`);
+  // Restore the original text FIRST, then forget the cookie: clearing it
+  // first makes the widget treat the call as a no-op and the visitor is
+  // stranded in the translated page.
+  callGTranslate(`${translationDefaultLanguage}|${translationDefaultLanguage}`);
 
-    window.setTimeout(() => {
-        const cleared = clearTranslationCookie();
-        const after = readTranslationCookie();
-        translationLog("reset cookie cleared", { variants: cleared, cookieAfter: after });
+  window.setTimeout(() => {
+    const cleared = clearTranslationCookie();
+    const after = readTranslationCookie();
+    translationLog("reset cookie cleared", {
+      variants: cleared,
+      cookieAfter: after,
+    });
 
-        if (!after) {
-            return;
-        }
+    if (!after) {
+      return;
+    }
 
-        /*
-         * The cookie came back. Nothing else can be done from here without
-         * a fresh document, so reload once — guarded by a sessionStorage
-         * flag so a persistent cookie can never cause a reload loop.
-         */
-        const guard = "goldtrap-translate-reset";
-        let alreadyTried = false;
-        try {
-            alreadyTried = window.sessionStorage.getItem(guard) === "1";
-            window.sessionStorage.setItem(guard, "1");
-        } catch (error) {
-            // Private mode or storage disabled: skip the reload entirely
-            // rather than risk looping.
-            alreadyTried = true;
-        }
+    /*
+     * The cookie came back. Nothing else can be done from here without
+     * a fresh document, so reload once — guarded by a sessionStorage
+     * flag so a persistent cookie can never cause a reload loop.
+     */
+    const guard = "goldtrap-translate-reset";
+    let alreadyTried = false;
+    try {
+      alreadyTried = window.sessionStorage.getItem(guard) === "1";
+      window.sessionStorage.setItem(guard, "1");
+    } catch (error) {
+      // Private mode or storage disabled: skip the reload entirely
+      // rather than risk looping.
+      alreadyTried = true;
+    }
 
-        if (!alreadyTried) {
-            translationLog("reset needs reload", { cookieAfter: after });
-            window.location.reload();
-        } else {
-            translationLog("reset FAILED — cookie persists", { cookieAfter: after });
-        }
-    }, 120);
+    if (!alreadyTried) {
+      translationLog("reset needs reload", { cookieAfter: after });
+      window.location.reload();
+    } else {
+      translationLog("reset FAILED — cookie persists", { cookieAfter: after });
+    }
+  }, 120);
 }
 
 /**
@@ -1141,271 +1163,281 @@ function resetSiteLanguageToDefault() {
  * Handles English → other, other → other, and other → English alike.
  */
 function setSiteLanguage(languageCode) {
-    translationLog("select", { to: languageCode, cookie: readTranslationCookie() });
+  translationLog("select", {
+    to: languageCode,
+    cookie: readTranslationCookie(),
+  });
 
-    if (languageCode === translationDefaultLanguage) {
-        resetSiteLanguageToDefault();
-        return;
-    }
+  if (languageCode === translationDefaultLanguage) {
+    resetSiteLanguageToDefault();
+    return;
+  }
 
-    // Leaving English for another language: the reset guard is spent, so a
-    // later return to English may reload again if it has to.
-    try {
-        window.sessionStorage.removeItem("goldtrap-translate-reset");
-    } catch (error) {
-        // Storage unavailable — the guard simply stays as it is.
-    }
+  // Leaving English for another language: the reset guard is spent, so a
+  // later return to English may reload again if it has to.
+  try {
+    window.sessionStorage.removeItem("goldtrap-translate-reset");
+  } catch (error) {
+    // Storage unavailable — the guard simply stays as it is.
+  }
 
-    callGTranslate(`${translationDefaultLanguage}|${languageCode}`);
+  callGTranslate(`${translationDefaultLanguage}|${languageCode}`);
 }
 
 function initTranslation() {
-    const root = qs("#lang-select");
-    if (!root) {
-        return;
+  const root = qs("#lang-select");
+  if (!root) {
+    return;
+  }
+
+  const toggle = qs("#lang-select-toggle", root);
+  const panel = qs("#lang-select-panel", root);
+  const search = qs("#lang-select-search", root);
+  const list = qs("#lang-select-list", root);
+  const label = qs("#lang-select-label", root);
+  const codeLabel = qs("#lang-select-code", root);
+
+  if (!toggle || !panel || !search || !list || !label) {
+    return;
+  }
+
+  const allLanguages = getAllTranslationLanguages();
+
+  /**
+   * Writes the current language into the header.
+   * The full name is shown on desktop and tablet, the abbreviation on
+   * mobile; CSS decides which is visible, so both are always current.
+   * The accessible name always states the full language.
+   */
+  function showCurrentLanguage(entry) {
+    label.textContent = entry.name;
+
+    if (codeLabel) {
+      codeLabel.textContent = languageAbbreviation(entry.code);
     }
 
-    const toggle = qs("#lang-select-toggle", root);
-    const panel = qs("#lang-select-panel", root);
-    const search = qs("#lang-select-search", root);
-    const list = qs("#lang-select-list", root);
-    const label = qs("#lang-select-label", root);
-    const codeLabel = qs("#lang-select-code", root);
+    toggle.setAttribute(
+      "aria-label",
+      `Language: ${entry.name}. Change language`,
+    );
+  }
 
-    if (!toggle || !panel || !search || !list || !label) {
-        return;
+  /*
+   * Reflect the language the visitor is already in — the cookie survives
+   * reloads, so a returning visitor lands on a translated page and the
+   * control must say so.
+   *
+   * A cookie naming a language the selector does not offer, or naming
+   * English itself (en/en, which some widget versions leave behind), is
+   * STALE: it is cleared here rather than trusted, because that leftover
+   * is exactly what makes a later switch look dead.
+   */
+  let activeCode = getActiveTranslationLanguage();
+  const cookieAtLoad = readTranslationCookie();
+  const activeEntry = allLanguages.find(
+    (language) => language.code === activeCode,
+  );
+
+  if (activeEntry && activeCode !== translationDefaultLanguage) {
+    showCurrentLanguage(activeEntry);
+  } else {
+    if (cookieAtLoad) {
+      translationLog("stale cookie at load — clearing", cookieAtLoad);
+      clearTranslationCookie();
+    }
+    activeCode = translationDefaultLanguage;
+    const fallback = allLanguages.find((l) => l.code === activeCode);
+    if (fallback) {
+      showCurrentLanguage(fallback);
+    }
+  }
+
+  translationLog("init", {
+    cookieAtLoad,
+    activeCode,
+    languagesListed: translationLanguages.length,
+  });
+
+  /**
+   * Renders the option list.
+   * With no search term only the shortlist shows; typing searches the
+   * full set, so every supported language stays reachable.
+   */
+  function renderOptions(filter = "") {
+    const term = filter.trim().toLowerCase();
+    const pool = term ? allLanguages : translationLanguages;
+    // The open dropdown always lists full language names, never codes.
+    const matches = pool.filter((language) =>
+      language.name.toLowerCase().includes(term),
+    );
+
+    list.innerHTML = "";
+
+    if (matches.length === 0) {
+      const empty = document.createElement("p");
+      empty.className = "lang-select__empty";
+      empty.textContent = "No languages found";
+      list.append(empty);
+      return;
     }
 
-    const allLanguages = getAllTranslationLanguages();
-
-    /**
-     * Writes the current language into the header.
-     * The full name is shown on desktop and tablet, the abbreviation on
-     * mobile; CSS decides which is visible, so both are always current.
-     * The accessible name always states the full language.
-     */
-    function showCurrentLanguage(entry) {
-        label.textContent = entry.name;
-
-        if (codeLabel) {
-            codeLabel.textContent = languageAbbreviation(entry.code);
-        }
-
-        toggle.setAttribute("aria-label", `Language: ${entry.name}. Change language`);
-    }
-
-    /*
-     * Reflect the language the visitor is already in — the cookie survives
-     * reloads, so a returning visitor lands on a translated page and the
-     * control must say so.
-     *
-     * A cookie naming a language the selector does not offer, or naming
-     * English itself (en/en, which some widget versions leave behind), is
-     * STALE: it is cleared here rather than trusted, because that leftover
-     * is exactly what makes a later switch look dead.
-     */
-    let activeCode = getActiveTranslationLanguage();
-    const cookieAtLoad = readTranslationCookie();
-    const activeEntry = allLanguages.find((language) => language.code === activeCode);
-
-    if (activeEntry && activeCode !== translationDefaultLanguage) {
-        showCurrentLanguage(activeEntry);
-    } else {
-        if (cookieAtLoad) {
-            translationLog("stale cookie at load — clearing", cookieAtLoad);
-            clearTranslationCookie();
-        }
-        activeCode = translationDefaultLanguage;
-        const fallback = allLanguages.find((l) => l.code === activeCode);
-        if (fallback) {
-            showCurrentLanguage(fallback);
-        }
-    }
-
-    translationLog("init", {
-        cookieAtLoad,
-        activeCode,
-        languagesListed: translationLanguages.length
+    matches.forEach((language) => {
+      const option = document.createElement("button");
+      option.type = "button";
+      option.className = "lang-select__option";
+      option.setAttribute("role", "option");
+      option.setAttribute(
+        "aria-selected",
+        String(language.code === activeCode),
+      );
+      option.dataset.code = language.code;
+      option.textContent = language.name;
+      list.append(option);
     });
+  }
 
-    /**
-     * Renders the option list.
-     * With no search term only the shortlist shows; typing searches the
-     * full set, so every supported language stays reachable.
-     */
-    function renderOptions(filter = "") {
-        const term = filter.trim().toLowerCase();
-        const pool = term ? allLanguages : translationLanguages;
-        // The open dropdown always lists full language names, never codes.
-        const matches = pool.filter((language) =>
-            language.name.toLowerCase().includes(term)
-        );
-
-        list.innerHTML = "";
-
-        if (matches.length === 0) {
-            const empty = document.createElement("p");
-            empty.className = "lang-select__empty";
-            empty.textContent = "No languages found";
-            list.append(empty);
-            return;
-        }
-
-        matches.forEach((language) => {
-            const option = document.createElement("button");
-            option.type = "button";
-            option.className = "lang-select__option";
-            option.setAttribute("role", "option");
-            option.setAttribute("aria-selected", String(language.code === activeCode));
-            option.dataset.code = language.code;
-            option.textContent = language.name;
-            list.append(option);
-        });
-    }
-
-    function openPanel() {
-        panel.hidden = false;
-        toggle.setAttribute("aria-expanded", "true");
-        search.value = "";
-        renderOptions();
-        search.focus();
-    }
-
-    function closePanel({ restoreFocus = false } = {}) {
-        panel.hidden = true;
-        toggle.setAttribute("aria-expanded", "false");
-        if (restoreFocus) {
-            toggle.focus();
-        }
-    }
-
-    const isOpen = () => !panel.hidden;
-
-    toggle.addEventListener("click", () => {
-        if (isOpen()) {
-            closePanel();
-            return;
-        }
-        // Warm Google's engine up while the visitor is still choosing.
-        preloadTranslationEngine();
-        openPanel();
-    });
-
-    search.addEventListener("input", () => renderOptions(search.value));
-
-    /**
-     * Moves the roving focus through the rendered options.
-     * The search field is the panel's first stop, so ArrowDown from it
-     * enters the list and ArrowUp from the first option returns to it.
-     *
-     * @param {HTMLElement} from the element focus is leaving
-     * @param {number} step +1 for down, -1 for up
-     */
-    function moveOptionFocus(from, step) {
-        const options = qsa(".lang-select__option", list);
-        if (options.length === 0) {
-            return;
-        }
-
-        const current = options.indexOf(from);
-
-        if (current === -1) {
-            // Coming from the search field.
-            (step > 0 ? options[0] : options[options.length - 1]).focus();
-            return;
-        }
-
-        const next = current + step;
-
-        if (next < 0) {
-            search.focus();
-            return;
-        }
-
-        options[Math.min(next, options.length - 1)].focus();
-    }
-
-    /*
-     * Keyboard model for the panel (CLAUDE.md §22):
-     *   ArrowDown / ArrowUp  move through the options
-     *   Home / End           first / last option
-     *   Enter or Space       choose the focused option (native button)
-     *   Escape               close and return focus to the trigger
-     *   Tab                  still walks the options in order
-     */
-    panel.addEventListener("keydown", (event) => {
-        const target = event.target;
-
-        if (event.key === "ArrowDown") {
-            event.preventDefault();
-            moveOptionFocus(target, 1);
-            return;
-        }
-
-        if (event.key === "ArrowUp") {
-            event.preventDefault();
-            moveOptionFocus(target, -1);
-            return;
-        }
-
-        const options = qsa(".lang-select__option", list);
-
-        if (event.key === "Home" && options.length) {
-            event.preventDefault();
-            options[0].focus();
-            return;
-        }
-
-        if (event.key === "End" && options.length) {
-            event.preventDefault();
-            options[options.length - 1].focus();
-        }
-    });
-
-    // ArrowDown on the closed trigger opens the panel and enters the list.
-    toggle.addEventListener("keydown", (event) => {
-        if (event.key !== "ArrowDown" || isOpen()) {
-            return;
-        }
-        event.preventDefault();
-        preloadTranslationEngine();
-        openPanel();
-        const first = qs(".lang-select__option", list);
-        if (first) {
-            first.focus();
-        }
-    });
-
-    // Delegated: one listener however many options are rendered.
-    list.addEventListener("click", (event) => {
-        const option = event.target.closest(".lang-select__option");
-        if (!option) {
-            return;
-        }
-
-        activeCode = option.dataset.code;
-        showCurrentLanguage({ code: activeCode, name: option.textContent });
-        setSiteLanguage(activeCode);
-        closePanel({ restoreFocus: true });
-    });
-
-    // Clicking anywhere outside closes the panel.
-    document.addEventListener("click", (event) => {
-        if (isOpen() && !root.contains(event.target)) {
-            closePanel();
-        }
-    });
-
-    document.addEventListener("keydown", (event) => {
-        if (event.key === "Escape" && isOpen()) {
-            closePanel({ restoreFocus: true });
-        }
-    });
-
+  function openPanel() {
+    panel.hidden = false;
+    toggle.setAttribute("aria-expanded", "true");
+    search.value = "";
     renderOptions();
-    loadGTranslate();
-}
+    search.focus();
+  }
 
+  function closePanel({ restoreFocus = false } = {}) {
+    panel.hidden = true;
+    toggle.setAttribute("aria-expanded", "false");
+    if (restoreFocus) {
+      toggle.focus();
+    }
+  }
+
+  const isOpen = () => !panel.hidden;
+
+  toggle.addEventListener("click", () => {
+    if (isOpen()) {
+      closePanel();
+      return;
+    }
+    // Warm Google's engine up while the visitor is still choosing.
+    preloadTranslationEngine();
+    openPanel();
+  });
+
+  search.addEventListener("input", () => renderOptions(search.value));
+
+  /**
+   * Moves the roving focus through the rendered options.
+   * The search field is the panel's first stop, so ArrowDown from it
+   * enters the list and ArrowUp from the first option returns to it.
+   *
+   * @param {HTMLElement} from the element focus is leaving
+   * @param {number} step +1 for down, -1 for up
+   */
+  function moveOptionFocus(from, step) {
+    const options = qsa(".lang-select__option", list);
+    if (options.length === 0) {
+      return;
+    }
+
+    const current = options.indexOf(from);
+
+    if (current === -1) {
+      // Coming from the search field.
+      (step > 0 ? options[0] : options[options.length - 1]).focus();
+      return;
+    }
+
+    const next = current + step;
+
+    if (next < 0) {
+      search.focus();
+      return;
+    }
+
+    options[Math.min(next, options.length - 1)].focus();
+  }
+
+  /*
+   * Keyboard model for the panel (CLAUDE.md §22):
+   *   ArrowDown / ArrowUp  move through the options
+   *   Home / End           first / last option
+   *   Enter or Space       choose the focused option (native button)
+   *   Escape               close and return focus to the trigger
+   *   Tab                  still walks the options in order
+   */
+  panel.addEventListener("keydown", (event) => {
+    const target = event.target;
+
+    if (event.key === "ArrowDown") {
+      event.preventDefault();
+      moveOptionFocus(target, 1);
+      return;
+    }
+
+    if (event.key === "ArrowUp") {
+      event.preventDefault();
+      moveOptionFocus(target, -1);
+      return;
+    }
+
+    const options = qsa(".lang-select__option", list);
+
+    if (event.key === "Home" && options.length) {
+      event.preventDefault();
+      options[0].focus();
+      return;
+    }
+
+    if (event.key === "End" && options.length) {
+      event.preventDefault();
+      options[options.length - 1].focus();
+    }
+  });
+
+  // ArrowDown on the closed trigger opens the panel and enters the list.
+  toggle.addEventListener("keydown", (event) => {
+    if (event.key !== "ArrowDown" || isOpen()) {
+      return;
+    }
+    event.preventDefault();
+    preloadTranslationEngine();
+    openPanel();
+    const first = qs(".lang-select__option", list);
+    if (first) {
+      first.focus();
+    }
+  });
+
+  // Delegated: one listener however many options are rendered.
+  list.addEventListener("click", (event) => {
+    const option = event.target.closest(".lang-select__option");
+    if (!option) {
+      return;
+    }
+
+    activeCode = option.dataset.code;
+    showCurrentLanguage({ code: activeCode, name: option.textContent });
+    setSiteLanguage(activeCode);
+    closePanel({ restoreFocus: true });
+  });
+
+  // Clicking anywhere outside closes the panel.
+  document.addEventListener("click", (event) => {
+    if (isOpen() && !root.contains(event.target)) {
+      closePanel();
+    }
+  });
+
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && isOpen()) {
+      closePanel({ restoreFocus: true });
+    }
+  });
+
+  renderOptions();
+  loadGTranslate();
+}
 
 /* ======================================================================
  * LIVE CHART
@@ -1419,20 +1451,19 @@ function initTranslation() {
  * ====================================================================== */
 
 function initLiveChart() {
-    const container = qs("#live-chart-container");
-    if (!container || !homepageLiveChartApi) {
-        return;
-    }
+  const container = qs("#live-chart-container");
+  if (!container || !homepageLiveChartApi) {
+    return;
+  }
 
-    const frame = document.createElement("iframe");
-    frame.src = homepageLiveChartApi;
-    frame.title = `Live XAUUSD price chart`;
-    frame.loading = "lazy";
-    frame.setAttribute("frameborder", "0");
-    frame.setAttribute("scrolling", "no");
-    container.append(frame);
+  const frame = document.createElement("iframe");
+  frame.src = homepageLiveChartApi;
+  frame.title = `Live XAUUSD price chart`;
+  frame.loading = "lazy";
+  frame.setAttribute("frameborder", "0");
+  frame.setAttribute("scrolling", "no");
+  container.append(frame);
 }
-
 
 /* ======================================================================
  * LIVE CHAT / PITCHBAR
@@ -1465,38 +1496,37 @@ function initLiveChart() {
 
 /** Opens the chat. Today: Telegram. Later: Pitchbar. */
 function openLiveChat(event) {
-    // --- PITCHBAR INTEGRATION POINT -------------------------------
-    // if (window.Pitchbar) { event.preventDefault(); window.Pitchbar.open(); return; }
-    // --------------------------------------------------------------
+  // --- PITCHBAR INTEGRATION POINT -------------------------------
+  // if (window.Pitchbar) { event.preventDefault(); window.Pitchbar.open(); return; }
+  // --------------------------------------------------------------
 
-    if (!liveChatUsesTelegramFallback) {
-        event.preventDefault();
-    }
-    // Otherwise the anchor's configured Telegram href handles the click.
+  if (!liveChatUsesTelegramFallback) {
+    event.preventDefault();
+  }
+  // Otherwise the anchor's configured Telegram href handles the click.
 }
 
 function initLiveChat() {
-    const launcher = qs("#live-chat-launcher");
-    if (!launcher) {
-        return;
-    }
+  const launcher = qs("#live-chat-launcher");
+  if (!launcher) {
+    return;
+  }
 
-    // Hover/focus label text comes from configuration, not the markup.
-    withElement(qs("#live-chat-label", launcher), (labelElement) => {
-        /*
-         * liveChatIconHoverText interpolates ${siteOwner}, so the owner's
-         * name is inside the label. The label itself stays translatable —
-         * protectIdentityTerms() wraps just the name.
-         */
-        labelElement.textContent = liveChatIconHoverText;
-    });
+  // Hover/focus label text comes from configuration, not the markup.
+  withElement(qs("#live-chat-label", launcher), (labelElement) => {
+    /*
+     * liveChatIconHoverText interpolates ${siteOwner}, so the owner's
+     * name is inside the label. The label itself stays translatable —
+     * protectIdentityTerms() wraps just the name.
+     */
+    labelElement.textContent = liveChatIconHoverText;
+  });
 
-    // The accessible name matches the visible label, plus the online state.
-    launcher.setAttribute("aria-label", `${liveChatIconHoverText} — online`);
+  // The accessible name matches the visible label, plus the online state.
+  launcher.setAttribute("aria-label", `${liveChatIconHoverText} — online`);
 
-    launcher.addEventListener("click", openLiveChat);
+  launcher.addEventListener("click", openLiveChat);
 }
-
 
 /* ======================================================================
  * MOBILE NAVIGATION (architecture only — not yet implemented)
@@ -1516,46 +1546,49 @@ function initLiveChat() {
  * ====================================================================== */
 
 function initMobileNavigation() {
-    const toggle = qs("#nav-toggle");
-    const nav = qs("#primary-nav");
+  const toggle = qs("#nav-toggle");
+  const nav = qs("#primary-nav");
 
-    if (!toggle || !nav) {
-        return;
+  if (!toggle || !nav) {
+    return;
+  }
+
+  const setOpen = (open) => {
+    toggle.setAttribute("aria-expanded", String(open));
+    nav.classList.toggle("is-open", open);
+    document.body.classList.toggle("nav-is-open", open);
+  };
+
+  const isOpen = () => toggle.getAttribute("aria-expanded") === "true";
+
+  toggle.addEventListener("click", () => setOpen(!isOpen()));
+
+  // Choosing a destination closes the menu.
+  nav.addEventListener("click", (event) => {
+    if (event.target.closest("a") && isOpen()) {
+      setOpen(false);
     }
+  });
 
-    const setOpen = (open) => {
-        toggle.setAttribute("aria-expanded", String(open));
-        nav.classList.toggle("is-open", open);
-        document.body.classList.toggle("nav-is-open", open);
-    };
+  // Escape closes it and returns focus to the toggle.
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && isOpen()) {
+      setOpen(false);
+      toggle.focus();
+    }
+  });
 
-    const isOpen = () => toggle.getAttribute("aria-expanded") === "true";
-
-    toggle.addEventListener("click", () => setOpen(!isOpen()));
-
-    // Choosing a destination closes the menu.
-    nav.addEventListener("click", (event) => {
-        if (event.target.closest("a") && isOpen()) {
-            setOpen(false);
-        }
-    });
-
-    // Escape closes it and returns focus to the toggle.
-    document.addEventListener("keydown", (event) => {
-        if (event.key === "Escape" && isOpen()) {
-            setOpen(false);
-            toggle.focus();
-        }
-    });
-
-    // Clicking outside closes it.
-    document.addEventListener("click", (event) => {
-        if (isOpen() && !nav.contains(event.target) && !toggle.contains(event.target)) {
-            setOpen(false);
-        }
-    });
+  // Clicking outside closes it.
+  document.addEventListener("click", (event) => {
+    if (
+      isOpen() &&
+      !nav.contains(event.target) &&
+      !toggle.contains(event.target)
+    ) {
+      setOpen(false);
+    }
+  });
 }
-
 
 /* ======================================================================
  * CLIPBOARD  (CLAUDE.md §10.3 and §14.1)
@@ -1566,31 +1599,31 @@ function initMobileNavigation() {
  * ====================================================================== */
 
 async function copyText(text) {
-    // Clipboard API where supported...
-    if (navigator.clipboard && window.isSecureContext) {
-        try {
-            await navigator.clipboard.writeText(text);
-            return true;
-        } catch (error) {
-            /* fall through to the legacy path below */
-        }
-    }
-
-    // ...with a execCommand fallback for insecure contexts and older browsers.
+  // Clipboard API where supported...
+  if (navigator.clipboard && window.isSecureContext) {
     try {
-        const scratch = document.createElement("textarea");
-        scratch.value = text;
-        scratch.setAttribute("readonly", "");
-        scratch.style.position = "fixed";
-        scratch.style.opacity = "0";
-        document.body.append(scratch);
-        scratch.select();
-        const succeeded = document.execCommand("copy");
-        scratch.remove();
-        return succeeded;
+      await navigator.clipboard.writeText(text);
+      return true;
     } catch (error) {
-        return false;
+      /* fall through to the legacy path below */
     }
+  }
+
+  // ...with a execCommand fallback for insecure contexts and older browsers.
+  try {
+    const scratch = document.createElement("textarea");
+    scratch.value = text;
+    scratch.setAttribute("readonly", "");
+    scratch.style.position = "fixed";
+    scratch.style.opacity = "0";
+    document.body.append(scratch);
+    scratch.select();
+    const succeeded = document.execCommand("copy");
+    scratch.remove();
+    return succeeded;
+  } catch (error) {
+    return false;
+  }
 }
 
 /**
@@ -1601,46 +1634,45 @@ async function copyText(text) {
  * @param {object}      options  { labelElement, idleLabel, copiedLabel }
  */
 function initCopyControl(button, getValue, options = {}) {
-    if (!button) {
-        return;
+  if (!button) {
+    return;
+  }
+
+  const { labelElement, idleLabel, copiedLabel } = options;
+  let resetTimer = null;
+
+  button.addEventListener("click", async () => {
+    const value = getValue();
+    if (!value) {
+      return;
     }
 
-    const { labelElement, idleLabel, copiedLabel } = options;
-    let resetTimer = null;
+    const copied = await copyText(value);
+    if (!copied) {
+      return;
+    }
 
-    button.addEventListener("click", async () => {
-        const value = getValue();
-        if (!value) {
-            return;
-        }
+    button.classList.add("is-copied");
 
-        const copied = await copyText(value);
-        if (!copied) {
-            return;
-        }
+    if (labelElement && copiedLabel) {
+      labelElement.textContent = copiedLabel;
+    }
 
-        button.classList.add("is-copied");
+    // Announce for screen readers, which cannot see the icon swap.
+    button.setAttribute("aria-label", `${copiedLabel || "Copied"}: ${value}`);
 
-        if (labelElement && copiedLabel) {
-            labelElement.textContent = copiedLabel;
-        }
+    window.clearTimeout(resetTimer);
+    resetTimer = window.setTimeout(() => {
+      button.classList.remove("is-copied");
 
-        // Announce for screen readers, which cannot see the icon swap.
-        button.setAttribute("aria-label", `${copiedLabel || "Copied"}: ${value}`);
+      if (labelElement && idleLabel) {
+        labelElement.textContent = idleLabel;
+      }
 
-        window.clearTimeout(resetTimer);
-        resetTimer = window.setTimeout(() => {
-            button.classList.remove("is-copied");
-
-            if (labelElement && idleLabel) {
-                labelElement.textContent = idleLabel;
-            }
-
-            button.setAttribute("aria-label", `Copy ${value}`);
-        }, COPY_FEEDBACK_MS);
-    });
+      button.setAttribute("aria-label", `Copy ${value}`);
+    }, COPY_FEEDBACK_MS);
+  });
 }
-
 
 /* ======================================================================
  * PURCHASE DIALOG  (CLAUDE.md §10 and §26)
@@ -1650,114 +1682,114 @@ function initCopyControl(button, getValue, options = {}) {
  * ====================================================================== */
 
 const purchaseDialog = {
-    element: null,
-    lastFocused: null,
+  element: null,
+  lastFocused: null,
 
-    init() {
-        this.element = qs("#purchase-dialog");
-        if (!this.element) {
-            return;
-        }
-
-        // Close on the X button.
-        withElement(qs("#purchase-dialog-close", this.element), (closeButton) => {
-            closeButton.addEventListener("click", () => this.close());
-        });
-
-        // Close on backdrop click. <dialog> reports clicks on the backdrop as
-        // clicks on the dialog itself, so compare against its content box.
-        this.element.addEventListener("click", (event) => {
-            if (event.target !== this.element) {
-                return;
-            }
-
-            const box = this.element.getBoundingClientRect();
-            const outside =
-                event.clientX < box.left ||
-                event.clientX > box.right ||
-                event.clientY < box.top ||
-                event.clientY > box.bottom;
-
-            if (outside) {
-                this.close();
-            }
-        });
-
-        // Escape is handled natively by <dialog>; restore focus when it fires.
-        this.element.addEventListener("close", () => {
-            withElement(this.lastFocused, (element) => element.focus());
-            this.lastFocused = null;
-        });
-    },
-
-    /**
-     * @param {object} payload
-     *   title    dialog heading
-     *   subtitle line under the heading
-     *   rows     [{ label, value, suffix, variant }]
-     *   note     paragraph above the confirm button
-     *   ctaLabel confirm button text
-     */
-    open(payload) {
-        if (!this.element) {
-            return;
-        }
-
-        this.lastFocused = document.activeElement;
-
-        withElement(qs("#purchase-dialog-title", this.element), (title) => {
-            title.textContent = payload.title;
-        });
-
-        withElement(qs("#purchase-dialog-subtitle", this.element), (subtitle) => {
-            subtitle.textContent = payload.subtitle;
-        });
-
-        withElement(qs("#purchase-dialog-rows", this.element), (container) => {
-            container.innerHTML = payload.rows.map(renderPurchaseRow).join("");
-
-            // The wallet row is rebuilt each time, so rewire its copy control.
-            initCopyControl(qs(".wallet-row", container), () => walletAddress);
-        });
-
-        withElement(qs("#purchase-dialog-note", this.element), (note) => {
-            note.textContent = payload.note;
-        });
-
-        withElement(qs("#purchase-dialog-confirm", this.element), (confirm) => {
-            confirm.href = telegramPersonal;
-            confirm.querySelector(".btn-label").textContent = payload.ctaLabel;
-        });
-
-        // The dialog's rows are rebuilt on every open, so the wallet
-        // address, amount, network and any identifier in the note are
-        // re-protected here, immediately before it becomes visible.
-        protectIdentityTerms(this.element);
-
-        if (typeof this.element.showModal === "function") {
-            this.element.showModal();
-        } else {
-            this.element.setAttribute("open", "");
-        }
-    },
-
-    close() {
-        if (!this.element) {
-            return;
-        }
-
-        if (typeof this.element.close === "function") {
-            this.element.close();
-        } else {
-            this.element.removeAttribute("open");
-        }
+  init() {
+    this.element = qs("#purchase-dialog");
+    if (!this.element) {
+      return;
     }
+
+    // Close on the X button.
+    withElement(qs("#purchase-dialog-close", this.element), (closeButton) => {
+      closeButton.addEventListener("click", () => this.close());
+    });
+
+    // Close on backdrop click. <dialog> reports clicks on the backdrop as
+    // clicks on the dialog itself, so compare against its content box.
+    this.element.addEventListener("click", (event) => {
+      if (event.target !== this.element) {
+        return;
+      }
+
+      const box = this.element.getBoundingClientRect();
+      const outside =
+        event.clientX < box.left ||
+        event.clientX > box.right ||
+        event.clientY < box.top ||
+        event.clientY > box.bottom;
+
+      if (outside) {
+        this.close();
+      }
+    });
+
+    // Escape is handled natively by <dialog>; restore focus when it fires.
+    this.element.addEventListener("close", () => {
+      withElement(this.lastFocused, (element) => element.focus());
+      this.lastFocused = null;
+    });
+  },
+
+  /**
+   * @param {object} payload
+   *   title    dialog heading
+   *   subtitle line under the heading
+   *   rows     [{ label, value, suffix, variant }]
+   *   note     paragraph above the confirm button
+   *   ctaLabel confirm button text
+   */
+  open(payload) {
+    if (!this.element) {
+      return;
+    }
+
+    this.lastFocused = document.activeElement;
+
+    withElement(qs("#purchase-dialog-title", this.element), (title) => {
+      title.textContent = payload.title;
+    });
+
+    withElement(qs("#purchase-dialog-subtitle", this.element), (subtitle) => {
+      subtitle.textContent = payload.subtitle;
+    });
+
+    withElement(qs("#purchase-dialog-rows", this.element), (container) => {
+      container.innerHTML = payload.rows.map(renderPurchaseRow).join("");
+
+      // The wallet row is rebuilt each time, so rewire its copy control.
+      initCopyControl(qs(".wallet-row", container), () => walletAddress);
+    });
+
+    withElement(qs("#purchase-dialog-note", this.element), (note) => {
+      note.textContent = payload.note;
+    });
+
+    withElement(qs("#purchase-dialog-confirm", this.element), (confirm) => {
+      confirm.href = telegramPersonal;
+      confirm.querySelector(".btn-label").textContent = payload.ctaLabel;
+    });
+
+    // The dialog's rows are rebuilt on every open, so the wallet
+    // address, amount, network and any identifier in the note are
+    // re-protected here, immediately before it becomes visible.
+    protectIdentityTerms(this.element);
+
+    if (typeof this.element.showModal === "function") {
+      this.element.showModal();
+    } else {
+      this.element.setAttribute("open", "");
+    }
+  },
+
+  close() {
+    if (!this.element) {
+      return;
+    }
+
+    if (typeof this.element.close === "function") {
+      this.element.close();
+    } else {
+      this.element.removeAttribute("open");
+    }
+  },
 };
 
 /** Renders one dialog row; the wallet row is a button, the rest are static. */
 function renderPurchaseRow(row) {
-    if (row.type === "wallet") {
-        return `
+  if (row.type === "wallet") {
+    return `
             <button type="button" class="wallet-row" aria-label="Copy ${row.value}">
                 <span>
                     <span class="wallet-row__label">${row.label}</span>
@@ -1775,27 +1807,27 @@ function renderPurchaseRow(row) {
                 </span>
             </button>
         `;
-    }
+  }
 
-    const valueClasses = [
-        "purchase-row__value",
-        row.variant === "gold" ? "purchase-row__value--gold" : "",
-        row.variant === "amount" ? "purchase-row__value--amount" : ""
-    ]
-        .filter(Boolean)
-        .join(" ");
+  const valueClasses = [
+    "purchase-row__value",
+    row.variant === "gold" ? "purchase-row__value--gold" : "",
+    row.variant === "amount" ? "purchase-row__value--amount" : "",
+  ]
+    .filter(Boolean)
+    .join(" ");
 
-    // The amount suffix ("USDT") is a currency code, never translated.
-    const suffix = row.suffix
-        ? `<span class="purchase-row__suffix notranslate" translate="no">${row.suffix}</span>`
-        : "";
+  // The amount suffix ("USDT") is a currency code, never translated.
+  const suffix = row.suffix
+    ? `<span class="purchase-row__suffix notranslate" translate="no">${row.suffix}</span>`
+    : "";
 
-    /*
-     * Row LABELS ("Plan", "Amount", "Network") are prose and translate
-     * normally. Row VALUES are identifiers — the plan name, the price, the
-     * network — and are marked here, on the element that receives them.
-     */
-    return `
+  /*
+   * Row LABELS ("Plan", "Amount", "Network") are prose and translate
+   * normally. Row VALUES are identifiers — the plan name, the price, the
+   * network — and are marked here, on the element that receives them.
+   */
+  return `
         <div class="purchase-row">
             <span class="purchase-row__label">${row.label}</span>
             <span class="${valueClasses} notranslate" translate="no">${row.value}${suffix}</span>
@@ -1808,106 +1840,105 @@ function renderPurchaseRow(row) {
  * Falls back to the configured site name if the element is absent.
  */
 function getEaTitle() {
-    return `${siteName} ${eaCurrentVersion}`;
+  return `${siteName} ${eaCurrentVersion}`;
 }
-
 
 /* ======================================================================
  * SECTION 5 — PRICING  (CLAUDE.md §9 and §25)
  * ====================================================================== */
 
 function initPricing() {
-    const grid = qs("#pricing-grid");
-    if (!grid) {
-        return;
+  const grid = qs("#pricing-grid");
+  if (!grid) {
+    return;
+  }
+
+  grid.innerHTML = pricingPlans.map(renderPlanCard).join("");
+
+  // Each card gets its own independent timer instance.
+  pricingPlans.forEach((plan, index) => {
+    const card = qs(`[data-plan-index="${index}"]`, grid);
+    if (card) {
+      setTimer(card, plan);
+    }
+  });
+
+  // Delegated so cards can be re-rendered without rebinding listeners.
+  grid.addEventListener("click", (event) => {
+    const button = event.target.closest("[data-open-purchase]");
+    if (!button) {
+      return;
     }
 
-    grid.innerHTML = pricingPlans.map(renderPlanCard).join("");
+    const card = button.closest(".plan-card");
+    if (!card) {
+      return;
+    }
 
-    // Each card gets its own independent timer instance.
-    pricingPlans.forEach((plan, index) => {
-        const card = qs(`[data-plan-index="${index}"]`, grid);
-        if (card) {
-            setTimer(card, plan);
-        }
-    });
-
-    // Delegated so cards can be re-rendered without rebinding listeners.
-    grid.addEventListener("click", (event) => {
-        const button = event.target.closest("[data-open-purchase]");
-        if (!button) {
-            return;
-        }
-
-        const card = button.closest(".plan-card");
-        if (!card) {
-            return;
-        }
-
-        openPlanDialog(card);
-    });
+    openPlanDialog(card);
+  });
 }
 
 function renderPlanCard(plan, index) {
-    const isFree = Number(plan.price) === 0;
-    const accentClass = plan.accent === "green" ? " plan-card--free" : "";
+  const isFree = Number(plan.price) === 0;
+  const accentClass = plan.accent === "green" ? " plan-card--free" : "";
 
-    const priceText = isFree ? "FREE" : `$${formatPrice(plan.price)}`;
-    // The currency code is an identifier, not a word.
-    const currency = plan.currency
-        ? `<span class="plan-card__currency notranslate" translate="no">${plan.currency}</span>`
-        : "";
+  const priceText = isFree ? "FREE" : `$${formatPrice(plan.price)}`;
+  // The currency code is an identifier, not a word.
+  const currency = plan.currency
+    ? `<span class="plan-card__currency notranslate" translate="no">${plan.currency}</span>`
+    : "";
 
-    const hotBadge = plan.hot
-        ? `<span class="badge-hot">${icons.flame} Hot</span>`
-        : "";
+  const hotBadge = plan.hot
+    ? `<span class="badge-hot">${icons.flame} Hot</span>`
+    : "";
 
-    const eyebrowIcon =
-        plan.eyebrowIcon === "dot"
-            ? '<span class="status-dot" aria-hidden="true"></span>'
-            : icons[plan.eyebrowIcon] || "";
+  const eyebrowIcon =
+    plan.eyebrowIcon === "dot"
+      ? '<span class="status-dot" aria-hidden="true"></span>'
+      : icons[plan.eyebrowIcon] || "";
 
-    // A plan supplies either a tick list or a numbered step list.
-    const features = plan.features
-        ? `<ul class="plan-card__features">${plan.features
-              .map((feature) => `<li>${icons.check}<span>${feature}</span></li>`)
-              .join("")}</ul>`
-        : "";
+  // A plan supplies either a tick list or a numbered step list.
+  const features = plan.features
+    ? `<ul class="plan-card__features">${plan.features
+        .map((feature) => `<li>${icons.check}<span>${feature}</span></li>`)
+        .join("")}</ul>`
+    : "";
 
-    const steps = plan.steps
-        ? `<ol class="plan-card__steps">${plan.steps
-              .map(
-                  (step, stepIndex) =>
-                      `<li><span class="icon-disc icon-disc--sm icon-disc--green" aria-hidden="true">${
-                          stepIndex + 1
-                      }</span><span>${step}</span></li>`
-              )
-              .join("")}</ol>`
-        : "";
+  const steps = plan.steps
+    ? `<ol class="plan-card__steps">${plan.steps
+        .map(
+          (step, stepIndex) =>
+            `<li><span class="icon-disc icon-disc--sm icon-disc--green" aria-hidden="true">${
+              stepIndex + 1
+            }</span><span>${step}</span></li>`,
+        )
+        .join("")}</ol>`
+    : "";
 
-    const note = plan.note ? `<p class="plan-card__note">${plan.note}</p>` : "";
+  const note = plan.note ? `<p class="plan-card__note">${plan.note}</p>` : "";
 
-    // A plan with an href links out; without one it opens the purchase dialog.
-    const ctaIcon = plan.cta.icon ? icons[plan.cta.icon] : "";
-    const ctaLabel = isFree
-        ? plan.cta.label
-        : `${plan.cta.label} — $${formatPrice(plan.price)} ${plan.currency}`.trim();
+  // A plan with an href links out; without one it opens the purchase dialog.
+  const ctaIcon = plan.cta.icon ? icons[plan.cta.icon] : "";
+  const ctaLabel = isFree
+    ? plan.cta.label
+    : `${plan.cta.label} — $${formatPrice(plan.price)} ${plan.currency}`.trim();
 
-    const cta = plan.cta.href
-        ? `<a class="btn btn--${plan.cta.type} btn--block plan-card__cta" href="${plan.cta.href}"
+  const cta = plan.cta.href
+    ? `<a class="btn btn--${plan.cta.type} btn--block plan-card__cta" href="${plan.cta.href}"
               target="_blank" rel="noopener noreferrer">
                <span class="btn-label">${ctaLabel}</span>${ctaIcon}
            </a>`
-        : `<button type="button" class="btn btn--${plan.cta.type} btn--block plan-card__cta"
+    : `<button type="button" class="btn btn--${plan.cta.type} btn--block plan-card__cta"
                    data-open-purchase>
                ${ctaIcon}<span class="btn-label">${ctaLabel}</span>
            </button>`;
 
-    /*
-     * data-* attributes carry the plan's identity so the dialog can read the
-     * selected card instead of holding its own copy of the values (§24).
-     */
-    return `
+  /*
+   * data-* attributes carry the plan's identity so the dialog can read the
+   * selected card instead of holding its own copy of the values (§24).
+   */
+  return `
         <article class="plan-card${accentClass} scroll-reveal"
                  style="--reveal-index: ${index}"
                  data-plan-index="${index}"
@@ -1954,69 +1985,72 @@ function renderPlanCard(plan, index) {
  * @param {object}      plan the matching entry from pricingPlans
  */
 function setTimer(card, plan) {
-    const timerElement = qs("[data-plan-timer]", card);
-    const valueElement = qs("[data-plan-timer-value]", card);
+  const timerElement = qs("[data-plan-timer]", card);
+  const valueElement = qs("[data-plan-timer-value]", card);
 
-    if (!timerElement || !valueElement) {
-        return;
-    }
+  if (!timerElement || !valueElement) {
+    return;
+  }
 
-    // Visibility is global (pricingTimerStatus); the countdown itself is per-plan.
-    const shouldShow = pricingTimerStatus === "show" && plan.timerTime > 0;
+  // Visibility is global (pricingTimerStatus); the countdown itself is per-plan.
+  const shouldShow = pricingTimerStatus === "show" && plan.timerTime > 0;
 
-    /*
-     * §9.4: when hidden the timer keeps its allocated space using
-     * visibility: hidden, so showing or hiding it never shifts the layout.
-     */
-    if (!shouldShow) {
-        timerElement.classList.add("is-hidden");
-        return;
-    }
+  /*
+   * §9.4: when hidden the timer keeps its allocated space using
+   * visibility: hidden, so showing or hiding it never shifts the layout.
+   */
+  if (!shouldShow) {
+    timerElement.classList.add("is-hidden");
+    return;
+  }
 
-    timerElement.classList.remove("is-hidden");
+  timerElement.classList.remove("is-hidden");
 
-    let remaining = plan.timerTime;
-    let currentPrice = plan.price;
+  let remaining = plan.timerTime;
+  let currentPrice = plan.price;
 
-    function formatRemaining(totalSeconds) {
-        const hours = String(Math.floor(totalSeconds / 3600)).padStart(2, "0");
-        const minutes = String(Math.floor((totalSeconds % 3600) / 60)).padStart(2, "0");
-        const seconds = String(totalSeconds % 60).padStart(2, "0");
-        return `${hours}:${minutes}:${seconds} left at this price`;
-    }
+  function formatRemaining(totalSeconds) {
+    const hours = String(Math.floor(totalSeconds / 3600)).padStart(2, "0");
+    const minutes = String(Math.floor((totalSeconds % 3600) / 60)).padStart(
+      2,
+      "0",
+    );
+    const seconds = String(totalSeconds % 60).padStart(2, "0");
+    return `${hours}:${minutes}:${seconds} left at this price`;
+  }
 
-    function applyPrice(newPrice) {
-        currentPrice = newPrice;
+  function applyPrice(newPrice) {
+    currentPrice = newPrice;
 
-        // Keep the card's data attribute authoritative for the dialog.
-        card.dataset.planPrice = String(newPrice);
+    // Keep the card's data attribute authoritative for the dialog.
+    card.dataset.planPrice = String(newPrice);
 
-        // Rewritten live, so it is re-marked on the element being written.
-        withElement(qs("[data-plan-price-display]", card), (display) => {
-            protectIdentityText(display, `$${formatPrice(newPrice)}`);
-        });
+    // Rewritten live, so it is re-marked on the element being written.
+    withElement(qs("[data-plan-price-display]", card), (display) => {
+      protectIdentityText(display, `$${formatPrice(newPrice)}`);
+    });
 
-        withElement(qs(".plan-card__cta .btn-label", card), (label) => {
-            label.textContent =
-                `${plan.cta.label} — $${formatPrice(newPrice)} ${plan.currency}`.trim();
-            // "Buy Now" translates; the price and currency inside must not.
-            protectIdentityTerms(label);
-        });
-    }
+    withElement(qs(".plan-card__cta .btn-label", card), (label) => {
+      label.textContent =
+        `${plan.cta.label} — $${formatPrice(newPrice)} ${plan.currency}`.trim();
+      // "Buy Now" translates; the price and currency inside must not.
+      protectIdentityTerms(label);
+    });
+  }
 
-    function tick() {
-        remaining -= 1;
+  function tick() {
+    remaining -= 1;
 
-        if (remaining <= 0) {
-            applyPrice(currentPrice + plan.increment);
-            remaining = plan.timerTime;
-        }
-
-        valueElement.textContent = formatRemaining(remaining);
+    if (remaining <= 0) {
+      applyPrice(currentPrice + plan.increment);
+      remaining = plan.timerTime;
     }
 
     valueElement.textContent = formatRemaining(remaining);
-    window.setInterval(tick, TIMER_TICK_MS);
+  }
+
+  valueElement.textContent = formatRemaining(remaining);
+  window.setInterval(tick, TIMER_TICK_MS);
 }
 
 /**
@@ -2024,29 +2058,28 @@ function setTimer(card, plan) {
  * plan name and amount are never duplicated in the dialog markup (§10.1).
  */
 function openPlanDialog(card) {
-    const planName = card.dataset.planName;
-    const price = Number(card.dataset.planPrice);
-    const currency = card.dataset.planCurrency || paymentAmountSuffix;
+  const planName = card.dataset.planName;
+  const price = Number(card.dataset.planPrice);
+  const currency = card.dataset.planCurrency || paymentAmountSuffix;
 
-    purchaseDialog.open({
-        title: `Purchase ${getEaTitle()}`,
-        subtitle: `Send ${currency} and confirm on Telegram.`,
-        rows: [
-            { label: "Plan", value: planName, variant: "gold" },
-            {
-                label: "Amount",
-                value: `$${formatPrice(price)}`,
-                suffix: currency,
-                variant: "amount"
-            },
-            { label: "Network", value: paymentNetwork, variant: "gold" },
-            { type: "wallet", label: "Wallet Address", value: walletAddress }
-        ],
-        note: `After payment, send the transaction screenshot to ${siteOwner} on Telegram for license activation.`,
-        ctaLabel: "Confirm Payment on Telegram"
-    });
+  purchaseDialog.open({
+    title: `Purchase ${getEaTitle()}`,
+    subtitle: `Send ${currency} and confirm on Telegram.`,
+    rows: [
+      { label: "Plan", value: planName, variant: "gold" },
+      {
+        label: "Amount",
+        value: `$${formatPrice(price)}`,
+        suffix: currency,
+        variant: "amount",
+      },
+      { label: "Network", value: paymentNetwork, variant: "gold" },
+      { type: "wallet", label: "Wallet Address", value: walletAddress },
+    ],
+    note: `After payment, send the transaction screenshot to ${siteOwner} on Telegram for license activation.`,
+    ctaLabel: "Confirm Payment on Telegram",
+  });
 }
-
 
 /* ======================================================================
  * SECTION 6 — SOURCE CODE DIALOG  (CLAUDE.md §12)
@@ -2056,90 +2089,85 @@ function openPlanDialog(card) {
  * ====================================================================== */
 
 function initSourceCode() {
-    const trigger = qs("#source-code-purchase");
-    if (!trigger) {
-        return;
-    }
+  const trigger = qs("#source-code-purchase");
+  if (!trigger) {
+    return;
+  }
 
-    trigger.addEventListener("click", () => {
-        // "Source Code" comes from the highlighted half of the page heading.
-        const headingAccent = qs("#source-code-heading .accent");
-        const headingText = headingAccent
-            ? headingAccent.textContent.trim()
-            : "Source Code";
+  trigger.addEventListener("click", () => {
+    // "Source Code" comes from the highlighted half of the page heading.
+    const headingAccent = qs("#source-code-heading .accent");
+    const headingText = headingAccent
+      ? headingAccent.textContent.trim()
+      : "Source Code";
 
-        const priceElement = qs("#source-code-price");
-        const priceText = priceElement ? priceElement.textContent.trim() : "";
-        const currencyElement = qs("#source-code-currency");
-        const currency = currencyElement ? currencyElement.textContent.trim() : "USD";
+    const priceElement = qs("#source-code-price");
+    const priceText = priceElement ? priceElement.textContent.trim() : "";
+    const currencyElement = qs("#source-code-currency");
+    const currency = currencyElement
+      ? currencyElement.textContent.trim()
+      : "USD";
 
-        purchaseDialog.open({
-            title: `${getEaTitle()} — ${headingText}`,
-            subtitle: `Send ${paymentAmountSuffix} and confirm on Telegram.`,
-            rows: [
-                {
-                    label: "Amount",
-                    value: priceText,
-                    suffix: currency,
-                    variant: "amount"
-                },
-                { label: "Network", value: paymentNetwork, variant: "gold" },
-                { type: "wallet", label: "Wallet Address", value: walletAddress }
-            ],
-            note: `After payment, send the transaction screenshot to ${siteOwner} on Telegram for license activation.`,
-            ctaLabel: "Confirm Payment on Telegram"
-        });
+    purchaseDialog.open({
+      title: `${getEaTitle()} — ${headingText}`,
+      subtitle: `Send ${paymentAmountSuffix} and confirm on Telegram.`,
+      rows: [
+        {
+          label: "Amount",
+          value: priceText,
+          suffix: currency,
+          variant: "amount",
+        },
+        { label: "Network", value: paymentNetwork, variant: "gold" },
+        { type: "wallet", label: "Wallet Address", value: walletAddress },
+      ],
+      note: `After payment, send the transaction screenshot to ${siteOwner} on Telegram for license activation.`,
+      ctaLabel: "Confirm Payment on Telegram",
     });
+  });
 }
-
 
 /* ======================================================================
  * SECTION 4 — LIVE ACTIVITY + STATISTICS  (CLAUDE.md §8.2 and §8.3)
  * ====================================================================== */
 
 function initLiveResults() {
-    /*
-     * Colour of the live-activity indicator. The continuous pulse itself is
-     * a CSS animation; only the colour is controlled from here.
-     */
-    const liveActivityPulsingDot = qs(".pulsing-dot");
+  /*
+   * Colour of the live-activity indicator. The continuous pulse itself is
+   * a CSS animation; only the colour is controlled from here.
+   */
+  const liveActivityPulsingDot = qs(".pulsing-dot");
 
-    if (liveActivityPulsingDot) {
-        liveActivityPulsingDot.style.background = liveActivityColor;
-    }
+  if (liveActivityPulsingDot) {
+    liveActivityPulsingDot.style.background = liveActivityColor;
+  }
 
-    withElement(qs("#stat-license-keys"), (element) => {
-        element.textContent = licenseKeysGeneratedToday;
-    });
+  withElement(qs("#stat-license-keys"), (element) => {
+    element.textContent = licenseKeysGeneratedToday;
+  });
 
-    withElement(qs("#stat-eas-running"), (element) => {
-        element.textContent = easRunningToday;
-    });
+  withElement(qs("#stat-eas-running"), (element) => {
+    element.textContent = easRunningToday;
+  });
 }
-
 
 /* ======================================================================
  * SECTION 8 — DOWNLOAD  (CLAUDE.md §14 and §14.1)
  * ====================================================================== */
 
 function initDownload() {
-    // The whitelist URL is printed from configuration, never hard-coded.
-    // A URL a visitor copies character for character: never translated.
-    withElement(qs("#whitelist-url"), (element) => {
-        protectIdentityText(element, metaTraderWhitelist);
-    });
+  // The whitelist URL is printed from configuration, never hard-coded.
+  // A URL a visitor copies character for character: never translated.
+  withElement(qs("#whitelist-url"), (element) => {
+    protectIdentityText(element, metaTraderWhitelist);
+  });
 
-    initCopyControl(
-        qs("#whitelist-copy"),
-        () => metaTraderWhitelist,
-        {
-            labelElement: qs("#whitelist-copy-label"),
-            idleLabel: "Copy",
-            copiedLabel: "Copied"
-        }
-    );
+  initCopyControl(qs("#whitelist-copy"), () => metaTraderWhitelist, {
+    labelElement: qs("#whitelist-copy-label"),
+    idleLabel: "Copy",
+    copiedLabel: "Copied",
+  });
 }
-
 
 /* ======================================================================
  * SECTION 9 — FAQ  (CLAUDE.md §15 and §16)
@@ -2149,42 +2177,42 @@ function initDownload() {
  * ====================================================================== */
 
 function initFaq() {
-    const root = qs("#faq");
-    if (!root) {
-        return;
-    }
+  const root = qs("#faq");
+  if (!root) {
+    return;
+  }
 
-    const categoriesContainer = qs("#faq-categories", root);
-    const panelsContainer = qs("#faq-panels", root);
+  const categoriesContainer = qs("#faq-categories", root);
+  const panelsContainer = qs("#faq-panels", root);
 
-    if (!categoriesContainer || !panelsContainer) {
-        return;
-    }
+  if (!categoriesContainer || !panelsContainer) {
+    return;
+  }
 
-    // "all" renders every category stacked; otherwise one category at a time.
-    const mode = root.dataset.faqMode === "all" ? "all" : "single";
-    const questionLimit = Number(root.dataset.faqLimit) || Infinity;
+  // "all" renders every category stacked; otherwise one category at a time.
+  const mode = root.dataset.faqMode === "all" ? "all" : "single";
+  const questionLimit = Number(root.dataset.faqLimit) || Infinity;
 
-    const faqData = faqServiceInstance.getFaqData();
-    const categoryIds = Object.keys(faqData);
+  const faqData = faqServiceInstance.getFaqData();
+  const categoryIds = Object.keys(faqData);
 
-    if (categoryIds.length === 0) {
-        return;
-    }
+  if (categoryIds.length === 0) {
+    return;
+  }
 
-    if (mode === "all") {
-        // Full FAQ page: no filter pills, every category rendered in order.
-        categoriesContainer.remove();
-        panelsContainer.innerHTML = categoryIds
-            .map((id) => renderFaqCategoryBlock(faqData[id], id, questionLimit))
-            .join("");
-        // FAQ prose mentions MT4/MT5, XAUUSD and the product by name.
-        protectIdentityTerms(panelsContainer);
-        openFirstFaqItem(panelsContainer);
-    } else {
-        categoriesContainer.innerHTML = categoryIds
-            .map(
-                (id, index) => `
+  if (mode === "all") {
+    // Full FAQ page: no filter pills, every category rendered in order.
+    categoriesContainer.remove();
+    panelsContainer.innerHTML = categoryIds
+      .map((id) => renderFaqCategoryBlock(faqData[id], id, questionLimit))
+      .join("");
+    // FAQ prose mentions MT4/MT5, XAUUSD and the product by name.
+    protectIdentityTerms(panelsContainer);
+    openFirstFaqItem(panelsContainer);
+  } else {
+    categoriesContainer.innerHTML = categoryIds
+      .map(
+        (id, index) => `
                     <button type="button"
                             class="faq__category"
                             role="tab"
@@ -2194,99 +2222,102 @@ function initFaq() {
                             data-category-id="${id}">
                         ${faqData[id].name}
                     </button>
-                `
-            )
-            .join("");
+                `,
+      )
+      .join("");
 
-        renderSingleCategory(categoryIds[0]);
+    renderSingleCategory(categoryIds[0]);
 
-        // Only one category may be active at a time.
-        categoriesContainer.addEventListener("click", (event) => {
-            const tab = event.target.closest(".faq__category");
-            if (!tab) {
-                return;
-            }
+    // Only one category may be active at a time.
+    categoriesContainer.addEventListener("click", (event) => {
+      const tab = event.target.closest(".faq__category");
+      if (!tab) {
+        return;
+      }
 
-            qsa(".faq__category", categoriesContainer).forEach((button) => {
-                button.setAttribute(
-                    "aria-selected",
-                    String(button === tab)
-                );
-            });
+      qsa(".faq__category", categoriesContainer).forEach((button) => {
+        button.setAttribute("aria-selected", String(button === tab));
+      });
 
-            renderSingleCategory(tab.dataset.categoryId);
-        });
-    }
-
-    function renderSingleCategory(categoryId) {
-        const category = faqServiceInstance.getCategory(categoryId);
-        if (!category) {
-            return;
-        }
-
-        panelsContainer.innerHTML = renderFaqColumns(
-            category.questions,
-            categoryId,
-            questionLimit
-        );
-
-        // Re-rendered content is unprotected until this runs over it.
-        protectIdentityTerms(panelsContainer);
-
-        // The mockup shows the first question of a category already open.
-        openFirstFaqItem(panelsContainer);
-    }
-
-    // One delegated listener covers every accordion on the page.
-    panelsContainer.addEventListener("click", (event) => {
-        const trigger = event.target.closest(".faq-item__trigger");
-        if (!trigger) {
-            return;
-        }
-
-        const item = trigger.closest(".faq-item");
-        const panel = qs(`#${trigger.getAttribute("aria-controls")}`, panelsContainer);
-        const isOpen = trigger.getAttribute("aria-expanded") === "true";
-
-        // Close every other question first — only one stays open (§15.2).
-        qsa(".faq-item__trigger", panelsContainer).forEach((otherTrigger) => {
-            otherTrigger.setAttribute("aria-expanded", "false");
-            otherTrigger.closest(".faq-item").classList.remove("is-open");
-
-            const otherPanel = qs(
-                `#${otherTrigger.getAttribute("aria-controls")}`,
-                panelsContainer
-            );
-
-            if (otherPanel) {
-                otherPanel.hidden = true;
-            }
-        });
-
-        // Clicking an open question (or its chevron) closes it.
-        if (!isOpen) {
-            trigger.setAttribute("aria-expanded", "true");
-            item.classList.add("is-open");
-            if (panel) {
-                panel.hidden = false;
-            }
-        }
+      renderSingleCategory(tab.dataset.categoryId);
     });
+  }
+
+  function renderSingleCategory(categoryId) {
+    const category = faqServiceInstance.getCategory(categoryId);
+    if (!category) {
+      return;
+    }
+
+    panelsContainer.innerHTML = renderFaqColumns(
+      category.questions,
+      categoryId,
+      questionLimit,
+    );
+
+    // Re-rendered content is unprotected until this runs over it.
+    protectIdentityTerms(panelsContainer);
+
+    // The mockup shows the first question of a category already open.
+    openFirstFaqItem(panelsContainer);
+  }
+
+  // One delegated listener covers every accordion on the page.
+  panelsContainer.addEventListener("click", (event) => {
+    const trigger = event.target.closest(".faq-item__trigger");
+    if (!trigger) {
+      return;
+    }
+
+    const item = trigger.closest(".faq-item");
+    const panel = qs(
+      `#${trigger.getAttribute("aria-controls")}`,
+      panelsContainer,
+    );
+    const isOpen = trigger.getAttribute("aria-expanded") === "true";
+
+    // Close every other question first — only one stays open (§15.2).
+    qsa(".faq-item__trigger", panelsContainer).forEach((otherTrigger) => {
+      otherTrigger.setAttribute("aria-expanded", "false");
+      otherTrigger.closest(".faq-item").classList.remove("is-open");
+
+      const otherPanel = qs(
+        `#${otherTrigger.getAttribute("aria-controls")}`,
+        panelsContainer,
+      );
+
+      if (otherPanel) {
+        otherPanel.hidden = true;
+      }
+    });
+
+    // Clicking an open question (or its chevron) closes it.
+    if (!isOpen) {
+      trigger.setAttribute("aria-expanded", "true");
+      item.classList.add("is-open");
+      if (panel) {
+        panel.hidden = false;
+      }
+    }
+  });
 }
 
 /** Opens the first question in a freshly rendered set, as the mockup shows. */
 function openFirstFaqItem(scope) {
-    const trigger = qs(".faq-item__trigger", scope);
-    if (!trigger) {
-        return;
-    }
+  const trigger = qs(".faq-item__trigger", scope);
+  if (!trigger) {
+    return;
+  }
 
-    trigger.setAttribute("aria-expanded", "true");
-    trigger.closest(".faq-item").classList.add("is-open");
+  trigger.setAttribute("aria-expanded", "true");
+  trigger.closest(".faq-item").classList.add("is-open");
 
-    withElement(qs(`#${trigger.getAttribute("aria-controls")}`, scope), (panel) => {
-        panel.hidden = false;
-    });
+  withElement(
+    qs(`#${trigger.getAttribute("aria-controls")}`, scope),
+    (panel) => {
+      panel.hidden = false;
+    },
+  );
 }
 
 /**
@@ -2295,14 +2326,16 @@ function openFirstFaqItem(scope) {
  * answer grows only its own column.
  */
 function renderFaqColumns(questions, categoryId, limit) {
-    const entries = Object.entries(questions).slice(0, limit);
-    const columns = [[], []];
+  const entries = Object.entries(questions).slice(0, limit);
+  const columns = [[], []];
 
-    entries.forEach(([questionId, entry], index) => {
-        columns[index % 2].push(renderFaqItem(entry, `${categoryId}-${questionId}`));
-    });
+  entries.forEach(([questionId, entry], index) => {
+    columns[index % 2].push(
+      renderFaqItem(entry, `${categoryId}-${questionId}`),
+    );
+  });
 
-    return `
+  return `
         <div class="faq__columns">
             <div class="faq__column">${columns[0].join("")}</div>
             <div class="faq__column">${columns[1].join("")}</div>
@@ -2311,7 +2344,7 @@ function renderFaqColumns(questions, categoryId, limit) {
 }
 
 function renderFaqCategoryBlock(category, categoryId, limit) {
-    return `
+  return `
         <section class="faq-block scroll-reveal">
             <h2 class="section-heading section-heading--center">${category.name}</h2>
             ${renderFaqColumns(category.questions, categoryId, limit)}
@@ -2320,10 +2353,10 @@ function renderFaqCategoryBlock(category, categoryId, limit) {
 }
 
 function renderFaqItem(entry, key) {
-    const triggerId = `faq-trigger-${key}`;
-    const panelId = `faq-panel-${key}`;
+  const triggerId = `faq-trigger-${key}`;
+  const panelId = `faq-panel-${key}`;
 
-    return `
+  return `
         <div class="faq-item">
             <h3>
                 <button type="button"
@@ -2347,39 +2380,36 @@ function renderFaqItem(entry, key) {
     `;
 }
 
-
 /* ======================================================================
  * SECTION 10 — FOOTER  (CLAUDE.md §18)
  * ====================================================================== */
 
 function initFooter() {
-    // Copyright is generated — the year is never hard-coded (§18.1).
-    withElement(qs("#footer-copyright"), (element) => {
-        /*
-         * "© 2026 GOLDTRAP EA by Abang Rimba" — the year and the word "by"
-         * are prose and may translate; the two names may not. The sentence
-         * is written whole and protectIdentityTerms() (run at the end of
-         * init) wraps just the names.
-         */
-        element.textContent =
-            `© ${new Date().getFullYear()} ${siteName} by ${siteOwner}`;
-    });
+  // Copyright is generated — the year is never hard-coded (§18.1).
+  withElement(qs("#footer-copyright"), (element) => {
+    /*
+     * "© 2026 GOLDTRAP EA by Abang Rimba" — the year and the word "by"
+     * are prose and may translate; the two names may not. The sentence
+     * is written whole and protectIdentityTerms() (run at the end of
+     * init) wraps just the names.
+     */
+    element.textContent = `© ${new Date().getFullYear()} ${siteName} by ${siteOwner}`;
+  });
 
-    // The editable footer caveat / disclaimer (§18.2).
-    const footerCaveatElement = document.getElementById("footer-caveat");
+  // The editable footer caveat / disclaimer (§18.2).
+  const footerCaveatElement = document.getElementById("footer-caveat");
 
-    if (footerCaveatElement) {
-        footerCaveatElement.textContent = footerCaveatText;
-    }
+  if (footerCaveatElement) {
+    footerCaveatElement.textContent = footerCaveatText;
+  }
 
-    // Terms and Conditions destination (§18.3).
-    const termsLinkElement = document.getElementById("terms-and-conditions-link");
+  // Terms and Conditions destination (§18.3).
+  const termsLinkElement = document.getElementById("terms-and-conditions-link");
 
-    if (termsLinkElement) {
-        termsLinkElement.href = termsAndConditionsLink;
-    }
+  if (termsLinkElement) {
+    termsLinkElement.href = termsAndConditionsLink;
+  }
 }
-
 
 /* ======================================================================
  * SHARED TELEGRAM / CONFIGURED LINKS
@@ -2389,21 +2419,20 @@ function initFooter() {
  * ====================================================================== */
 
 function initConfiguredLinks() {
-    qsa("[data-telegram]").forEach((link) => {
-        link.href =
-            link.dataset.telegram === "personal" ? telegramPersonal : telegramChannel;
-    });
+  qsa("[data-telegram]").forEach((link) => {
+    link.href =
+      link.dataset.telegram === "personal" ? telegramPersonal : telegramChannel;
+  });
 
-    qsa("[data-whitelist-link]").forEach((link) => {
-        link.href = metaTraderWhitelist;
-    });
+  qsa("[data-whitelist-link]").forEach((link) => {
+    link.href = metaTraderWhitelist;
+  });
 
-    // The site name appears in the header wordmark and the document title.
-    qsa("[data-site-name]").forEach((element) => {
-        protectIdentityText(element, siteName);
-    });
+  // The site name appears in the header wordmark and the document title.
+  qsa("[data-site-name]").forEach((element) => {
+    protectIdentityText(element, siteName);
+  });
 }
-
 
 /* ======================================================================
  * SCROLL REVEAL  (CLAUDE.md §20)
@@ -2430,82 +2459,84 @@ let revealIsReady = false;
  * @param {ParentNode} [scope] where to look; defaults to the document.
  */
 function observeReveal(scope = document) {
-    if (!revealIsReady) {
-        // initScrollReveal() has not run yet — it will collect these itself.
-        return;
-    }
+  if (!revealIsReady) {
+    // initScrollReveal() has not run yet — it will collect these itself.
+    return;
+  }
 
-    const elements = qsa(".scroll-reveal", scope).filter(
-        (element) => !element.classList.contains("is-visible")
-    );
+  const elements = qsa(".scroll-reveal", scope).filter(
+    (element) => !element.classList.contains("is-visible"),
+  );
 
-    if (elements.length === 0) {
-        return;
-    }
+  if (elements.length === 0) {
+    return;
+  }
 
-    // No IntersectionObserver: everything is shown immediately (§20.6).
-    if (!revealObserver) {
-        elements.forEach((element) => element.classList.add("is-visible"));
-        return;
-    }
+  // No IntersectionObserver: everything is shown immediately (§20.6).
+  if (!revealObserver) {
+    elements.forEach((element) => element.classList.add("is-visible"));
+    return;
+  }
 
-    assignRevealIndexes(elements);
-    elements.forEach((element) => revealObserver.observe(element));
+  assignRevealIndexes(elements);
+  elements.forEach((element) => revealObserver.observe(element));
 }
 
 /** Stagger index of each element within its own parent group. */
 function assignRevealIndexes(elements) {
-    elements.forEach((element) => {
-        if (element.style.getPropertyValue("--reveal-index")) {
-            return;
-        }
+  elements.forEach((element) => {
+    if (element.style.getPropertyValue("--reveal-index")) {
+      return;
+    }
 
-        const siblings = Array.from(element.parentElement?.children || []).filter(
-            (child) => child.classList.contains("scroll-reveal")
-        );
+    const siblings = Array.from(element.parentElement?.children || []).filter(
+      (child) => child.classList.contains("scroll-reveal"),
+    );
 
-        element.style.setProperty("--reveal-index", String(siblings.indexOf(element)));
-    });
+    element.style.setProperty(
+      "--reveal-index",
+      String(siblings.indexOf(element)),
+    );
+  });
 }
 
 function initScrollReveal() {
-    const revealElements = qsa(".scroll-reveal");
+  const revealElements = qsa(".scroll-reveal");
 
-    revealIsReady = true;
+  revealIsReady = true;
 
-    if (revealElements.length === 0) {
-        return;
-    }
+  if (revealElements.length === 0) {
+    return;
+  }
 
-    // Without IntersectionObserver, show everything immediately (§20.6).
-    if (!("IntersectionObserver" in window)) {
-        revealElements.forEach((element) => element.classList.add("is-visible"));
-        return;
-    }
+  // Without IntersectionObserver, show everything immediately (§20.6).
+  if (!("IntersectionObserver" in window)) {
+    revealElements.forEach((element) => element.classList.add("is-visible"));
+    return;
+  }
 
-    assignRevealIndexes(revealElements);
+  assignRevealIndexes(revealElements);
 
-    revealObserver = new IntersectionObserver(
-        (entries, observer) => {
-            entries.forEach((entry) => {
-                if (!entry.isIntersecting) {
-                    return;
-                }
-
-                entry.target.classList.add("is-visible");
-
-                // Stop observing once revealed — the animation runs once.
-                observer.unobserve(entry.target);
-            });
-        },
-        {
-            threshold: REVEAL_THRESHOLD
+  revealObserver = new IntersectionObserver(
+    (entries, observer) => {
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting) {
+          return;
         }
-    );
 
-    revealElements.forEach((element) => revealObserver.observe(element));
+        entry.target.classList.add("is-visible");
+
+        // Stop observing once revealed — the animation runs once.
+        observer.unobserve(entry.target);
+      });
+    },
+    {
+      threshold: REVEAL_THRESHOLD,
+    },
+  );
+
+  revealElements.forEach((element) => revealObserver.observe(element));
 }
-
 
 /* ======================================================================
  * BOOTSTRAP
@@ -2516,56 +2547,56 @@ function initScrollReveal() {
  * ====================================================================== */
 
 function init() {
-    // Theme and identity first: everything rendered later inherits them.
-    applySiteColors();
-    applySiteIdentity();
-    initConfiguredLinks();
+  // Theme and identity first: everything rendered later inherits them.
+  applySiteColors();
+  applySiteIdentity();
+  initConfiguredLinks();
 
-    initAnnouncementBar();
-    initTranslation();
-    initMobileNavigation();
-    initLiveChart();
-    initLiveChat();
-    initLiveResults();
-    purchaseDialog.init();
-    initPricing();
-    initSourceCode();
-    initDownload();
-    initFaq();
+  initAnnouncementBar();
+  initTranslation();
+  initMobileNavigation();
+  initLiveChart();
+  initLiveChat();
+  initLiveResults();
+  purchaseDialog.init();
+  initPricing();
+  initSourceCode();
+  initDownload();
+  initFaq();
 
-    /*
-     * The complete FAQ page. Returns immediately on any page without the
-     * FAQ root, so the homepage is unaffected. Configuration is passed in
-     * rather than re-declared, so there is still one source of truth (§18).
-     */
-    initFaqPage({
-        siteName,
-        siteOwner,
-        eaVersion: eaCurrentVersion,
-        telegramPersonal,
-        telegramChannel,
-        // Lets the FAQ page register list content it renders after load.
-        observeReveal,
-        // ...and protect the identity strings inside what it renders.
-        protectIdentityTerms
-    });
+  /*
+   * The complete FAQ page. Returns immediately on any page without the
+   * FAQ root, so the homepage is unaffected. Configuration is passed in
+   * rather than re-declared, so there is still one source of truth (§18).
+   */
+  initFaqPage({
+    siteName,
+    siteOwner,
+    eaVersion: eaCurrentVersion,
+    telegramPersonal,
+    telegramChannel,
+    // Lets the FAQ page register list content it renders after load.
+    observeReveal,
+    // ...and protect the identity strings inside what it renders.
+    protectIdentityTerms,
+  });
 
-    initFooter();
+  initFooter();
 
-    /*
-     * Identity strings last, once every section has rendered: this walks
-     * the page and wraps brand names, versions, file names, symbols,
-     * platform names and prices so the translation layer leaves them
-     * byte-identical. Sections rendered later re-run it themselves.
-     */
-    protectIdentityTerms(document.body);
+  /*
+   * Identity strings last, once every section has rendered: this walks
+   * the page and wraps brand names, versions, file names, symbols,
+   * platform names and prices so the translation layer leaves them
+   * byte-identical. Sections rendered later re-run it themselves.
+   */
+  protectIdentityTerms(document.body);
 
-    // Runs last so dynamically rendered cards are observed too.
-    initScrollReveal();
+  // Runs last so dynamically rendered cards are observed too.
+  initScrollReveal();
 }
 
 if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", init);
+  document.addEventListener("DOMContentLoaded", init);
 } else {
-    init();
+  init();
 }
