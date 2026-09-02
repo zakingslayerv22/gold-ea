@@ -904,3 +904,286 @@ stylesheet:
 
 3. **`termsAndConditionsLink` remains `"#"`** — no terms URL has been
    supplied.
+
+---
+
+## Copy Link, Mobile FAQ Page, Sticky Rail and the Announcement Bar
+
+**Date:** 1 September 2026
+
+Four pieces of work. Taken in the brief's priority order, with the
+announcement bar first.
+
+---
+
+### D. The announcement bar — no regression found
+
+**The two breakages described were not present in any build.** Measured with
+devtools, not from screenshots, at 1920px:
+
+| | reference `goldenboxea.com` | deployed GitHub Pages | working tree (before this pass) |
+| --- | --- | --- | --- |
+| bar height | 51px | 51px | 51px |
+| inner padding | 6px / 6px | 6px / 6px | 6px / 6px |
+| text above / below | 13.8 / 14.8 | 13.6 / 14.6 | 13.6 / 14.6 |
+| bottom border | 1px `rgb(41,35,18)` | 1px `rgb(41,35,18)` | 1px `rgb(41,35,18)` |
+
+All three were byte-for-byte the same layout. The padding was symmetric, the
+text was vertically centred, and the 1px muted-gold bottom border
+(`--rule-warm`, `#292312`) was present in every one — including the build
+described as broken. The height was 51px everywhere, not 64px before and
+42px after.
+
+**So there was nothing to find a cause for.** Screenshot measurement is the
+likely source: a page captured at a different zoom or device pixel ratio
+scales every dimension, and 51px reads as anything from 42 to 64 depending
+on the factor.
+
+**What was done anyway.** The bar's height was the one real difference from
+the number requested, so it was rebuilt to that specification:
+
+| | before | after |
+| --- | --- | --- |
+| height at 1920 | 51px | **65.75px** |
+| vertical padding | 6px / 6px (with `min-height: 50px`) | **21px / 21px** |
+| text above / below | 13.6 / 14.6 | **21 / 21** |
+| bottom border | present | present, unchanged |
+
+The 65.75 is 21 + 22.75 + 21 + 1: the requested 21px on both sides, the
+line's real height at Roboto 14px/1.625, and the border. It is 1.75px over
+the 64 in the brief because the brief assumed a 21px text line.
+
+Three structural points:
+
+- The padding is **one custom property**, `--action-bar-padding-block`, used
+  for both sides. Two sides cannot drift apart in a future pass because
+  there is only one value.
+- `min-height` is gone. A min-height centres the text in a fixed box and
+  would have *masked* a broken padding value rather than exposing it.
+- The height comes from padding only, never a fixed `height`, so the bar
+  grows when the text wraps: measured 65.75px at 1920 (1 line), 103px at
+  390 (4 lines), 122.5px at 320 (5 lines), padding symmetric at every one.
+
+The dismiss button gains a 44px touch target on phones while its visual
+circle stays 32px. Dismissal, the version-based re-show, the hover
+behaviour and the copy are untouched and re-verified.
+
+**`--sticky-offset` is now measured at runtime**, in `updateStickyOffset()`.
+It sums the height of any chrome that is actually `position: sticky` or
+`fixed`, and it is recomputed on load, on resize, on orientation change,
+through a `ResizeObserver` on the bar and the header, and — the case that
+matters — the moment the bar is **dismissed**. CSS uses it for the FAQ
+rail's `top` and for `scroll-margin-top` on every FAQ item, so the two can
+never disagree. Verified: with the bar dismissed there is no leftover gap
+and a deep-linked question still lands 16px below the pinned rail.
+
+---
+
+### A. Per-question copy link
+
+Every question on the homepage and the full FAQ page carries a control that
+copies a deep link to that one question.
+
+**The link.** `<origin><current page>#<stable question id>` — the origin
+from `window.location`, never a hard-coded domain, so it is correct on a
+local server, on GitHub Pages and on production. The fragment is the id
+already in `faq-page-content.js`; there is no parallel id scheme and no
+array position, so reordering the database does not break a link.
+
+> **One deviation, flagged.** The brief's shape points every link at
+> `frequently-asked-questions.html`. A link always points at **the page it
+> was copied from** instead. The homepage's 24 featured questions are their
+> own approved collection — they do not exist on the FAQ page — so a
+> homepage link sent there would land on different wording or on nothing.
+> On the FAQ page the result is exactly the shape asked for.
+
+**The trap.** The control is a **sibling** of the accordion trigger, never
+nested inside it: a button inside a button is invalid HTML and breaks
+keyboard and screen-reader behaviour. Both question headers were
+restructured into a flex row holding the two controls. The handler also
+calls `stopPropagation()` so no listener added later on an ancestor can
+toggle the answer. **Verified explicitly on both pages: the open/closed
+state of every question is identical before and after a copy tap.**
+
+**States.** Muted at rest, white on hover, green with a check mark when
+copied, red with the same check on failure — reverting after 5s, the same
+`COPY_FEEDBACK_MS` the wallet and download controls use, so there is one
+copy idiom site-wide. `copyText()` is reused, so the `execCommand` fallback
+for insecure origins comes with it; a genuine failure shows the failed
+state rather than a silent no-op.
+
+**Deep links.** On load and on `hashchange`, both pages switch to the
+question's category, clear any active search, open it under the existing
+one-open-at-a-time rule, and scroll it into view. The offset comes from
+`scroll-margin-top: calc(var(--sticky-offset) + 16px)` — no magic number in
+the scroll call. An unknown or malformed hash returns silently.
+
+**Accessibility.** `aria-label="Copy link to this question"`, updated on
+success and failure; a shared `role="status" aria-live="polite"` region
+announces the result, because colour is not perceivable to every visitor;
+the icon swap and the label carry the meaning and colour only reinforces
+it; 44px of touch target with a 16px icon, so the question text is not
+crowded; visible `:focus-visible`. The copied URL is an identity string and
+is announced verbatim.
+
+---
+
+### B. Mobile sticky category bar
+
+**Measured before and after**, on the FAQ page:
+
+| viewport | before | after |
+| --- | --- | --- |
+| 320 × 844 | 566.9px — 67.2% of the viewport, 9 chip rows | **62px — 7.3%, 1 row** |
+| 360 × 800 | 507px — 63.4%, 8 rows | **62px — 7.8%, 1 row** |
+| 390 × 844 | 507px — 60.1%, 8 rows | **62px — 7.3%, 1 row** |
+| 414 × 896 | 507px — 56.6%, 8 rows | **62px — 6.9%, 1 row** |
+| 768 × 1024 | 267.5px — 26.1%, 4 rows | **62px — 6.1%, 1 row** |
+| 844 × 390 (landscape) | 259.1px — 66.4%, 3 rows | **62px — 15.9%, 1 row** |
+
+Every width is now far inside the 25% budget.
+
+**The rail.** `flex-wrap: nowrap` is the whole fix — chips can no longer
+stack. Left-aligned (`justify-content: flex-start`; centring is what
+produced the pyramid), `overflow-x: auto`, `scroll-snap-type: x proximity`
+with `scroll-snap-align: start`, momentum scrolling on iOS, scrollbar
+hidden but scrolling intact, and a mask that fades the right edge — and the
+left edge too once scrolled, set from JS — so it is visible that there is
+more off-screen. The rail's leading padding is the page gutter, so the
+first chip lines up with the content below, and its trailing padding clears
+the pinned search button. Chips are compact but never below 44px tall.
+
+**The query is deliberately wider than the phone breakpoint:**
+`max-width: 899.98px, (max-height: 540px)`. Ten chips do not fit on one row
+until roughly 1000px, so 768px still wrapped onto four rows — over budget —
+and a landscape phone is 844px *wide* but only 390px *tall*, where four
+rows is 66% of the screen. Short viewports get the rail regardless of
+width.
+
+**Search moved out of the rail.** Inside it, it scrolled away with the
+chips. It is now an icon button pinned at the end of the row, outside the
+`overflow-x` container, and it stays visible at all times on mobile rather
+than only after the hero search scrolls away — on a phone it is the only
+search affordance in the pinned row. Tapping it opens a **full-screen
+sheet**: 72 questions produce long result lists, and a sheet gives them the
+whole screen. Focus moves to the input on open; Escape closes it and
+returns focus to the trigger; live search and the no-results state behave
+exactly as on desktop.
+
+> **A trap worth recording.** The sheet is `position: fixed; inset: 0`, but
+> it first rendered 60px tall pinned to the bar. `backdrop-filter` on the
+> sticky bar makes that element a **containing block for fixed-position
+> descendants**, so the sheet was sizing against the 60px bar instead of the
+> viewport. The blur is dropped on small screens and replaced with a solid
+> background, which fixes it and costs a phone less to paint.
+
+**Active chip visibility.** `scrollIntoView({ inline: 'center', block:
+'nearest' })` on load, on tap, and on keyboard focus. `block: 'nearest'` is
+not optional — without it the browser also scrolls the nearest *vertical*
+scroller, which is the page. **Verified at all six sizes: tapping a chip
+moves the page by 0px.**
+
+> A note on that measurement. It first appeared to drift 20–70px. It does
+> not: the site sets `scroll-behavior: smooth`, so the harness's own
+> `scrollTo` was still animating when the baseline was read. Waiting for
+> two identical frames before measuring shows the true figure — zero. A
+> scroll-anchoring fix written for the phantom drift was reverted.
+
+**Rail accessibility.** `role="group"` and `aria-label` on the rail,
+`aria-pressed` on each chip — both already present and kept. Left/Right
+arrows move between chips and scroll the focused chip into view, so a
+keyboard user never focuses something off-screen. The rail carries
+`padding-block: 6px; margin-block: -6px` so `overflow-x: auto` cannot clip
+the focus ring — the classic way a scroll rail becomes unusable by
+keyboard. Smooth scrolling is skipped under `prefers-reduced-motion`.
+
+---
+
+### C. Mobile FAQ page layout
+
+> **`mockups/mobile/pages/` does not exist in the repository.** The only
+> mobile mockup present is `mockups/mobile.png`, which is the homepage. The
+> arrangement therefore follows the established desktop page — the same
+> elements in the same order, stacked into one column — which is what the
+> mockup would have governed. Everything else in this section came from the
+> brief's explicit instructions. **Please add the mockup if the arrangement
+> should differ; the spacing work below stands either way.**
+
+**Spacing tokens, not one-off margins.** A six-step scale on `.faq-page`
+(`--space-2xs` 6px through `--space-xl` 44px) supplies every vertical gap,
+so the rhythm is deliberate rather than accumulated.
+
+**What was tightened, and why:**
+
+| what | before | after | why |
+| --- | --- | --- | --- |
+| hero top padding | 64px | **24px** | the eyebrow, heading and search field must be visible without scrolling at 390 × 844 |
+| hero bottom padding | 60px | 32px | consistent with the scale |
+| title → lead | 20px | 10px | the two read as one block |
+| lead → search | 32px | 24px | |
+| popular chips top | 40px | 24px | |
+| content top padding | 64px | **32px** | the mockup's gap between the last popular question and the first section is not needed |
+| between question groups | 56px | 32px | |
+| back-to-homepage top | 48px | 32px | |
+| question row padding | 22px / 24px | 16px / 16px / 16px / 4px | makes room for the copy control without crowding the text |
+
+**Verified at 390 × 844: the eyebrow, the heading and the search field are
+all above the fold.**
+
+**Quality bar.** No horizontal overflow at 320, 360, 390, 414, 768 or
+844 × 390. Every touch target at least 44px. No interactive element sits
+under the chat launcher at the bottom of the page at any width — checked by
+rectangle intersection, not by eye. Long category names do not wrap because
+the rail scrolls instead.
+
+---
+
+### Verification
+
+| suite | result |
+| --- | --- |
+| Copy link (both pages, states, deep links, unknown hash, a11y) | 23 / 0 |
+| Mobile FAQ (6 viewports: rail, budget, chips, search sheet, overflow, chat) | 60 / 0 |
+| Announcement bar (3 widths, wrapping, dismiss, offset, persistence) | 24 / 0 |
+| Identity strings, six languages | 83 / 0 |
+| Desktop regression (type, gutters, fonts, shimmer, chat) | 48 / 0 |
+| Translation (Chromium + WebKit) | 28 / 0 |
+| Interactions (dialogs, clipboard, timers, accordion, search) | 12 / 0 |
+| FAQ desktop | 52 / 0 |
+| FAQ fix pass | 44 / 0 |
+| FAQ no-results states | 27 / 0 |
+| Homepage | 10 / 0 |
+| Homepage FAQ | 12 / 0 |
+| Homepage pill-by-pill | 83 / 0 |
+
+**506 assertions, 0 failures.** Zero console errors at any width.
+
+**Desktop is unchanged.** A full-page pixel diff against the previous commit
+at 1920px, with the announcement bar removed from both captures so its
+deliberate 14.75px height change does not shift every glyph onto a
+different subpixel:
+
+- **homepage: pixel-identical from y0 down to y6397.** The FAQ section spans
+  y6020–7037, so everything above the FAQ questions is untouched. The
+  differences are the question rows gaining the copy control and the footer
+  shifting 24px as the section grew.
+- **FAQ page: the hero and search band are pixel-identical**; the
+  differences are the 72 question rows gaining the copy control.
+- The harness was validated by diffing the previous commit against itself:
+  0 differing pixels.
+
+---
+
+### Flagged rather than changed
+
+1. **`mockups/mobile/pages/` is missing** — see section C.
+2. **The announcement-bar regression could not be reproduced** — see section
+   D. The bar was rebuilt to the requested specification anyway, but no
+   rule was found stripping padding or removing a border, so there is
+   nothing quietly affecting other components.
+3. **The bar is 65.75px, not exactly 64px.** 21 + 21 padding plus the real
+   22.75px line height plus the 1px border. Ask and the line-height can be
+   set to 1.5 to land on exactly 64.
+4. **A landscape phone keeps the desktop dropdown position for the search
+   sheet at widths above 900px** only if it is also taller than 540px —
+   below that it gets the full-screen sheet like every other small screen.

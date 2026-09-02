@@ -126,6 +126,27 @@
 
     --header-height: 80px;        /* measured on the reference site         */
 
+    /*
+     * The announcement bar's vertical padding, as ONE value used for both
+     * sides. Declaring it once is the point: a shorthand that sets only
+     * padding-top, or a later rule overriding one side, is how a bar ends
+     * up with its text sitting flush against the bottom edge. The bar's
+     * height comes from this padding, never from a fixed height, so it
+     * grows correctly when the announcement wraps to two or three lines.
+     */
+    --action-bar-padding-block: 21px;
+
+    /*
+     * How much fixed/sticky chrome sits at the top of the viewport. Written
+     * by main.js from the REAL measured heights, because the announcement
+     * bar is dismissible — assuming a value leaves deep links and the FAQ
+     * category rail off by the bar's height once it is closed.
+     *
+     * Used for the FAQ rail's `top` and for `scroll-margin-top` on anything
+     * scrolled to, so the two can never disagree.
+     */
+    --sticky-offset: 0px;
+
     /* --- Radii --- */
     --radius-pill: 999px;
     --radius-sm: 12px;            /* inner rows: dialog rows, licence field         */
@@ -873,6 +894,71 @@ button {
  * 7. SITE CHROME
  * ====================================================================== */
 
+/* --- FAQ per-question copy link --------------------------------------
+ * A sibling of the accordion trigger, not a child of it. Three states:
+ * muted at rest, white on hover, green with a check when copied. The icon
+ * swap and the aria-live announcement carry the meaning — colour only
+ * reinforces it, so the control still works for a colourblind visitor.
+ * ------------------------------------------------------------------- */
+
+.faq-copy-link {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    /* 44px of touch target without a 44px visual footprint. */
+    width: 44px;
+    height: 44px;
+    margin-inline-start: 4px;
+    padding: 0;
+    border-radius: 50%;
+    color: var(--text-dim);
+    transition: color var(--transition), background var(--transition);
+}
+
+.faq-copy-link:hover {
+    color: var(--text);
+    background: rgba(255, 255, 255, 0.06);
+}
+
+.faq-copy-link:focus-visible {
+    color: var(--text);
+}
+
+.faq-copy-link.is-copied {
+    color: var(--green-dot);
+}
+
+.faq-copy-link.is-failed {
+    color: var(--danger-text);
+}
+
+/* The two icons occupy the same cell; exactly one is shown. */
+.faq-copy-link__icon {
+    display: inline-flex;
+}
+
+.faq-copy-link__icon--done,
+.faq-copy-link.is-copied .faq-copy-link__icon--link,
+.faq-copy-link.is-failed .faq-copy-link__icon--link {
+    display: none;
+}
+
+.faq-copy-link.is-copied .faq-copy-link__icon--done,
+.faq-copy-link.is-failed .faq-copy-link__icon--done {
+    display: inline-flex;
+}
+
+/*
+ * Anything scrolled to lands below the sticky chrome. One property, shared
+ * with the rail's `top`, rather than a magic number in the scroll call.
+ */
+.faq-item,
+.faq-question {
+    scroll-margin-top: calc(var(--sticky-offset) + 16px);
+}
+
+
 /* --- 7.1 Top action bar ---------------------------------------------- */
 
 .action-bar {
@@ -885,13 +971,18 @@ button {
     display: none;
 }
 
+/*
+ * Symmetric padding, single source. See --action-bar-padding-block.
+ * min-height is deliberately `auto`: a min-height would centre the text in
+ * a fixed box and mask a broken padding value instead of exposing it.
+ */
 .action-bar__inner {
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 10px;
-    min-height: 50px;
-    padding: 6px 40px;
+    min-height: auto;
+    padding: var(--action-bar-padding-block) 40px;
     text-align: center;
 }
 
@@ -2085,6 +2176,19 @@ button {
 .faq-item.is-open {
     background: rgba(221, 185, 84, 0.04);
     border-color: var(--border-gold);
+}
+
+/* The homepage question header: trigger plus copy control, side by side. */
+.faq-item__heading {
+    display: flex;
+    align-items: center;
+    margin: 0;
+    padding-inline-end: 8px;
+    font-family: inherit;
+    font-size: inherit;
+    font-weight: inherit;
+    line-height: inherit;
+    letter-spacing: inherit;
 }
 
 .faq-item__trigger {
@@ -3319,9 +3423,16 @@ font {
 
     /* ---- Announcement bar ---------------------------------------------- */
 
+    /*
+     * Narrow screens tighten the padding but keep it symmetric, and keep
+     * it on the same custom property so the two sides cannot drift.
+     */
+    .action-bar {
+        --action-bar-padding-block: 12px;
+    }
+
     .action-bar__inner {
-        padding: 10px 44px;
-        min-height: 0;
+        padding: var(--action-bar-padding-block) 44px;
     }
 
     .action-bar__link {
@@ -3329,8 +3440,11 @@ font {
         line-height: 1.5;
     }
 
+    /* A 44px touch target on phones; the visual circle stays 32px. */
     .action-bar__close {
         right: 8px;
+        min-width: 44px;
+        min-height: 44px;
     }
 
     /* ---- Live chat ------------------------------------------------------
@@ -3917,8 +4031,17 @@ font {
     background: var(--surface);
 }
 
+/*
+ * The heading is a row of TWO sibling controls: the accordion trigger,
+ * which takes all the space, and the copy-link button beside it. The copy
+ * button is padded away from the trigger's own right padding so the two
+ * hit areas do not touch.
+ */
 .faq-question__heading {
+    display: flex;
+    align-items: center;
     margin: 0;
+    padding-inline-end: 8px;
     font-size: inherit;
     font-weight: inherit;
     line-height: inherit;
@@ -4070,4 +4193,242 @@ font {
     display: flex;
     justify-content: center;
     margin-top: 48px;
+}
+
+
+/* ======================================================================
+ * 23. FAQ PAGE — MOBILE
+ * ======================================================================
+ * The desktop layout above is approved and unchanged. Everything in this
+ * section applies only below the mobile breakpoint.
+ *
+ * THE PROBLEM THIS SOLVES
+ * The ten category chips sat in a centred, wrapping flex container. At
+ * 390px they wrapped onto eight rows and the whole eight-row stack was
+ * what got pinned: 507px of sticky chrome, 60% of the viewport, leaving
+ * about 280px to read in. Measured, not estimated.
+ *
+ * THE FIX
+ * One row that scrolls horizontally, left-aligned, with the search moved
+ * out of the scrolling container so it is always reachable.
+ * ====================================================================== */
+
+/*
+ * RAIL MECHANICS.
+ * The query is deliberately wider than the phone breakpoint. Ten chips do
+ * not fit on one row until roughly 1000px, so at 768px they still wrapped
+ * onto four rows — 26% of the viewport, over budget. A landscape phone
+ * (844 x 390) is wide but only 390px TALL, where four rows is 66% of the
+ * screen, so short viewports get the rail regardless of their width.
+ */
+@media (max-width: 899.98px), (max-height: 540px) {
+
+    .faq-sticky-bar {
+        top: var(--sticky-offset);
+        padding-block: 8px;
+        /*
+         * The blur is dropped on small screens for a reason beyond
+         * performance: `backdrop-filter` makes an element a containing
+         * block for its fixed-position descendants, so the full-screen
+         * search sheet inside this bar would size itself against the BAR
+         * (60px tall) instead of the viewport. A solid background keeps
+         * the sheet full-screen.
+         */
+        backdrop-filter: none;
+        background: var(--bg-zinc);
+    }
+
+    .faq-sticky-bar__inner {
+        flex-wrap: nowrap;
+        justify-content: flex-start;
+        gap: 8px;
+        /*
+         * The rail handles its own inline padding so the chips can scroll
+         * under the edges; the container's padding would clip them.
+         */
+        padding-inline: 0;
+    }
+
+    .faq-category-navigation {
+        flex: 1 1 auto;
+        min-width: 0;
+        flex-wrap: nowrap;
+        justify-content: flex-start;
+        gap: 8px;
+        overflow-x: auto;
+        overflow-y: hidden;
+        /* Momentum scrolling on iOS. */
+        -webkit-overflow-scrolling: touch;
+        scroll-snap-type: x proximity;
+        scrollbar-width: none;
+        /*
+         * The first chip lines up with the content below, and the last one
+         * can scroll clear of the pinned search button.
+         */
+        padding-inline: var(--gutter) 56px;
+        /*
+         * Room for the focus ring: `overflow-x: auto` clips it otherwise,
+         * which is the classic way a scroll rail becomes unusable by
+         * keyboard. The negative margin keeps the visual position.
+         */
+        padding-block: 6px;
+        margin-block: -6px;
+        /*
+         * The fade tells the visitor there is more off-screen. Without an
+         * affordance, horizontal scroll simply is not discovered.
+         */
+        -webkit-mask-image: linear-gradient(to right,
+            transparent 0, #000 var(--gutter), #000 calc(100% - 40px), transparent 100%);
+        mask-image: linear-gradient(to right,
+            transparent 0, #000 var(--gutter), #000 calc(100% - 40px), transparent 100%);
+    }
+
+    .faq-category-navigation::-webkit-scrollbar {
+        display: none;
+    }
+
+    /* Once scrolled, the left edge fades too — the class is set from JS. */
+    .faq-category-navigation.is-scrolled {
+        -webkit-mask-image: linear-gradient(to right,
+            transparent 0, #000 24px, #000 calc(100% - 40px), transparent 100%);
+        mask-image: linear-gradient(to right,
+            transparent 0, #000 24px, #000 calc(100% - 40px), transparent 100%);
+    }
+
+    .faq-category-button {
+        flex: 0 0 auto;
+        scroll-snap-align: start;
+        /* Compact chips, but never below the 44px touch minimum. */
+        min-height: 44px;
+        padding: 10px 14px;
+        gap: 6px;
+        white-space: nowrap;
+    }
+
+    .faq-category-button__count {
+        padding: 1px 5px;
+    }
+
+    /* ---- Search: pinned outside the scrolling rail ---------------------
+     * Inside the rail it would scroll away with the chips. As an icon
+     * button at the end of the row it is always one tap away.
+     * ------------------------------------------------------------------ */
+    .faq-sticky-search-button {
+        flex: 0 0 auto;
+        width: 44px;
+        min-height: 44px;
+        margin-inline-end: var(--gutter);
+        padding: 0;
+        justify-content: center;
+        /* The word "Search" is hidden; the icon carries it. */
+        font-size: 0;
+    }
+
+    .faq-sticky-search-button svg {
+        width: 18px;
+        height: 18px;
+    }
+
+    /* ---- Search sheet ---------------------------------------------------
+     * Full screen rather than an in-place expansion: 72 questions produce
+     * long result lists, and a sheet gives them the whole screen while
+     * matching what a phone user expects from a search control.
+     * ------------------------------------------------------------------ */
+    .faq-sticky-search-panel {
+        position: fixed;
+        inset: 0;
+        top: 0;
+        z-index: 80;
+        display: flex;
+        flex-direction: column;
+        padding-top: env(safe-area-inset-top, 0px);
+        background: var(--bg-zinc);
+        border: 0;
+        box-shadow: none;
+        overflow-y: auto;
+        overscroll-behavior: contain;
+    }
+
+    .faq-sticky-search-panel__inner {
+        padding-block: var(--space-sm, 16px);
+    }
+
+    .faq-sticky-search-panel .faq-search--compact {
+        max-width: none;
+    }
+}
+
+
+@media (max-width: 767.98px) {
+
+    /* ---- Vertical rhythm ------------------------------------------------
+     * A small set of tokens rather than one-off margins, so the page reads
+     * as one deliberate rhythm. The mockup's own vertical spacing is not
+     * reproduced — see MOBILE.md for what was tightened and why.
+     * ------------------------------------------------------------------ */
+    .faq-page {
+        --space-2xs: 6px;
+        --space-xs: 10px;
+        --space-sm: 16px;
+        --space-md: 24px;
+        --space-lg: 32px;
+        --space-xl: 44px;
+    }
+
+    /* ---- Page rhythm ----------------------------------------------------
+     * The mockup's top gap pushed the heading and the search field below
+     * the fold on a 390 x 844 screen. Tightened so the eyebrow, the
+     * heading and the search are all visible without scrolling.
+     * ------------------------------------------------------------------ */
+    .faq-page__hero-inner {
+        padding-block: var(--space-md) var(--space-lg);
+    }
+
+    .faq-page__title {
+        margin-bottom: var(--space-xs);
+    }
+
+    .faq-page__lead {
+        margin-bottom: var(--space-md);
+    }
+
+    .faq-popular {
+        margin-top: var(--space-md);
+    }
+
+    /* The mockup left a large gap here; a normal section rhythm is enough. */
+    .faq-page__content-inner {
+        padding-block: var(--space-lg) var(--space-xl);
+    }
+
+    .faq-group + .faq-group {
+        margin-top: var(--space-lg);
+    }
+
+    .faq-page__back {
+        margin-top: var(--space-lg);
+    }
+
+    /* ---- Question rows --------------------------------------------------
+     * Tighter padding, and the copy control keeps its 44px target without
+     * crowding the question text.
+     * ------------------------------------------------------------------ */
+    .faq-question__trigger {
+        gap: 12px;
+        padding: 16px 4px 16px 16px;
+    }
+
+    .faq-copy-link {
+        margin-inline-start: 0;
+    }
+}
+
+/*
+ * Reduced motion: the rail and the sheet stop animating, but both remain
+ * fully operable.
+ */
+@media (prefers-reduced-motion: reduce) {
+    .faq-category-navigation {
+        scroll-behavior: auto;
+    }
 }

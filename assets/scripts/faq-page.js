@@ -110,7 +110,11 @@ export function initFaqPage(config = {}) {
         // Marks brand names, versions, platform names, symbols and prices
         // inside rendered answers as non-translatable. Every re-render
         // needs it again: replacing the markup discards the marking.
-        protectIdentityTerms = () => {}
+        protectIdentityTerms = () => {},
+        // The shared per-question copy-link control (markup + behaviour).
+        // Same implementation the homepage uses — there is one, not two.
+        renderCopyLink = () => "",
+        initCopyLinks = () => {}
     } = config;
 
     /** The same token substitution the rest of the site uses (§18, §25). */
@@ -289,7 +293,7 @@ export function initFaqPage(config = {}) {
 
         return `
             <div class="faq-question${isOpen ? " is-open" : ""}"
-                 data-question-key="${question.key}">
+                 id="${question.key}" data-question-key="${question.key}">
                 <h3 class="faq-question__heading">
                     <button type="button" class="faq-question__trigger"
                             id="${triggerId}" aria-controls="${panelId}"
@@ -297,6 +301,12 @@ export function initFaqPage(config = {}) {
                         <span class="faq-question__text">${escapeHtml(question.question)}</span>
                         ${icon("chevron", 20, 2.2)}
                     </button>
+                    <!--
+                        A SIBLING of the trigger, never nested inside it:
+                        nested buttons are invalid HTML, and a nested copy
+                        control would toggle the answer on every tap.
+                    -->
+                    ${renderCopyLink(question.key)}
                 </h3>
                 <div class="faq-answer" id="${panelId}" role="region"
                      aria-labelledby="${triggerId}"${isOpen ? "" : " hidden"}>
@@ -566,12 +576,25 @@ export function initFaqPage(config = {}) {
             return;
         }
 
+        /*
+         * On desktop the compact search appears only once the hero search
+         * has scrolled away — it would otherwise duplicate a control that
+         * is already on screen. On mobile it is the ONLY search affordance
+         * in the pinned row, so it stays visible at all times: hiding it
+         * would leave a phone visitor with no way to search after
+         * scrolling.
+         */
+        // The same query the stylesheet uses for the scrolling rail, so the
+        // pinned button exists exactly where the rail does.
+        const isMobile = () =>
+            window.matchMedia("(max-width: 899.98px), (max-height: 540px)").matches;
+
         const observer = new IntersectionObserver(
             (entries) => {
                 entries.forEach((entry) => {
                     const heroSearchVisible = entry.isIntersecting;
-                    stickyToggle.hidden = heroSearchVisible;
-                    if (heroSearchVisible && stickySearchIsOpen()) {
+                    stickyToggle.hidden = heroSearchVisible && !isMobile();
+                    if (heroSearchVisible && !isMobile() && stickySearchIsOpen()) {
                         closeStickySearch({ restoreFocus: false });
                     }
                 });
@@ -607,6 +630,74 @@ export function initFaqPage(config = {}) {
         clearSearch({ focusMain: true })
     );
 
+    /**
+     * Brings the active chip into view inside the RAIL.
+     *
+     * `block: "nearest"` is not optional. Without it the browser also
+     * scrolls the nearest vertical scroller — the page — so every filter
+     * tap jumps the reader somewhere else. With it, only the rail moves
+     * horizontally and the page stays exactly where it was.
+     *
+     * @param {Element} [chip] defaults to the currently active chip
+     */
+    function revealActiveChip(chip) {
+        const target = chip || qs(".faq-category-button.is-active", navigation);
+        if (!target || !navigation) {
+            return;
+        }
+
+        // Nothing to reveal when the rail is not scrolling (desktop).
+        if (navigation.scrollWidth <= navigation.clientWidth) {
+            return;
+        }
+
+        const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+        target.scrollIntoView({
+            inline: "center",
+            block: "nearest",
+            behavior: reduced ? "auto" : "smooth"
+        });
+    }
+
+    /** Fades the rail's left edge once it has been scrolled away from 0. */
+    function updateRailFade() {
+        if (!navigation) {
+            return;
+        }
+        navigation.classList.toggle("is-scrolled", navigation.scrollLeft > 4);
+    }
+
+    navigation?.addEventListener("scroll", updateRailFade, { passive: true });
+
+    /*
+     * Left/Right move between chips. A chip that receives focus is scrolled
+     * into view, so a keyboard user never focuses something off-screen.
+     */
+    navigation?.addEventListener("keydown", (event) => {
+        if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") {
+            return;
+        }
+        const chips = qsa(".faq-category-button", navigation);
+        const current = chips.indexOf(event.target.closest(".faq-category-button"));
+        if (current === -1) {
+            return;
+        }
+        event.preventDefault();
+        const next = chips[current + (event.key === "ArrowRight" ? 1 : -1)];
+        if (next) {
+            next.focus();
+            revealActiveChip(next);
+        }
+    });
+
+    navigation?.addEventListener("focusin", (event) => {
+        const chip = event.target.closest(".faq-category-button");
+        if (chip) {
+            revealActiveChip(chip);
+        }
+    });
+
     navigation?.addEventListener("click", (event) => {
         const button = event.target.closest(".faq-category-button");
         if (!button) {
@@ -620,6 +711,8 @@ export function initFaqPage(config = {}) {
             openKey = null;
         }
         update();
+        // The chip has just been re-rendered, so re-find it by state.
+        revealActiveChip();
     });
 
     popularList?.addEventListener("click", (event) => {
@@ -665,6 +758,63 @@ export function initFaqPage(config = {}) {
         }
         toggleQuestion(trigger.closest(".faq-question").dataset.questionKey);
     });
+
+    // Copy controls, delegated once on the container that survives every
+    // re-render. The control is a sibling of the trigger above, so this
+    // listener and that one can never both fire for the same click.
+    initCopyLinks(results);
+
+    /**
+     * Opens the question named by the URL hash.
+     *
+     * Clears any active filter or search first, so a deep link always
+     * resolves even when the visitor's last state hid that question, then
+     * opens it under the normal one-open-at-a-time rule and scrolls it
+     * clear of the sticky chrome (scroll-margin-top does the offsetting,
+     * so there is no magic number here).
+     *
+     * An unknown or malformed hash returns silently and the page renders
+     * its normal state.
+     */
+    function openQuestionFromHash() {
+        const hash = decodeURIComponent(window.location.hash.replace(/^#/, ""));
+        if (!hash) {
+            return;
+        }
+
+        const question = categories
+            .flatMap((category) => category.questions)
+            .find((entry) => entry.key === hash);
+
+        if (!question) {
+            return;
+        }
+
+        activeCategoryId = question.categoryId;
+        query = "";
+        allExpanded = false;
+        openKey = question.key;
+        if (searchInput) {
+            searchInput.value = "";
+        }
+        update();
+
+        const target = qs(
+            `.faq-question[data-question-key="${question.key}"]`,
+            results
+        );
+        if (!target) {
+            return;
+        }
+
+        // Same reveal fix as the popular chips: the scroll-reveal observer
+        // will not have fired by the time the scroll lands.
+        target.closest(".faq-group")?.classList.add("is-visible");
+        target.scrollIntoView({ block: "start", behavior: "smooth" });
+    }
+
+    openQuestionFromHash();
+    window.addEventListener("hashchange", openQuestionFromHash);
 
     expandAll?.addEventListener("click", () => {
         allExpanded = !allExpanded;
@@ -727,6 +877,14 @@ export function initFaqPage(config = {}) {
      * protects itself inside renderResults().
      */
     protectIdentityTerms(document.body);
+
+    /*
+     * The rail starts with "All" selected, but a deep link or a restored
+     * category can start it elsewhere — bring whatever is active into view,
+     * and set the edge fade from the rail's real scroll position.
+     */
+    revealActiveChip();
+    updateRailFade();
 
     // The support button reuses the configured Telegram destination (§16).
     qsa("[data-faq-telegram]").forEach((link) => {

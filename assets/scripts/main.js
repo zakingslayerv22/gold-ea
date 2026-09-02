@@ -887,6 +887,13 @@ function initAnnouncementBar() {
         closeButton.addEventListener("click", () => {
             bar.hidden = true;
             storeDismissedAnnouncementVersion(announcementVersion);
+            /*
+             * Dismissing changes how much chrome sits at the top, so the
+             * sticky offset is recomputed immediately. Without this the FAQ
+             * category rail and every deep-link landing would stay off by
+             * the bar's height for the rest of the session.
+             */
+            updateStickyOffset();
         });
     });
 }
@@ -1643,6 +1650,197 @@ function initCopyControl(button, getValue, options = {}) {
 
 
 /* ======================================================================
+ * STICKY OFFSET
+ * ======================================================================
+ * How much fixed/sticky chrome sits at the top of the viewport, written to
+ * --sticky-offset for CSS to use as the FAQ rail's `top` and as
+ * `scroll-margin-top` on anything scrolled to.
+ *
+ * MEASURED, NEVER ASSUMED. The announcement bar is dismissible: hard-coding
+ * its height leaves every deep link and the category rail off by that much
+ * the moment a visitor closes it. So the value is recomputed whenever the
+ * chrome changes — on load, on resize, and when the bar is dismissed.
+ *
+ * Only elements that are actually pinned count. The announcement bar
+ * scrolls away with the page, so it contributes nothing once scrolled; it
+ * is the sticky header, where one exists, that occupies the viewport.
+ * ====================================================================== */
+
+function updateStickyOffset() {
+    let offset = 0;
+
+    qsa(".site-header, .action-bar").forEach((element) => {
+        if (element.hidden || element.offsetParent === null) {
+            return;
+        }
+        const position = window.getComputedStyle(element).position;
+        if (position === "sticky" || position === "fixed") {
+            offset += element.getBoundingClientRect().height;
+        }
+    });
+
+    document.documentElement.style.setProperty(
+        "--sticky-offset",
+        `${Math.round(offset)}px`
+    );
+}
+
+/** Recomputes the offset whenever the chrome can have changed. */
+function initStickyOffset() {
+    updateStickyOffset();
+    window.addEventListener("resize", updateStickyOffset);
+    window.addEventListener("orientationchange", updateStickyOffset);
+
+    // The announcement bar is dismissible and the header can wrap, so watch
+    // them rather than guessing when they change.
+    if ("ResizeObserver" in window) {
+        const observer = new ResizeObserver(() => updateStickyOffset());
+        qsa(".site-header, .action-bar").forEach((element) => observer.observe(element));
+    }
+}
+
+
+/* ======================================================================
+ * PER-QUESTION COPY LINK
+ * ======================================================================
+ * Every FAQ question — on the homepage and on the full FAQ page — carries
+ * a control that copies a deep link to that one question.
+ *
+ * THE LINK
+ * The origin comes from window.location, never a hard-coded domain, so the
+ * same code produces a correct link on a local server, on the GitHub Pages
+ * build and on the production domain. The fragment is the question's
+ * STABLE id from faq-page-content.js — reordering the database does not
+ * change it, and there is no parallel id scheme.
+ *
+ * A link always points at the page it was copied from. The homepage's
+ * featured questions are their own approved collection, so a homepage
+ * question does not exist on the FAQ page and linking there would land on
+ * the wrong text or on nothing at all.
+ *
+ * THE TRAP
+ * The control sits in the question header, which is itself the accordion
+ * trigger. It is therefore a SIBLING of the trigger button, never nested
+ * inside it: nested interactive elements are invalid HTML and break
+ * keyboard and screen-reader behaviour. The click handler also stops
+ * propagation, so no delegated accordion listener can ever see it.
+ * ====================================================================== */
+
+/** Icons for the copy control. Two states: link, and copied. */
+const faqCopyIcons = {
+    link: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/></svg>',
+    done: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>'
+};
+
+/**
+ * The absolute URL of a question on the CURRENT page.
+ *
+ * @param {string} questionId the question's stable id
+ * @returns {string} e.g. "https://example.com/frequently-asked-questions.html#getting-started--mt4-or-mt5"
+ */
+function faqDeepLinkUrl(questionId) {
+    const url = new URL(window.location.href);
+    url.search = "";
+    url.hash = questionId;
+    return url.toString();
+}
+
+/**
+ * Markup for one copy control. Rendered as a sibling of the accordion
+ * trigger — see the note above about nested interactive elements.
+ *
+ * @param {string} questionId the question's stable id
+ * @returns {string} HTML
+ */
+function renderFaqCopyLink(questionId) {
+    return `
+        <button type="button" class="faq-copy-link" data-faq-copy="${questionId}"
+                aria-label="Copy link to this question">
+            <span class="faq-copy-link__icon faq-copy-link__icon--link">${faqCopyIcons.link}</span>
+            <span class="faq-copy-link__icon faq-copy-link__icon--done">${faqCopyIcons.done}</span>
+        </button>`;
+}
+
+/**
+ * The shared announcement region. Colour and an icon swap are not
+ * perceivable to a screen-reader user, so every copy result is also spoken.
+ */
+function faqCopyLiveRegion() {
+    let region = qs("#faq-copy-status");
+
+    if (!region) {
+        region = document.createElement("p");
+        region.id = "faq-copy-status";
+        region.className = "visually-hidden";
+        region.setAttribute("role", "status");
+        region.setAttribute("aria-live", "polite");
+        document.body.append(region);
+    }
+
+    return region;
+}
+
+/**
+ * One delegated listener for every copy control on the page, present and
+ * future — the FAQ list is re-rendered on each keystroke, so per-button
+ * listeners would be lost.
+ *
+ * @param {Element} scope the container to listen on
+ */
+function initFaqCopyLinks(scope) {
+    if (!scope || scope.dataset.copyLinksReady === "true") {
+        return;
+    }
+    scope.dataset.copyLinksReady = "true";
+
+    const timers = new WeakMap();
+
+    scope.addEventListener("click", async (event) => {
+        const button = event.target.closest(".faq-copy-link");
+        if (!button || !scope.contains(button)) {
+            return;
+        }
+
+        /*
+         * The control is already a sibling of the trigger, so no accordion
+         * listener matches it. This is belt and braces: it also stops any
+         * listener added later on an ancestor from toggling the question.
+         */
+        event.preventDefault();
+        event.stopPropagation();
+
+        const questionId = button.dataset.faqCopy;
+        const url = faqDeepLinkUrl(questionId);
+        const region = faqCopyLiveRegion();
+        const copied = await copyText(url);
+
+        window.clearTimeout(timers.get(button));
+        button.classList.remove("is-copied", "is-failed");
+
+        if (copied) {
+            button.classList.add("is-copied");
+            button.setAttribute("aria-label", "Link copied to clipboard");
+            region.textContent = `Link copied: ${url}`;
+        } else {
+            /*
+             * A real failure gets a real failed state. Silently doing
+             * nothing would leave the visitor believing they had the link.
+             */
+            button.classList.add("is-failed");
+            button.setAttribute("aria-label", "Copying the link failed");
+            region.textContent = "Could not copy the link. Please copy it from the address bar.";
+        }
+
+        timers.set(button, window.setTimeout(() => {
+            button.classList.remove("is-copied", "is-failed");
+            button.setAttribute("aria-label", "Copy link to this question");
+            region.textContent = "";
+        }, COPY_FEEDBACK_MS));
+    });
+}
+
+
+/* ======================================================================
  * PURCHASE DIALOG  (CLAUDE.md §10 and §26)
  * ======================================================================
  * A single reusable dialog serving both the EA plans and the source code.
@@ -2237,6 +2435,63 @@ function initFaq() {
         openFirstFaqItem(panelsContainer);
     }
 
+    // Copy controls: one delegated listener for every question, present
+    // and future — the panel is re-rendered whenever the category changes.
+    initFaqCopyLinks(panelsContainer);
+
+    /**
+     * Opens the question named by the URL hash, if there is one.
+     *
+     * Switches to its category first when a filter is active, respects the
+     * one-open-at-a-time rule, and scrolls it clear of the sticky chrome
+     * via scroll-margin-top rather than a magic offset. An unknown or
+     * malformed hash falls through silently and the page renders normally.
+     */
+    function openQuestionFromHash() {
+        const hash = decodeURIComponent(window.location.hash.replace(/^#/, ""));
+        if (!hash) {
+            return;
+        }
+
+        // The key is "<categoryId>-<questionId>"; the category is the part
+        // before the first dash that names one of the rendered categories.
+        const categoryId = categoryIds.find(
+            (id) => hash === id || hash.startsWith(`${id}-`)
+        );
+
+        if (!categoryId) {
+            return;     // Not one of ours: leave the page alone.
+        }
+
+        if (mode !== "all") {
+            const tab = qs(
+                `.faq__category[data-category-id="${categoryId}"]`,
+                categoriesContainer
+            );
+            if (tab) {
+                qsa(".faq__category", categoriesContainer).forEach((button) => {
+                    button.setAttribute("aria-selected", String(button === tab));
+                });
+                renderSingleCategory(categoryId);
+            }
+        }
+
+        const item = qs(`[data-question-key="${hash}"]`, panelsContainer);
+        if (!item) {
+            return;
+        }
+
+        const trigger = qs(".faq-item__trigger", item);
+        if (trigger && trigger.getAttribute("aria-expanded") !== "true") {
+            trigger.click();
+        }
+
+        item.scrollIntoView({ block: "start", behavior: "smooth" });
+    }
+
+    openQuestionFromHash();
+    window.addEventListener("hashchange", openQuestionFromHash);
+
     // One delegated listener covers every accordion on the page.
     panelsContainer.addEventListener("click", (event) => {
         const trigger = event.target.closest(".faq-item__trigger");
@@ -2323,9 +2578,15 @@ function renderFaqItem(entry, key) {
     const triggerId = `faq-trigger-${key}`;
     const panelId = `faq-panel-${key}`;
 
+    /*
+     * The heading holds TWO sibling controls: the accordion trigger and the
+     * copy-link button. The copy button is deliberately outside the trigger
+     * — a button inside a button is invalid HTML and breaks keyboard and
+     * screen-reader behaviour, and every copy tap would toggle the answer.
+     */
     return `
-        <div class="faq-item">
-            <h3>
+        <div class="faq-item" id="${key}" data-question-key="${key}">
+            <h3 class="faq-item__heading">
                 <button type="button"
                         class="faq-item__trigger"
                         id="${triggerId}"
@@ -2338,6 +2599,7 @@ function renderFaqItem(entry, key) {
                         <polyline points="6 9 12 15 18 9"/>
                     </svg>
                 </button>
+                ${renderFaqCopyLink(key)}
             </h3>
             <div class="faq-item__panel" id="${panelId}" role="region"
                  aria-labelledby="${triggerId}" hidden>
@@ -2547,7 +2809,10 @@ function init() {
         // Lets the FAQ page register list content it renders after load.
         observeReveal,
         // ...and protect the identity strings inside what it renders.
-        protectIdentityTerms
+        protectIdentityTerms,
+        // The per-question copy link: one implementation, both pages.
+        renderCopyLink: renderFaqCopyLink,
+        initCopyLinks: initFaqCopyLinks
     });
 
     initFooter();
@@ -2559,6 +2824,9 @@ function init() {
      * byte-identical. Sections rendered later re-run it themselves.
      */
     protectIdentityTerms(document.body);
+
+    // Measure the sticky chrome once everything above it exists.
+    initStickyOffset();
 
     // Runs last so dynamically rendered cards are observed too.
     initScrollReveal();
