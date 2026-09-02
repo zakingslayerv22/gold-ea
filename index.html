@@ -30,7 +30,16 @@
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&family=Roboto:wght@400;500;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <!--
+        Exactly the weights the stylesheet uses. A weight that is not
+        listed here gets synthesised by the browser, which renders at a
+        different width and reads as a size change — so keep this in step
+        with the type scale in styles.css.
+          Montserrat  900        headings
+          Roboto      400–900    everything else
+          Roboto Mono 400, 600   wallet address, file name, whitelist URL
+    -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@900&family=Roboto:wght@400;500;600;700;900&family=Roboto+Mono:wght@400;600&display=swap" rel="stylesheet">
 
     <link rel="stylesheet" href="assets/styles/styles.css">
 </head>
@@ -473,7 +482,7 @@
                      SECTION 8 — DOWNLOAD (§14) shares this band
                      ================================================== -->
                 <section class="section section--black" id="free-access" aria-labelledby="free-access-title">
-                    <div class="container container--sm section__inner free-access__inner">
+                    <div class="container section__inner free-access__inner">
                         <p class="eyebrow scroll-reveal">Free Access</p>
                         <h2 class="section-heading section-heading--center scroll-reveal"
                             id="free-access-title">
@@ -518,7 +527,7 @@
                     </div>
 
                     <!-- Section 8 — Download -->
-                    <div class="container container--md section__inner download__inner" id="downloads">
+                    <div class="container container--narrow section__inner download__inner" id="downloads">
                         <p class="eyebrow-pill scroll-reveal">
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                             Downloads
@@ -635,7 +644,7 @@
                      ================================================== -->
                 <section class="section section--zinc" id="faq" aria-labelledby="faq-title"
                          data-faq-mode="single" data-faq-limit="6">
-                    <div class="container container--md section__inner faq__inner">
+                    <div class="container container--narrow section__inner faq__inner">
                         <p class="eyebrow scroll-reveal">FAQ</p>
                         <h2 class="section-heading section-heading--sm section-heading--center scroll-reveal" id="faq-title">
                             Frequently Asked Questions
@@ -665,7 +674,7 @@
              SECTION 10 — FOOTER (§18)
              ================================================== -->
         <footer class="site-footer">
-                <div class="container site-footer__inner">
+                <div class="container container--footer site-footer__inner">
                     <!-- Editable footer caveat / disclaimer — text from main.js -->
                     <p id="footer-caveat" class="scroll-reveal"></p>
 
@@ -700,7 +709,7 @@
         <span class="chat-widget__avatar-wrap">
             <span class="chat-widget__pulse" aria-hidden="true"></span>
             <img class="chat-widget__avatar" src="assets/images/chat-avatar.png"
-                 alt="" width="68" height="68">
+                 alt="" width="56" height="56">
             <span class="chat-widget__status" aria-hidden="true"></span>
         </span>
     </a>
