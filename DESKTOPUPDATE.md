@@ -2228,3 +2228,190 @@ behaviour were both re-tested and are unchanged.
    means adding `translate="no"` / `notranslate` to the wordmark elements,
    which changes behaviour this brief did not ask for. Say the word and it
    is a small change.
+
+---
+
+# Identity Strings Are Never Translated
+
+**Date:** 1 September 2026
+**Scope:** contained. No mobile work started, no redesign, no refactoring
+beyond the one helper described below.
+
+## The problem
+
+Google Translate has no concept of a proper noun. Left alone it rendered the
+wordmark as "TRAMPA DE ORO EA" in Spanish and "جولدن بوكس" in Arabic. A
+brand, a version, a file name, a symbol, a price and — above all — a wallet
+address are **identifiers**, not prose: they must appear byte-identical in
+every language. The prose around them should still translate normally.
+
+## One helper, two entry points, one rule
+
+`main.js` gained a single protection helper rather than scattered markup.
+Both mechanisms are applied together — `translate="no"` is the standard
+attribute, `class="notranslate"` is what Google's engine honours most
+reliably.
+
+```js
+markNotTranslatable(element)         // applies both markers
+protectIdentityText(element, value)  // the element IS the identifier
+protectIdentityTerms(root)           // identifiers EMBEDDED in prose
+```
+
+- **`protectIdentityText(el, value)`** marks the element and writes the text
+  in one call, so a future developer cannot write the text and forget the
+  marking. Used where the element carries nothing but the identifier: the
+  wordmark, the version, the file name, the whitelist URL, a live-updated
+  price.
+
+- **`protectIdentityTerms(root)`** walks the text nodes under `root` and
+  wraps only the identifiers it finds in marked spans, leaving the sentence
+  around them free to translate. It skips `script`, `style`, `textarea`,
+  anything already marked, and Google's own injected UI, so it is safe to
+  call repeatedly.
+
+**The rule:** never mark a parent and assume a later `textContent` write
+inherits it. It does not — rewriting `textContent` destroys any marked
+children. Every identity write goes through one of the two functions, and
+`protectIdentityTerms()` is re-run over anything rendered after load.
+
+### Where it runs
+
+| call site | why |
+| --- | --- |
+| end of `init()` | one sweep once every section has rendered |
+| homepage FAQ, first render | answers name MT4/MT5, XAUUSD and the product |
+| homepage FAQ, on category change | the re-render discards the previous marking |
+| purchase dialog, on open | rows are rebuilt each time, wallet address included |
+| pricing card, when a countdown ends | the price element is rewritten live |
+| FAQ page boot | hero, popular chips, category navigation |
+| FAQ page `renderResults()` | re-runs on every keystroke of the search |
+
+`protectIdentityTerms` is handed to `faq-page.js` through the existing
+config object, alongside `observeReveal` — so there is still one
+implementation, not two.
+
+## The complete list of protected strings
+
+Every one of these was confirmed marked in the rendered DOM.
+
+| string | where it appears |
+| --- | --- |
+| `GOLDTRAP EA` (`siteName`) | nav wordmark, hero H1, section headings that embed it, dialog title, FAQ questions and answers, footer copyright, document title |
+| `Abang Rimba` (`siteOwner`) | footer copyright, chat hover label, dialog note, FAQ answers |
+| `v4.2.3` (`eaCurrentVersion`) | download card, FAQ support panel, source-code dialog |
+| `GoldTrap_v4_2_3.ex5` / `.ex4` (`eaCurrentFileName`) | both download cards |
+| `TM74BDqkK3uoaJpZiFcNNChnj8jXQ3xWrT` (`walletAddress`) | purchase dialog |
+| `TRC20 (TRON)` (`paymentNetwork`) | purchase dialog |
+| `USDT` (`paymentAmountSuffix`) | plan cards, dialog amount suffix |
+| `https://a689.link` (`metaTraderWhitelist`) | setup note |
+| `MetaTrader 4`, `MetaTrader 5`, `MetaTrader`, `MT4`, `MT5` | nav, hero eyebrow, benefits, download cards, 72 FAQ answers |
+| `XAUUSD` | hero copy, benefits, FAQ answers |
+| `Telegram` | buttons, dialog note, FAQ answers |
+| `$299`, `$740`, `$9,650`, `FREE` and any `$n,nnn.nn` | plan cards, source-code price, dialog amount |
+| plan names in the dialog (`Unlimited`, `5 Accounts`) | purchase dialog rows |
+
+80 marked elements on the homepage, 142 on the FAQ page. A sweep for
+unprotected occurrences of any term on either page returns **zero**.
+
+## Two decisions worth knowing
+
+**1. "FREE" is protected, after trying the opposite.** It is a word rather
+than a figure, so it was first left translatable — and Google, with no
+sentence around it, picked the wrong sense in four of six languages:
+Chinese "自由的" and Arabic "حر" mean free as in *liberty*, and German gave
+"FREI". A price field reading that is worse than one reading English, so it
+is marked. Change it in `renderPlanCard` if you disagree.
+
+**2. Spaces are pulled inside the protected span.** Google replaces each
+translatable text node wholesale and trims its edges, so a space left
+*outside* a marked span is silently eaten: the footer first rendered as
+"© 2026 GOLDTRAP EAporAbang Rimba" in Spanish. `protectIdentityTerms()`
+absorbs one leading and one trailing space into the span, where the engine
+cannot touch it. The footer now reads "© 2026 GOLDTRAP EA por Abang Rimba".
+A test asserts no protected term ends up glued to a neighbouring word in any
+of the six languages.
+
+## Verification
+
+Six languages — Spanish, French, Arabic, Chinese, German, Portuguese — plus
+a return to English. **83 assertions, 0 failures.**
+
+For every language:
+
+- the wordmark and the hero H1 read exactly `GOLDTRAP EA`;
+- **the hero shimmer is intact** — `background-clip: text` still computes to
+  `text`, the animation is still `gt2-shimmer`, and the gradient is still a
+  `linear-gradient`. Marking the H1 non-translatable does not disturb the
+  clip, because the marking is an attribute and a class, not a box change;
+- version, file name and whitelist URL are unchanged;
+- prices and currency codes are unchanged;
+- the XAUUSD and MT5 occurrence counts are identical to English, so nothing
+  was translated away;
+- the owner's name survives in the footer and the chat label, with correct
+  spacing;
+- **ordinary prose still translates** — the nav reads "Cómo se negocia",
+  "Comment ça se négocie", "كيفية التداول", "交易方式", "Wie es gehandelt
+  wird", "Como funciona o sistema de negociação", and plan captions,
+  headings and FAQ answers all translate normally;
+- no layout overflow, and Arabic (RTL) leaves the header exactly 1344px
+  wide — unchanged from English;
+- the browser tab title still carries the brand name: Google translates the
+  tagline but leaves `GOLDTRAP EA` and `MT4/MT5` verbatim in all six.
+
+**The wallet address is byte-identical in all six languages** —
+`TM74BDqkK3uoaJpZiFcNNChnj8jXQ3xWrT` — and clicking copy in a translated
+page puts exactly that string on the clipboard. Verified per language, by
+opening the dialog and reading the clipboard back.
+
+The FAQ page under German: the heading and questions translate, all 72
+answers still render, every identity term keeps its exact occurrence count,
+and searching a protected term (`XAUUSD`) still returns 12 answers rather
+than the no-results card. The download file name and whitelist URL are
+unchanged after a reload in German, and their copy buttons still copy the
+correct values.
+
+### Nothing regressed
+
+| suite | result |
+| --- | --- |
+| Identity strings, six languages | 83 / 0 |
+| FAQ page + downloads under translation | 9 / 0 |
+| Desktop regression (type, gutters, fonts, shimmer, chat) | 48 / 0 |
+| Translation (Chromium + WebKit, round trips, keyboard) | 28 / 0 |
+| Interactions (dialogs, clipboard, timers, accordion, search) | 12 / 0 |
+| FAQ desktop | 52 / 0 |
+| FAQ fix pass | 44 / 0 |
+| FAQ no-results states | 27 / 0 |
+| Homepage | 10 / 0 |
+| Homepage FAQ | 12 / 0 |
+| Homepage pill-by-pill | 83 / 0 |
+
+**408 assertions, 0 failures**, no console or page errors on either page.
+The FAQ single-source-of-truth architecture, the search / no-results logic,
+the type scale, the container widths, the 56 × 56 launcher and the hardened
+English reset are all untouched and re-verified. No FAQ question or answer
+text was altered.
+
+## Flagged rather than changed
+
+1. **The `<title>` element cannot carry a marked span**, so Google
+   translates the tagline part of it. The brand name survives verbatim in
+   all six languages because it is matched as a term, but the surrounding
+   words do change in the browser tab. That is normal behaviour for a
+   translated page and reads correctly; say the word if you would rather
+   the whole title were frozen.
+
+2. **`aria-label` and other attribute text are not covered.** The helper
+   protects text nodes; attributes such as the wallet button's
+   `aria-label="Copy TM74…"` are separate strings. Google does translate
+   some attributes. The visible address is protected, so a sighted or
+   copying user is safe, but a screen-reader user in a translated page may
+   hear a translated label around the address. Fixing it properly means
+   marking attributes individually — worth a small follow-up if you want it.
+
+3. **`VT Markets`** — the partner broker's name — is a proper noun and is
+   currently translated along with the prose ("Registro a través de VT
+   Markets IB" happens to survive, but nothing guarantees it). It was not on
+   your list, so it was left alone. One line to add if you want it
+   protected.

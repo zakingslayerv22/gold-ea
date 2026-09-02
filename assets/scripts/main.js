@@ -565,6 +565,205 @@ function applySiteColors() {
  * rewritten from the same values.
  * ====================================================================== */
 
+/* ======================================================================
+ * IDENTITY STRINGS MUST NEVER BE TRANSLATED
+ * ======================================================================
+ * A brand name, a version, a wallet address, a file name, a symbol or a
+ * price is an IDENTIFIER, not prose. Google Translate does not know that:
+ * left alone it renders the wordmark as "TRAMPA DE ORO EA" in Spanish and
+ * "جولدن بوكس" in Arabic. A translated, transliterated or re-spaced wallet
+ * address is the worst case of all — someone could send funds nowhere.
+ *
+ * Two mechanisms are applied together, because they cover different cases:
+ *   translate="no"          the standards-compliant HTML attribute
+ *   class="notranslate"     what Google's engine honours most reliably
+ *
+ * There are two ways to use this, and one rule.
+ *
+ *   protectIdentityText(element, value)
+ *       The element IS the identifier — a wordmark, a price, a wallet
+ *       address. Marks it and writes the text in one step, so a future
+ *       developer cannot write the text and forget the marking.
+ *
+ *   protectIdentityTerms(root)
+ *       The identifier is EMBEDDED IN PROSE that should still translate.
+ *       Walks the text under `root` and wraps only the identifiers it
+ *       finds in marked spans, leaving the sentence around them free to
+ *       translate.
+ *
+ * THE RULE: never mark a parent and assume a later textContent write
+ * inherits it. It does not — rewriting textContent destroys any marked
+ * children. Every identity write goes through one of the two functions
+ * above, and protectIdentityTerms() is re-run over anything rendered
+ * after load.
+ * ====================================================================== */
+
+/** Applies both non-translatable markers to one element. */
+function markNotTranslatable(element) {
+    if (!element) {
+        return element;
+    }
+    element.setAttribute("translate", "no");
+    element.classList.add("notranslate");
+    return element;
+}
+
+/**
+ * Writes an identity string into an element and marks the whole element
+ * non-translatable. Use when the element carries nothing but the
+ * identifier.
+ *
+ * @param {Element|null} element
+ * @param {string} value
+ * @returns {Element|null} the element, for chaining
+ */
+function protectIdentityText(element, value) {
+    if (!element) {
+        return null;
+    }
+    markNotTranslatable(element);
+    element.textContent = value;
+    return element;
+}
+
+/**
+ * Every string that must survive translation byte-for-byte.
+ *
+ * Order matters: the list is sorted longest-first before matching, so
+ * "MetaTrader 5" wins over "MetaTrader" and the full file name wins over
+ * the version inside it. Prices are matched by pattern rather than by
+ * value, since they are configurable per plan.
+ */
+function getIdentityTerms() {
+    return [
+        siteName,
+        siteOwner,
+        eaCurrentVersion,
+        eaCurrentFileName,
+        eaFileNameFor("mt4"),
+        walletAddress,
+        paymentNetwork,
+        paymentAmountSuffix,
+        metaTraderWhitelist,
+        "MetaTrader 4",
+        "MetaTrader 5",
+        "MetaTrader",
+        "MT4",
+        "MT5",
+        "XAUUSD",
+        "Telegram"
+    ].filter(Boolean).sort((a, b) => b.length - a.length);
+}
+
+/** Prices and money figures: $299, $9,650, $1.50. */
+const identityPricePattern = /\$\d[\d,]*(?:\.\d+)?/;
+
+/** Elements whose subtree must never be walked or rewritten. */
+const identitySkipSelector =
+    "script, style, textarea, .notranslate, [translate='no'], " +
+    ".gtranslate_wrapper, #goog-gt-tt, .skiptranslate";
+
+/**
+ * Wraps every identity term found in the text under `root` in a marked
+ * span, leaving the surrounding prose translatable.
+ *
+ * Safe to call repeatedly: a term that has already been wrapped now sits
+ * inside a `.notranslate` element, and those subtrees are skipped. Call it
+ * again after rendering anything new — the FAQ list, a dialog, the pricing
+ * cards — so late content is protected too.
+ *
+ * @param {Node} [root=document.body]
+ */
+function protectIdentityTerms(root = document.body) {
+    if (!root) {
+        return;
+    }
+
+    const terms = getIdentityTerms();
+    // One pattern: the identifiers, plus the price shape, in one pass.
+    const escaped = terms.map((term) => term.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"));
+    const pattern = new RegExp(
+        `(${escaped.join("|")}|${identityPricePattern.source})`,
+        "g"
+    );
+
+    const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
+        acceptNode(node) {
+            if (!node.nodeValue || !node.nodeValue.trim()) {
+                return NodeFilter.FILTER_REJECT;
+            }
+            if (node.parentElement && node.parentElement.closest(identitySkipSelector)) {
+                return NodeFilter.FILTER_REJECT;
+            }
+            return NodeFilter.FILTER_ACCEPT;
+        }
+    });
+
+    // Collect first: rewriting while walking would invalidate the walker.
+    const targets = [];
+    let current = walker.nextNode();
+
+    while (current) {
+        pattern.lastIndex = 0;
+        if (pattern.test(current.nodeValue)) {
+            targets.push(current);
+        }
+        current = walker.nextNode();
+    }
+
+    targets.forEach((textNode) => {
+        const fragment = document.createDocumentFragment();
+        const text = textNode.nodeValue;
+        let index = 0;
+
+        pattern.lastIndex = 0;
+        let match = pattern.exec(text);
+
+        while (match) {
+            /*
+             * The spaces either side of the term are pulled INSIDE the
+             * protected span. Google replaces each translatable text node
+             * wholesale and trims its edges, so a space left outside is
+             * silently eaten and the line renders as
+             * "© 2026 GOLDTRAP EAporAbang Rimba". Inside the span it is
+             * untouchable. `index` clamps the start so two adjacent terms
+             * cannot both claim the same space.
+             */
+            let start = match.index;
+            if (start > index && text[start - 1] === " ") {
+                start -= 1;
+            }
+
+            let end = match.index + match[0].length;
+            if (text[end] === " ") {
+                end += 1;
+            }
+
+            if (start > index) {
+                fragment.append(text.slice(index, start));
+            }
+
+            const span = document.createElement("span");
+            markNotTranslatable(span);
+            span.textContent = text.slice(start, end);
+            fragment.append(span);
+            index = end;
+            match = pattern.exec(text);
+            // A match already swallowed by the space above is skipped.
+            while (match && match.index < index) {
+                match = pattern.exec(text);
+            }
+        }
+
+        if (index < text.length) {
+            fragment.append(text.slice(index));
+        }
+
+        textNode.parentNode.replaceChild(fragment, textNode);
+    });
+}
+
+
 /** Replaces the {siteName} / {eaVersion} placeholders in a string. */
 function fillTokens(text) {
     return text
@@ -582,20 +781,26 @@ function eaFileNameFor(platform) {
 }
 
 function applySiteIdentity() {
+    // The element IS the identifier: marked and written in one step.
     qsa("[data-site-name]").forEach((element) => {
-        element.textContent = siteName;
-    });
-
-    qsa("[data-site-name-in]").forEach((element) => {
-        element.textContent = fillTokens(element.textContent);
+        protectIdentityText(element, siteName);
     });
 
     qsa("[data-ea-version]").forEach((element) => {
-        element.textContent = eaCurrentVersion;
+        protectIdentityText(element, eaCurrentVersion);
     });
 
     qsa("[data-ea-filename]").forEach((element) => {
-        element.textContent = eaFileNameFor(element.dataset.eaFilename);
+        protectIdentityText(element, eaFileNameFor(element.dataset.eaFilename));
+    });
+
+    /*
+     * These carry the name INSIDE a sentence, so the element itself stays
+     * translatable and only the substituted identifier is protected —
+     * protectIdentityTerms() at the end of init() wraps it.
+     */
+    qsa("[data-site-name-in]").forEach((element) => {
+        element.textContent = fillTokens(element.textContent);
     });
 
     // Metadata — the title pattern is supplied by the page itself.
@@ -1278,6 +1483,11 @@ function initLiveChat() {
 
     // Hover/focus label text comes from configuration, not the markup.
     withElement(qs("#live-chat-label", launcher), (labelElement) => {
+        /*
+         * liveChatIconHoverText interpolates ${siteOwner}, so the owner's
+         * name is inside the label. The label itself stays translatable —
+         * protectIdentityTerms() wraps just the name.
+         */
         labelElement.textContent = liveChatIconHoverText;
     });
 
@@ -1519,6 +1729,11 @@ const purchaseDialog = {
             confirm.querySelector(".btn-label").textContent = payload.ctaLabel;
         });
 
+        // The dialog's rows are rebuilt on every open, so the wallet
+        // address, amount, network and any identifier in the note are
+        // re-protected here, immediately before it becomes visible.
+        protectIdentityTerms(this.element);
+
         if (typeof this.element.showModal === "function") {
             this.element.showModal();
         } else {
@@ -1546,7 +1761,13 @@ function renderPurchaseRow(row) {
             <button type="button" class="wallet-row" aria-label="Copy ${row.value}">
                 <span>
                     <span class="wallet-row__label">${row.label}</span>
-                    <span class="wallet-row__value">${row.value}</span>
+                    <!--
+                        THE highest-stakes string on the site. A translated,
+                        transliterated or re-spaced address could send funds
+                        nowhere, so it is marked here in the markup that
+                        creates it rather than relying on an ancestor.
+                    -->
+                    <span class="wallet-row__value notranslate" translate="no">${row.value}</span>
                 </span>
                 <span class="wallet-row__icon">
                     <svg class="icon-copy" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
@@ -1564,14 +1785,20 @@ function renderPurchaseRow(row) {
         .filter(Boolean)
         .join(" ");
 
+    // The amount suffix ("USDT") is a currency code, never translated.
     const suffix = row.suffix
-        ? `<span class="purchase-row__suffix">${row.suffix}</span>`
+        ? `<span class="purchase-row__suffix notranslate" translate="no">${row.suffix}</span>`
         : "";
 
+    /*
+     * Row LABELS ("Plan", "Amount", "Network") are prose and translate
+     * normally. Row VALUES are identifiers — the plan name, the price, the
+     * network — and are marked here, on the element that receives them.
+     */
     return `
         <div class="purchase-row">
             <span class="purchase-row__label">${row.label}</span>
-            <span class="${valueClasses}">${row.value}${suffix}</span>
+            <span class="${valueClasses} notranslate" translate="no">${row.value}${suffix}</span>
         </div>
     `;
 }
@@ -1626,8 +1853,9 @@ function renderPlanCard(plan, index) {
     const accentClass = plan.accent === "green" ? " plan-card--free" : "";
 
     const priceText = isFree ? "FREE" : `$${formatPrice(plan.price)}`;
+    // The currency code is an identifier, not a word.
     const currency = plan.currency
-        ? `<span class="plan-card__currency">${plan.currency}</span>`
+        ? `<span class="plan-card__currency notranslate" translate="no">${plan.currency}</span>`
         : "";
 
     const hotBadge = plan.hot
@@ -1689,7 +1917,16 @@ function renderPlanCard(plan, index) {
             <p class="plan-card__eyebrow">${eyebrowIcon}<span>${plan.eyebrow}</span></p>
             <h3 class="plan-card__name">${plan.planName}</h3>
             <div class="plan-card__price-row">
-                <span class="plan-card__price" data-plan-price-display>${priceText}</span>
+                <!--
+                    The price cell, including the free plan's "FREE".
+                    Leaving "FREE" translatable was tried and reverted:
+                    with no sentence around it Google picks the wrong sense
+                    of the word — "自由的" and "حر" mean free as in liberty,
+                    and German gave "FREI". A price field reading that is
+                    worse than one reading English.
+                -->
+                <span class="plan-card__price notranslate" translate="no"
+                      data-plan-price-display>${priceText}</span>
                 ${currency}
                 ${hotBadge}
             </div>
@@ -1754,13 +1991,16 @@ function setTimer(card, plan) {
         // Keep the card's data attribute authoritative for the dialog.
         card.dataset.planPrice = String(newPrice);
 
+        // Rewritten live, so it is re-marked on the element being written.
         withElement(qs("[data-plan-price-display]", card), (display) => {
-            display.textContent = `$${formatPrice(newPrice)}`;
+            protectIdentityText(display, `$${formatPrice(newPrice)}`);
         });
 
         withElement(qs(".plan-card__cta .btn-label", card), (label) => {
             label.textContent =
                 `${plan.cta.label} — $${formatPrice(newPrice)} ${plan.currency}`.trim();
+            // "Buy Now" translates; the price and currency inside must not.
+            protectIdentityTerms(label);
         });
     }
 
@@ -1884,8 +2124,9 @@ function initLiveResults() {
 
 function initDownload() {
     // The whitelist URL is printed from configuration, never hard-coded.
+    // A URL a visitor copies character for character: never translated.
     withElement(qs("#whitelist-url"), (element) => {
-        element.textContent = metaTraderWhitelist;
+        protectIdentityText(element, metaTraderWhitelist);
     });
 
     initCopyControl(
@@ -1937,6 +2178,8 @@ function initFaq() {
         panelsContainer.innerHTML = categoryIds
             .map((id) => renderFaqCategoryBlock(faqData[id], id, questionLimit))
             .join("");
+        // FAQ prose mentions MT4/MT5, XAUUSD and the product by name.
+        protectIdentityTerms(panelsContainer);
         openFirstFaqItem(panelsContainer);
     } else {
         categoriesContainer.innerHTML = categoryIds
@@ -1986,6 +2229,9 @@ function initFaq() {
             categoryId,
             questionLimit
         );
+
+        // Re-rendered content is unprotected until this runs over it.
+        protectIdentityTerms(panelsContainer);
 
         // The mockup shows the first question of a category already open.
         openFirstFaqItem(panelsContainer);
@@ -2109,7 +2355,14 @@ function renderFaqItem(entry, key) {
 function initFooter() {
     // Copyright is generated — the year is never hard-coded (§18.1).
     withElement(qs("#footer-copyright"), (element) => {
-        element.textContent = `© ${new Date().getFullYear()} ${siteName} by ${siteOwner}`;
+        /*
+         * "© 2026 GOLDTRAP EA by Abang Rimba" — the year and the word "by"
+         * are prose and may translate; the two names may not. The sentence
+         * is written whole and protectIdentityTerms() (run at the end of
+         * init) wraps just the names.
+         */
+        element.textContent =
+            `© ${new Date().getFullYear()} ${siteName} by ${siteOwner}`;
     });
 
     // The editable footer caveat / disclaimer (§18.2).
@@ -2147,7 +2400,7 @@ function initConfiguredLinks() {
 
     // The site name appears in the header wordmark and the document title.
     qsa("[data-site-name]").forEach((element) => {
-        element.textContent = siteName;
+        protectIdentityText(element, siteName);
     });
 }
 
@@ -2292,10 +2545,20 @@ function init() {
         telegramPersonal,
         telegramChannel,
         // Lets the FAQ page register list content it renders after load.
-        observeReveal
+        observeReveal,
+        // ...and protect the identity strings inside what it renders.
+        protectIdentityTerms
     });
 
     initFooter();
+
+    /*
+     * Identity strings last, once every section has rendered: this walks
+     * the page and wraps brand names, versions, file names, symbols,
+     * platform names and prices so the translation layer leaves them
+     * byte-identical. Sections rendered later re-run it themselves.
+     */
+    protectIdentityTerms(document.body);
 
     // Runs last so dynamically rendered cards are observed too.
     initScrollReveal();

@@ -106,7 +106,11 @@ export function initFaqPage(config = {}) {
         // Registers content rendered after page load with the site's own
         // scroll-reveal observer. Without it, re-rendered groups keep the
         // .scroll-reveal starting state and the list is invisible.
-        observeReveal = () => {}
+        observeReveal = () => {},
+        // Marks brand names, versions, platform names, symbols and prices
+        // inside rendered answers as non-translatable. Every re-render
+        // needs it again: replacing the markup discards the marking.
+        protectIdentityTerms = () => {}
     } = config;
 
     /** The same token substitution the rest of the site uses (§18, §25). */
@@ -348,6 +352,11 @@ export function initFaqPage(config = {}) {
                     )
                     .join("");
                 results.hidden = false;
+
+                // Identity strings first: the answers are full of MT4/MT5,
+                // XAUUSD, file names and the product name, and this markup
+                // has just replaced whatever was protected before.
+                protectIdentityTerms(results);
 
                 // Every re-render produces brand new .scroll-reveal sections.
                 // They must be handed back to the observer or they stay at
@@ -710,6 +719,14 @@ export function initFaqPage(config = {}) {
     renderPopular();
     update();
     watchHeroSearch();
+
+    /*
+     * The hero, the popular chips and the category navigation are rendered
+     * once at boot and never replaced, so one sweep covers them. The answer
+     * list is different — it is re-rendered on every keystroke, so it
+     * protects itself inside renderResults().
+     */
+    protectIdentityTerms(document.body);
 
     // The support button reuses the configured Telegram destination (§16).
     qsa("[data-faq-telegram]").forEach((link) => {
