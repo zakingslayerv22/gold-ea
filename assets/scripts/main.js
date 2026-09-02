@@ -313,6 +313,29 @@ const termsAndConditionsLink = "#";
 
 const translationDefaultLanguage = "en";
 
+/*
+ * TRANSLATION DIAGNOSTICS
+ * ----------------------------------------------------------------------
+ * Set to true and every step of a language switch is logged to the browser
+ * console, prefixed with [translate]. Set to false to silence it.
+ *
+ * What each line tells you:
+ *   script requested / loaded / FAILED  the GTranslate widget script
+ *   init                                the selector wired up, plus the
+ *                                       googtrans cookie found at load
+ *   select                              a language was chosen
+ *   reset                               English chosen: cookie before,
+ *                                       what was cleared, cookie after
+ *   apply                               the pair handed to the widget
+ *   engine missing                      the hidden switcher never appeared
+ *
+ * If a switch appears dead, the useful lines are `reset` and `apply`: a
+ * cookie that is still present on the "after" line means something is
+ * writing it back, and an `engine missing` line means the widget script
+ * never rendered its switcher (usually a blocked request).
+ */
+const translationDiagnostics = true;
+
 const translationLanguages = [
     { code: "en", name: "English" },
     { code: "es", name: "Spanish" },
@@ -728,6 +751,11 @@ function loadGTranslate() {
     const script = document.createElement("script");
     script.id = "gtranslate-script";
     script.src = "https://cdn.gtranslate.net/widgets/latest/dropdown.js";
+    script.addEventListener("load", () => translationLog("script loaded"));
+    script.addEventListener("error", () =>
+        translationLog("script FAILED to load — the request was blocked or offline")
+    );
+    translationLog("script requested", script.src);
     script.defer = true;
     document.body.append(script);
 }
@@ -773,15 +801,49 @@ function callGTranslate(languagePair, attempt = 0) {
         preloadTranslationEngine();
         selector.value = languagePair;
         selector.dispatchEvent(new Event("change", { bubbles: true }));
+        translationLog("apply", { pair: languagePair, afterAttempts: attempt });
         return;
     }
 
     if (attempt < 60) {
         window.setTimeout(() => callGTranslate(languagePair, attempt + 1), 150);
+        return;
     }
+
+    translationLog("engine missing — the hidden switcher never appeared", {
+        pair: languagePair
+    });
 }
 
-/** Removes the googtrans cookie from every host/path it may be set on. */
+/** Reads the raw googtrans cookie, or null. Used by the diagnostics. */
+function readTranslationCookie() {
+    const match = document.cookie.match("(^|;) ?googtrans=([^;]*)(;|$)");
+    return match ? decodeURIComponent(match[2]) : null;
+}
+
+/** Console tracing for the translation flow. See translationDiagnostics. */
+function translationLog(step, detail) {
+    if (!translationDiagnostics) {
+        return;
+    }
+    window.console.log(`[translate] ${step}`, detail === undefined ? "" : detail);
+}
+
+/**
+ * Removes the googtrans cookie from every host and path variant it may
+ * have been written on.
+ *
+ * GTranslate and Google's own element do not agree on where they set it:
+ * depending on which wrote it, it can live on the bare host, on the
+ * dot-prefixed host, on the registrable domain, and at "/" or at the
+ * current path. A cookie left behind on ANY of those keeps the page
+ * translated, which is what makes a return to English look dead — the
+ * text reverts and then the surviving cookie puts it straight back on the
+ * next navigation. So every combination is expired, not just the one we
+ * think we wrote.
+ *
+ * @returns {string[]} the variants that were cleared, for the log.
+ */
 function clearTranslationCookie() {
     const hostname = window.location.hostname;
     const domains = ["", hostname, "." + hostname];
@@ -792,10 +854,81 @@ function clearTranslationCookie() {
         domains.push("." + parts.slice(-2).join("."));
     }
 
+    // Both the root path and the current directory: a cookie written at a
+    // deeper path shadows the one at "/" and is not cleared by expiring "/".
+    const paths = new Set(["/", window.location.pathname]);
+    const directory = window.location.pathname.replace(/[^/]*$/, "");
+    if (directory) {
+        paths.add(directory);
+    }
+
+    const cleared = [];
+
     domains.forEach((domain) => {
-        const suffix = domain ? "; domain=" + domain : "";
-        document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/" + suffix;
+        paths.forEach((path) => {
+            const suffix = domain ? "; domain=" + domain : "";
+            document.cookie =
+                "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=" +
+                path + suffix;
+            cleared.push(`${domain || "(host)"}${path}`);
+        });
     });
+
+    return cleared;
+}
+
+/**
+ * Returns the page to English.
+ *
+ * English is treated as an explicit RESET, not as "just another language".
+ * Asking the widget for en|en tells it to restore the original text, but
+ * it is the cookie that decides whether the page comes back translated,
+ * so the cookie is cleared afterwards across every variant above and the
+ * result is verified. If a cookie survives — something wrote it back — the
+ * page is reloaded once, which is the only guaranteed way to drop
+ * Google's in-memory state.
+ */
+function resetSiteLanguageToDefault() {
+    const before = readTranslationCookie();
+    translationLog("reset requested", { cookieBefore: before });
+
+    // Restore the original text FIRST, then forget the cookie: clearing it
+    // first makes the widget treat the call as a no-op and the visitor is
+    // stranded in the translated page.
+    callGTranslate(`${translationDefaultLanguage}|${translationDefaultLanguage}`);
+
+    window.setTimeout(() => {
+        const cleared = clearTranslationCookie();
+        const after = readTranslationCookie();
+        translationLog("reset cookie cleared", { variants: cleared, cookieAfter: after });
+
+        if (!after) {
+            return;
+        }
+
+        /*
+         * The cookie came back. Nothing else can be done from here without
+         * a fresh document, so reload once — guarded by a sessionStorage
+         * flag so a persistent cookie can never cause a reload loop.
+         */
+        const guard = "goldtrap-translate-reset";
+        let alreadyTried = false;
+        try {
+            alreadyTried = window.sessionStorage.getItem(guard) === "1";
+            window.sessionStorage.setItem(guard, "1");
+        } catch (error) {
+            // Private mode or storage disabled: skip the reload entirely
+            // rather than risk looping.
+            alreadyTried = true;
+        }
+
+        if (!alreadyTried) {
+            translationLog("reset needs reload", { cookieAfter: after });
+            window.location.reload();
+        } else {
+            translationLog("reset FAILED — cookie persists", { cookieAfter: after });
+        }
+    }, 120);
 }
 
 /**
@@ -803,11 +936,19 @@ function clearTranslationCookie() {
  * Handles English → other, other → other, and other → English alike.
  */
 function setSiteLanguage(languageCode) {
+    translationLog("select", { to: languageCode, cookie: readTranslationCookie() });
+
     if (languageCode === translationDefaultLanguage) {
-        // Restore the original text FIRST, then forget the cookie.
-        callGTranslate(`${translationDefaultLanguage}|${translationDefaultLanguage}`);
-        window.setTimeout(clearTranslationCookie, 60);
+        resetSiteLanguageToDefault();
         return;
+    }
+
+    // Leaving English for another language: the reset guard is spent, so a
+    // later return to English may reload again if it has to.
+    try {
+        window.sessionStorage.removeItem("goldtrap-translate-reset");
+    } catch (error) {
+        // Storage unavailable — the guard simply stays as it is.
     }
 
     callGTranslate(`${translationDefaultLanguage}|${languageCode}`);
@@ -848,19 +989,39 @@ function initTranslation() {
         toggle.setAttribute("aria-label", `Language: ${entry.name}. Change language`);
     }
 
-    // Reflect the language the visitor is already in (cookie survives reloads).
+    /*
+     * Reflect the language the visitor is already in — the cookie survives
+     * reloads, so a returning visitor lands on a translated page and the
+     * control must say so.
+     *
+     * A cookie naming a language the selector does not offer, or naming
+     * English itself (en/en, which some widget versions leave behind), is
+     * STALE: it is cleared here rather than trusted, because that leftover
+     * is exactly what makes a later switch look dead.
+     */
     let activeCode = getActiveTranslationLanguage();
+    const cookieAtLoad = readTranslationCookie();
     const activeEntry = allLanguages.find((language) => language.code === activeCode);
 
-    if (activeEntry) {
+    if (activeEntry && activeCode !== translationDefaultLanguage) {
         showCurrentLanguage(activeEntry);
     } else {
+        if (cookieAtLoad) {
+            translationLog("stale cookie at load — clearing", cookieAtLoad);
+            clearTranslationCookie();
+        }
         activeCode = translationDefaultLanguage;
         const fallback = allLanguages.find((l) => l.code === activeCode);
         if (fallback) {
             showCurrentLanguage(fallback);
         }
     }
+
+    translationLog("init", {
+        cookieAtLoad,
+        activeCode,
+        languagesListed: translationLanguages.length
+    });
 
     /**
      * Renders the option list.
@@ -926,6 +1087,89 @@ function initTranslation() {
     });
 
     search.addEventListener("input", () => renderOptions(search.value));
+
+    /**
+     * Moves the roving focus through the rendered options.
+     * The search field is the panel's first stop, so ArrowDown from it
+     * enters the list and ArrowUp from the first option returns to it.
+     *
+     * @param {HTMLElement} from the element focus is leaving
+     * @param {number} step +1 for down, -1 for up
+     */
+    function moveOptionFocus(from, step) {
+        const options = qsa(".lang-select__option", list);
+        if (options.length === 0) {
+            return;
+        }
+
+        const current = options.indexOf(from);
+
+        if (current === -1) {
+            // Coming from the search field.
+            (step > 0 ? options[0] : options[options.length - 1]).focus();
+            return;
+        }
+
+        const next = current + step;
+
+        if (next < 0) {
+            search.focus();
+            return;
+        }
+
+        options[Math.min(next, options.length - 1)].focus();
+    }
+
+    /*
+     * Keyboard model for the panel (CLAUDE.md §22):
+     *   ArrowDown / ArrowUp  move through the options
+     *   Home / End           first / last option
+     *   Enter or Space       choose the focused option (native button)
+     *   Escape               close and return focus to the trigger
+     *   Tab                  still walks the options in order
+     */
+    panel.addEventListener("keydown", (event) => {
+        const target = event.target;
+
+        if (event.key === "ArrowDown") {
+            event.preventDefault();
+            moveOptionFocus(target, 1);
+            return;
+        }
+
+        if (event.key === "ArrowUp") {
+            event.preventDefault();
+            moveOptionFocus(target, -1);
+            return;
+        }
+
+        const options = qsa(".lang-select__option", list);
+
+        if (event.key === "Home" && options.length) {
+            event.preventDefault();
+            options[0].focus();
+            return;
+        }
+
+        if (event.key === "End" && options.length) {
+            event.preventDefault();
+            options[options.length - 1].focus();
+        }
+    });
+
+    // ArrowDown on the closed trigger opens the panel and enters the list.
+    toggle.addEventListener("keydown", (event) => {
+        if (event.key !== "ArrowDown" || isOpen()) {
+            return;
+        }
+        event.preventDefault();
+        preloadTranslationEngine();
+        openPanel();
+        const first = qs(".lang-select__option", list);
+        if (first) {
+            first.focus();
+        }
+    });
 
     // Delegated: one listener however many options are rendered.
     list.addEventListener("click", (event) => {

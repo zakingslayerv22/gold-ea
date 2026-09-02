@@ -27,7 +27,16 @@
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&family=Roboto:wght@400;500;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <!--
+        Exactly the weights the stylesheet uses. A weight that is not
+        listed here gets synthesised by the browser, which renders at a
+        different width and reads as a size change — so keep this in step
+        with the type scale in styles.css.
+          Montserrat  900        headings
+          Roboto      400–900    everything else
+          Roboto Mono 400, 600   wallet address, file name, whitelist URL
+    -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@900&family=Roboto:wght@400;500;600;700;900&family=Roboto+Mono:wght@400;600&display=swap" rel="stylesheet">
 
     <link rel="stylesheet" href="assets/styles/styles.css">
 </head>
@@ -285,7 +294,7 @@
             </main>
 
             <footer class="site-footer">
-                <div class="container site-footer__inner">
+                <div class="container container--footer site-footer__inner">
                     <p id="footer-caveat" class="scroll-reveal"></p>
 
                     <p class="terms-notice scroll-reveal">
@@ -310,7 +319,7 @@
         <span class="chat-widget__avatar-wrap">
             <span class="chat-widget__pulse" aria-hidden="true"></span>
             <img class="chat-widget__avatar" src="assets/images/chat-avatar.png"
-                 alt="" width="68" height="68">
+                 alt="" width="56" height="56">
             <span class="chat-widget__status" aria-hidden="true"></span>
         </span>
     </a>

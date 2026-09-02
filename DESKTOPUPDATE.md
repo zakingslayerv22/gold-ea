@@ -1842,3 +1842,389 @@ The footer's +55 is the specification's Terms and Conditions line, which
 the mockup does not contain. The pricing band's +77 is the pre-existing
 card height discussed in §2 above, the larger part of it being the
 timer's mandated reserved space.
+
+---
+
+# Desktop Regression Fix — Typography, Gutters, Translation, Live Chat Icon
+
+**Date:** 1 September 2026
+**Scope:** desktop only. No mobile or tablet work was started, and no
+responsive breakpoint was touched beyond the container change below.
+
+## 0. Source-of-truth hierarchy used
+
+Three inputs, ranked as the brief sets out:
+
+1. **`mockups/desktop/`** — composition: what exists, where, in what order,
+   layout, imagery, colour, hierarchy.
+2. **`https://eagoldtrap.com/en`** — exact numeric CSS: font sizes, weights,
+   line-heights, tracking, container widths, gutters. Measured, not
+   estimated, so it wins over a cap height read off a raster mockup.
+3. **The written brief** — binding on the font stacks, the `-0.02em` heading
+   tracking and the shimmer gradient; a starting hypothesis for numbers.
+
+Every value below was read off the reference site's computed styles at a
+1920px viewport before being implemented. Nothing was copied from that site
+— no markup, no class names, no copy, no assets.
+
+## 1. Typography
+
+### 1.1 The heading typeface had genuinely drifted
+
+The build was on **Poppins**. The mockup is **Montserrat**, which the brief
+also specifies, so the two agree and this was a real regression to fix.
+
+Two independent checks:
+
+- **Letterform.** The lowercase `a` in "Why Traders Choose" in
+  `mockups/desktop.png` is **double-storey**. Poppins' `a` is a
+  single-storey circle with a stem; Montserrat's is double-storey.
+- **Metric fit.** Scaling each candidate until its rendered ink width
+  matched the mockup's "GOLDTRAP EA" (681px) gave an ink height of 66px for
+  Montserrat against a measured 65px — 1px out. Poppins was 8px out and
+  Roboto 13px out.
+
+### 1.2 Font roles
+
+| face | role | weights loaded |
+| --- | --- | --- |
+| Montserrat | headings only, always with `letter-spacing: -0.02em` | 900 |
+| Roboto | everything else | 400, 500, 600, 700, 900 |
+| Roboto Mono | wallet address, download file name, whitelist URL | 400, 600 |
+
+The body stack and the rendering hints (`-webkit-font-smoothing`,
+`text-rendering`) are declared **once** on `html`. The display face and its
+tracking are declared **once**, on the `h1, h2, h3, h4` rule. Every heading
+in the site is one of those elements, so no component restates either.
+
+Countdown timers deliberately left the mono face: they are Roboto 18/900
+with `font-variant-numeric: tabular-nums`, so the digits are fixed-width and
+the timer cannot jitter as it ticks, without a typeface change. They stay
+bold and prominent.
+
+The `<link>` in both pages lists exactly the weights above. A weight that is
+not loaded gets synthesised by the browser, which renders at a different
+width and reads as a size change — the most likely cause of the reported
+"font sizes changed" and now verified against: **no element falls back to a
+system font**, and only Montserrat, Roboto and Roboto Mono appear in any
+computed style on the page.
+
+### 1.3 Type scale
+
+One scale, defined as custom properties in `:root`, referenced everywhere.
+No desktop rule carries a literal size any more; the only literal left is
+the deliberate 16px on the language search input, which stops iOS zooming
+the page when it is focused.
+
+```
+--fs-h1 72   --fs-h2 48   --fs-h2-sm 36   --fs-h3-lg 30   --fs-h3 20   --fs-h4 18
+--fs-lead 20 --fs-subhead 18 --fs-body 16 --fs-sm 14 --fs-xs 12 --fs-2xs 11 --fs-3xs 10
+--fs-stat 30 --fs-price 48 --fs-timer 18
+--lh-h1 0.95 --lh-h2 1 --lh-h2-sm 1.1111 --lh-h3-lg 1.2 --lh-h3 1.4 --lh-h4 1.5556
+--lh-body 1.625 --lh-tight 1.5
+--ls-heading -0.02em --ls-eyebrow 0.05em
+```
+
+### 1.4 Every desktop size that changed
+
+Values are as computed at 1920px, so a former `clamp()` is shown at the size
+it actually rendered.
+
+| element | before | after | reference |
+| --- | --- | --- | --- |
+| `#footer-caveat` | 14px | 11px | type scale |
+| `.benefit-card__label` | 17px | 16px | Benefit label 16 / 900 |
+| `.brand__name` | 20px | 14px | Nav brand wordmark 14 / 900 |
+| `.btn` | 16px | 14px | Buttons 14 / 900 |
+| `.btn--lg` | 17px | 14px | Buttons 14 / 900 |
+| `.chat-widget__label` | 14px | 12px | type scale |
+| `.copy-btn` | 14px | 11px | type scale |
+| `.download-card__file` | 14px | 12px | File name 12 mono |
+| `.download-card__licence` | 14px | 12px | type scale |
+| `.download-card__title` | 22px | 18px | Download platform H3 18 / lh 28 |
+| `.download__licence-hint` | 14px | 12px | type scale |
+| `.eyebrow-pill` | 13px | 12px | type scale |
+| `.faq-answer__text` | 15px | 14px | Card body 14 / lh 22.75 |
+| `.faq-category-button` | 14px | 12px | type scale |
+| `.faq-category-button__count` | 12px | 11px | type scale |
+| `.faq-group__heading` | 24px | 20px | type scale |
+| `.faq-item__trigger` | 17px | 16px | FAQ question 16 / 900 |
+| `.faq-no-results__text` | 15px | 14px | type scale |
+| `.faq-no-results__title` | 22px | 20px | type scale |
+| `.faq-page__expand-all` | 14px | 12px | type scale |
+| `.faq-page__lead` | 20px | 18px | Section intro 18 |
+| `.faq-page__title` | 63px | 48px | Section H2 primary 48 |
+| `.faq-popular__chip` | 14px | 12px | type scale |
+| `.faq-popular__label` | 14px | 12px | type scale |
+| `.faq-sticky-search-button` | 14px | 12px | type scale |
+| `.faq-support__text` | 15px | 14px | type scale |
+| `.faq-support__title` | 24px | 20px | type scale |
+| `.faq-support__version` | 14px | 12px | type scale |
+| `.faq__category` | 15px | 12px | FAQ category 12 / 700 |
+| `.feature-list li` | 16px | 14px | type scale |
+| `.free-access__step-label` | 16px | 14px | type scale |
+| `.hero__chart-caption` | 14px | 12px | Chart disclaimer 12 / lh 19.5 |
+| `.hero__subtitle` | 22px | 18px | Hero gold subhead 18 / 700 |
+| `.hero__text` | 24.96px | 20px | Hero lead 20 / lh 32.5 |
+| `.hero__title` | 94px | 72px | Hero H1 72 / lh 68.4 |
+| `.icon-disc--sm` | 13px | 12px | type scale |
+| `.live-stats__pill` | 13px | 11px | "Live Activity" 11 / 900 |
+| `.plan-card__caption` | 14px | 12px | Plan sub-line 12 / 400 |
+| `.plan-card__currency` | 15px | 14px | type scale |
+| `.plan-card__eyebrow` | 13px | 12px | Plan kicker 12 / 900 |
+| `.plan-card__features li` | 15px | 14px | type scale |
+| `.plan-card__name` | 22px | 20px | Plan name 20 / 900 |
+| `.plan-card__note` | 13px | 11px | Plan badge 11 / 700 |
+| `.plan-card__price` | 52px | 48px | Plan price 48 / 900 |
+| `.plan-card__steps li` | 15px | 14px | type scale |
+| `.plan-card__timer` | 14px | 18px | Timer 18 / 900 (mono face replaced by tabular Roboto) |
+| `.preset-banner__link` | 14px | 12px | type scale |
+| `.preset-banner__text` | 14px | 12px | type scale |
+| `.primary-nav__link` | 16px | 14px | Nav links 14 / 600 |
+| `.purchase-dialog__note` | 15px | 12px | type scale |
+| `.purchase-dialog__subtitle` | 15px | 14px | type scale |
+| `.purchase-dialog__title` | 24px | 20px | type scale |
+| `.purchase-row__label` | 15px | 14px | type scale |
+| `.purchase-row__suffix` | 14px | 12px | type scale |
+| `.purchase-row__value--amount` | 22px | 30px | type scale |
+| `.section-heading` | 57.6px | 48px | Section H2 primary 48 / lh 48 |
+| `.section-heading--sm` | 48px | 36px | Section H2 secondary 36 / lh 40 |
+| `.section-lead` | 20px | 18px | Section intro 18 / 400 |
+| `.setup-note__steps` | 14px | 12px | type scale |
+| `.setup-note__text` | 15px | 12px | type scale |
+| `.setup-note__url` | 14px | 12px | Whitelist URL 12 / 600 mono |
+| `.site-footer__copyright` | 14px | 11px | Footer copyright 11 / 400 |
+| `.source-code__price` | 44px | 30px | Source price 30 / 900 |
+| `.source-code__title` | 40px | 30px | "Get the Source Code" H3 30 / lh 36 |
+| `.stat__label` | 13px | 11px | Live-results label 11 |
+| `.stat__value` | 36px | 30px | Live-results number 30 |
+| `.step-card .icon-disc` | 16px | 14px | type scale |
+| `.step-card__text` | 18px | 14px | Card body 14 / lh 22.75 |
+| `.step-card__title` | 25.92px | 20px | Card H3 20 / lh 28 |
+| `.terms-notice` | 14px | 11px | type scale |
+| `.wallet-row__value` | 15px | 14px | type scale |
+
+Sizes inside the `max-width` media queries were **not** touched: they only
+apply below the desktop range and belong to the mobile and tablet passes.
+
+## 2. Containers and gutters
+
+The visible side gutter is not a value — it is what is left over once a
+centred max-width container is placed in the viewport. Implemented as the
+brief specifies: full-bleed section, centred container, fixed 32px inline
+padding.
+
+```
+--container-wide   1280px   header, hero, benefits, how it works,
+                            live results, pricing, free access
+--container-mid    1152px   source-code card
+--container-narrow 1024px   download, FAQ
+--container-footer  768px   footer
+--gutter             32px   edge safety padding, never the gutter itself
+--header-height      80px
+```
+
+The header and hero previously sat in their own 1520px container. They now
+use the same 1280px container as everything else, so the nav, the hero copy
+and every section heading share one left edge.
+
+The source-code card sits inside the pricing section's container, so it
+constrains itself to `--container-mid` rather than needing a second wrapper
+in the markup.
+
+Measured left / right distance from the viewport edge to the first content:
+
+| viewport | wide (1280) | mid (1152) | narrow (1024) | footer (768) |
+| --- | --- | --- | --- | --- |
+| 1920 | 320 / 320 | 384 / 384 | 448 / 448 | 576 / 576 |
+| 1440 | 80 / 80 | 144 / 144 | 208 / 208 | 336 / 336 |
+| 1280 | 32 / 32 (bottomed out) | 64 / 64 | 128 / 128 | 256 / 256 |
+| 1100 | 32 / 32 | 32 / 32 | 38 / 38 | 166 / 166 |
+
+Symmetrical at every width, shrinking smoothly, bottoming out at the 32px
+padding with no content touching the edge and no horizontal overflow.
+
+**Hero grid rebalanced.** The chart column was `clamp(420px, 36vw, 694px)`,
+sized for the old 1520px container. In a 1280px container that left the copy
+column at 525px — exactly the width of the 72px wordmark, which clipped it.
+The mockup's 694px panel scaled to the new container is
+694 × (1280 / 1520) = 584px, so the column is now
+`clamp(380px, 30vw, 584px)` and the title has room on one line at every
+desktop width.
+
+## 3. Hero shimmer
+
+Montserrat 900 / 72px / line-height 0.95 / tracking -0.02em, with the
+reference site's own gradient and keyframe:
+
+```css
+background-image: linear-gradient(105deg,
+    #f7e7a6 0%, #c9a84c 28%, #fff8d7 50%, #d6b75a 72%, #f7e7a6 100%);
+background-size: 200% auto;
+
+@keyframes gt2-shimmer { 100% { background-position: 200% center; } }
+```
+
+Three details worth knowing:
+
+- The transparent fill and the animation are inside
+  `@supports ((-webkit-background-clip: text) or (background-clip: text))`.
+  The base rule sets a solid gold `color`, so a browser without
+  background-clip paints that instead of rendering an invisible title.
+- `white-space: nowrap` keeps the wordmark on one line at desktop widths.
+- `prefers-reduced-motion: reduce` sets `animation: none` only. The gradient
+  fill and the clip stay, so the title still renders as gold rather than
+  vanishing.
+
+## 4. Live chat launcher
+
+**Confirmed computed size: 56 × 56** — the widget, the round wrapper and the
+avatar image all measure exactly 56 × 56 in the browser, and the `<img>`
+carries `width="56" height="56"` in both pages. It was **68 × 68**, not 72:
+72 → 68 happened in the 22 August pass.
+
+One custom property, `--chat-size`, drives all three. Nothing in the CSS,
+the markup or the scripts hard-codes 72px any more.
+
+| property | value |
+| --- | --- |
+| size | 56 × 56, `border-radius: 50%` |
+| position | `fixed`, right 24px, bottom `max(24px, env(safe-area-inset-bottom))` (16px on small screens) |
+| z-index | 60 — above content, below an open dialog (dialogs render in the top layer) |
+| base fill | `linear-gradient(to bottom, #F1D998, #C9A94E)` on the wrapper |
+| ring | 1px `rgba(255, 246, 221, 0.4)`, drawn as an **inset** shadow so it cannot add to the 56px box |
+| shadow | `0 12px 32px rgba(0, 0, 0, 0.5)` |
+| pulse | separate `<span>`, `inset: 0`, behind the avatar, animating scale + opacity with an 18px blur so it reads as a glow rather than a ring |
+| avatar | `assets/images/chat-avatar.png`, `object-fit: cover`, clipped by the round wrapper |
+| online dot | 14 × 14, offset -2 / -2, `--green-dot`, 2px border in the page background so it reads as a cut-out |
+| hover / active | `scale(1.05)` / `scale(0.95)` |
+| hover label | `right: 68px`, vertically centred, 12px / 700, white on a dark pill, hidden until hover or keyboard focus |
+
+The label text comes from `liveChatIconHoverText` in `main.js` and
+interpolates `${siteOwner}` — it renders "Chat with Abang Rimba". The pulse
+continues while hovering. Under `prefers-reduced-motion: reduce` the pulse
+stops and the icon and the online dot stay visible. The markup and the
+container are unchanged, so the self-hosted Pitchbar widget can still drop
+in.
+
+## 5. Translation
+
+The implementation was **not** replaced. It could not be made to fail — on
+the deployed site and locally, in Chromium and in WebKit, on both pages,
+English → Spanish → English and English → Arabic → English all translated
+and fully restored with no console errors. Rewriting a working mechanism
+against an unreproducible failure was not worth the risk.
+
+Two changes, as the brief directs.
+
+### 5.1 English is now an explicit reset
+
+`resetSiteLanguageToDefault()` replaces "English is just another option":
+
+1. Ask the widget for `en|en` first, so the original text is restored while
+   the cookie is still in place — clearing it first makes the call a no-op
+   and strands the visitor in the translated page.
+2. Then expire `googtrans` across **every** variant it can have been written
+   on: bare host, dot-prefixed host and registrable domain, each at `/`, at
+   the current path and at the current directory. GTranslate and Google's
+   own element do not agree on where they set it, and a cookie surviving on
+   any one of them puts the translation straight back.
+3. Re-read the cookie and confirm it is gone. If something wrote it back,
+   reload once — guarded by a `sessionStorage` flag so a stubborn cookie can
+   never cause a reload loop, and skipped entirely when storage is
+   unavailable.
+
+A stale cookie is also handled **at page load**: a `googtrans` value naming
+a language the selector does not offer, or naming English itself (`/en/en`,
+which some widget versions leave behind), is cleared rather than trusted.
+That leftover is the most likely cause of a switch appearing dead in a
+browser used across several sessions.
+
+### 5.2 Diagnostics
+
+`const translationDiagnostics = true;` sits with the language configuration
+in `main.js`. Set it to `false` to silence the logging. Every line is
+prefixed `[translate]`.
+
+| line | meaning |
+| --- | --- |
+| `script requested` / `script loaded` | the GTranslate widget script |
+| `script FAILED to load` | **the request was blocked** — ad blocker, shields, DNS filter, or offline |
+| `init` | selector wired up; shows the cookie found at load and how many languages are listed |
+| `stale cookie at load — clearing` | a leftover cookie was found and dropped |
+| `select` | a language was chosen; shows the cookie at that moment |
+| `apply` | the pair handed to the widget, and how many retries it took |
+| `engine missing` | the hidden switcher never appeared — the script did not render |
+| `reset requested` / `reset cookie cleared` | English chosen: cookie before, the variants cleared, cookie after |
+| `reset needs reload` / `reset FAILED — cookie persists` | something wrote the cookie back |
+
+**What to look for.** Open the console before touching the selector, then go
+English → Spanish → English:
+
+- No `script loaded` line, or `script FAILED` → the CDN request is being
+  blocked; the rest cannot work.
+- `engine missing` → the script loaded but never rendered its switcher.
+- `reset cookie cleared` with a non-null `cookieAfter` → something is
+  writing the cookie back; the reload line should follow.
+- No `[translate]` lines at all → `main.js` is not running on that page.
+
+Send that console output and it will identify the case precisely.
+
+### 5.3 Confirmed still working
+
+Roughly 15 languages (17 listed); search filters the list; clicking outside
+closes the panel; translating breaks no layout and produces no overflow; the
+hero title keeps its gradient and its shimmer while translated.
+
+**Keyboard operation was genuinely incomplete** and is now finished: the
+trigger opens with Enter or ArrowDown, ArrowDown/ArrowUp move through the
+options, ArrowUp from the first option returns to the search field, Home and
+End jump to the ends, Enter chooses, Escape closes and returns focus to the
+trigger, and `aria-expanded`, `role="listbox"` and `role="option"` are all
+correct.
+
+## 6. Verification performed
+
+| suite | result |
+| --- | --- |
+| Desktop regression (type scale, gutters at 1920/1440/1280/1100, fonts, shimmer, chat, reduced motion) | 48 / 0 |
+| Translation (Chromium + WebKit, ES and AR round trips, stale cookie, keyboard, outside click) | 28 / 0 |
+| Interactions (pricing dialog, wallet copy, source-code dialog, download copy, timers, FAQ accordion, FAQ search and no-results) | 12 / 0 |
+| FAQ desktop | 52 / 0 |
+| FAQ fix pass | 44 / 0 |
+| FAQ no-results states | 27 / 0 |
+| Homepage | 10 / 0 |
+| Homepage FAQ | 12 / 0 |
+| Homepage pill-by-pill | 83 / 0 |
+
+**316 assertions, 0 failures.** Zero console errors and zero failed font or
+script requests on either page.
+
+The FAQ single-source-of-truth architecture and the FAQ search / no-results
+behaviour were both re-tested and are unchanged.
+
+## 7. Not matched, and why
+
+1. **The mockup's own section-heading size.** Cap heights in
+   `mockups/desktop.png` measure ~60px for the five primary headings and
+   ~47px for the two secondary ones. The reference site computes 48px and
+   36px. Per the hierarchy in §0 the live site wins, so the build is 48 / 36
+   and the two-tier hierarchy the mockup shows is preserved.
+
+2. **Heading tracking.** The mockup's "Why Traders Choose" measures a
+   width-to-cap ratio of 15.60; Montserrat at `-0.02em` gives 15.24 and at
+   `0` gives 15.73, so the artwork sits at roughly `-0.008em`. `-0.02em` is
+   a fixed requirement of the brief and matches the reference site, so it is
+   what shipped.
+
+3. **Responsive font sizes.** Every size inside a `max-width` media query
+   still carries a literal value rather than a token. Retuning them is the
+   mobile and tablet pass; changing them now would have meant editing
+   breakpoints this brief rules out.
+
+4. **The site name is translated.** Selecting Spanish renders the hero as
+   "TRAMPA DE ORO EA" and Arabic as "جولدن بوكس". `siteName` is meant to be
+   authoritative, so Google translating it is arguably wrong — but fixing it
+   means adding `translate="no"` / `notranslate` to the wordmark elements,
+   which changes behaviour this brief did not ask for. Say the word and it
+   is a small change.
