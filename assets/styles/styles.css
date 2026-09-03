@@ -3097,6 +3097,14 @@ font {
 
     .hero__title {
         line-height: 1.02;
+        /*
+         * Releases the desktop nowrap so the wordmark can break at its
+         * own space. At 360px the one-line title is 411px wide inside a
+         * 328px column, which pushed "EA" past the edge; wrapping puts
+         * it on a second line instead. `normal` only breaks when it has
+         * to, so wider phones still render it on one line.
+         */
+        white-space: normal;
     }
 
     .hero__text {
@@ -3888,7 +3896,8 @@ font {
  * -------------------------------------------------------------------- */
 
 .faq-popular {
-    margin-top: 30px;
+    /* Breathing room under the search field before the "Popular:" label. */
+    margin-top: 40px;
     width: 100%;
     max-width: var(--faq-bar-width);
 }
@@ -3905,7 +3914,12 @@ font {
     flex-wrap: wrap;
     justify-content: center;
     gap: 10px;
-    margin-top: 12px;
+    /*
+     * Kept well under the gap above the label, so "Popular:" continues to
+     * read as belonging to the chips beneath it rather than floating
+     * between the search field and the list.
+     */
+    margin-top: 14px;
 }
 
 .faq-popular__chip {
@@ -4549,8 +4563,14 @@ font {
         margin-bottom: var(--space-md);
     }
 
+    /*
+     * A literal value, not var(--space-md): the token block in this same
+     * media query is written against `.faq-page`, and no element carries
+     * that class, so the token is undefined here and the margin was
+     * collapsing to 0 — leaving a 1px gap under the search field.
+     */
     .faq-popular {
-        margin-top: var(--space-md);
+        margin-top: 28px;
     }
 
     /* The mockup left a large gap here; a normal section rhythm is enough. */
