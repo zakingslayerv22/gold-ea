@@ -1,15 +1,4 @@
-# ============================================================================
-#  FALLBACK DEPLOY: lftp instead of FTP-Deploy-Action
-#  Save at: .github/workflows/deploy.yml   (replace your existing one)
-#
-#  WHY: FTP-Deploy-Action's underlying library (basic-ftp) opens a NEW TLS
-#  session for the data connection. cPanel FTP servers often REQUIRE that the
-#  data connection reuse the control connection's TLS session, and reject it
-#  otherwise -> the server closes the socket -> "FIN packet unexpectedly".
-#  lftp handles this correctly and lets you control data-channel encryption.
-# ============================================================================
-
-name: Deploy to Namecheap (lftp)
+name: Deploy to Namecheap
 
 on:
   push:
@@ -19,6 +8,11 @@ on:
 concurrency:
   group: deploy-production
   cancel-in-progress: true
+
+env:
+  # ./          = FTP user is jailed directly inside public_html  (Fix A)
+  # /public_html/ = FTP user lands in /home/goldnkum              (Fix B)
+  REMOTE_DIR: ./
 
 jobs:
   deploy:
@@ -32,73 +26,89 @@ jobs:
       - name: Install lftp
         run: sudo apt-get update -qq && sudo apt-get install -y -qq lftp
 
-      # ---- ATTEMPT 1: full FTPS (control + data encrypted) -----------------
-      # If this is the step that fails, comment it out and use ATTEMPT 2.
-      - name: Deploy via FTPS
+      - name: Check secrets are actually set
         env:
           FTP_HOST: ${{ secrets.FTP_SERVER }}
           FTP_USER: ${{ secrets.FTP_USERNAME }}
           FTP_PASS: ${{ secrets.FTP_PASSWORD }}
         run: |
-          lftp -c "
-            set ftp:ssl-allow yes;
-            set ftp:ssl-force yes;
-            set ftp:ssl-protect-data yes;
-            set ssl:verify-certificate no;
-            set ftp:passive-mode yes;
-            set net:timeout 30;
-            set net:max-retries 5;
-            set net:reconnect-interval-base 5;
-            open -u \"$FTP_USER\",\"$FTP_PASS\" \"$FTP_HOST\";
-            mirror --reverse --verbose --only-newer --parallel=2 \
+          fail=0
+          [ -z "$FTP_HOST" ] && { echo "FTP_SERVER secret is EMPTY or misnamed"; fail=1; }
+          [ -z "$FTP_USER" ] && { echo "FTP_USERNAME secret is EMPTY or misnamed"; fail=1; }
+          [ -z "$FTP_PASS" ] && { echo "FTP_PASSWORD secret is EMPTY or misnamed"; fail=1; }
+          echo "host length: ${#FTP_HOST} chars"
+          echo "user length: ${#FTP_USER} chars"
+          echo "pass length: ${#FTP_PASS} chars"
+          echo "--- DNS resolution test ---"
+          getent hosts "$FTP_HOST" || echo "WARNING: could not resolve '$FTP_HOST'"
+          exit $fail
+
+      - name: Diagnose where this FTP user lands
+        env:
+          FTP_HOST: ${{ secrets.FTP_SERVER }}
+          FTP_USER: ${{ secrets.FTP_USERNAME }}
+          FTP_PASS: ${{ secrets.FTP_PASSWORD }}
+        run: |
+          lftp -u "$FTP_USER","$FTP_PASS" "$FTP_HOST" <<'LFTPEOF'
+            set ftp:ssl-allow yes
+            set ftp:ssl-force yes
+            set ftp:ssl-protect-data no
+            set ssl:verify-certificate no
+            set ftp:passive-mode yes
+            echo "### LOGIN DIRECTORY = your FTP jail root ###"
+            pwd
+            echo "### WHAT IS HERE ###"
+            cls -l ./
+            bye
+          LFTPEOF
+
+      - name: Deploy via FTPS
+        env:
+          FTP_HOST: ${{ secrets.FTP_SERVER }}
+          FTP_USER: ${{ secrets.FTP_USERNAME }}
+          FTP_PASS: ${{ secrets.FTP_PASSWORD }}
+          TARGET: ${{ env.REMOTE_DIR }}
+        run: |
+          lftp -u "$FTP_USER","$FTP_PASS" "$FTP_HOST" <<LFTPEOF
+            set ftp:ssl-allow yes
+            set ftp:ssl-force yes
+            set ftp:ssl-protect-data no
+            set ftp:ssl-protect-list no
+            set ssl:verify-certificate no
+            set ftp:passive-mode yes
+            set ftp:use-allo no
+            set net:timeout 30
+            set net:max-retries 3
+            set net:reconnect-interval-base 5
+            mirror --reverse --verbose --transfer-all --parallel=1 \
               --exclude-glob .git/ \
               --exclude-glob .git* \
               --exclude-glob .github/ \
               --exclude-glob node_modules/ \
               --exclude-glob mockups/ \
               --exclude-glob '*.md' \
-              ./ public_html/;
+              ./ $TARGET
             bye
-          "
+          LFTPEOF
 
-      # ---- ATTEMPT 2: encrypted login, PLAIN data channel ------------------
-      # Password stays encrypted (ssl-force yes). Only the file BYTES travel
-      # unencrypted. For a public static site that's an acceptable trade-off,
-      # and it completely avoids the data-channel TLS session reuse problem.
-      #
-      # To use: delete/comment the "Deploy via FTPS" step above, uncomment this.
-      #
-      # - name: Deploy via FTPS (plain data channel)
-      #   env:
-      #     FTP_HOST: ${{ secrets.FTP_SERVER }}
-      #     FTP_USER: ${{ secrets.FTP_USERNAME }}
-      #     FTP_PASS: ${{ secrets.FTP_PASSWORD }}
-      #   run: |
-      #     lftp -c "
-      #       set ftp:ssl-allow yes;
-      #       set ftp:ssl-force yes;
-      #       set ftp:ssl-protect-data no;
-      #       set ssl:verify-certificate no;
-      #       set ftp:passive-mode yes;
-      #       set net:timeout 30;
-      #       set net:max-retries 5;
-      #       open -u \"$FTP_USER\",\"$FTP_PASS\" \"$FTP_HOST\";
-      #       mirror --reverse --verbose --only-newer --parallel=2 \
-      #         --exclude-glob .git/ --exclude-glob .git* \
-      #         --exclude-glob .github/ --exclude-glob node_modules/ \
-      #         --exclude-glob mockups/ --exclude-glob '*.md' \
-      #         ./ public_html/;
-      #       bye
-      #     "
-
-# ---------------------------------------------------------------------------
-# NOTES
-#  * Add --dry-run to the mirror line to preview without uploading.
-#  * Add --delete to remove server files not present locally (CAREFUL).
-#  * mirror --only-newer compares timestamps, so no state file is needed;
-#    the "first publish" full re-upload problem disappears entirely.
-#  * --parallel=2 is deliberately low. Shared hosts cap simultaneous FTP
-#    connections per IP; high parallelism causes disconnects.
-#  * If lftp ALSO fails, run it with -d for full protocol debug output:
-#      lftp -d -c " ... "
-#
+      - name: Verify sizes are NOT zero
+        env:
+          FTP_HOST: ${{ secrets.FTP_SERVER }}
+          FTP_USER: ${{ secrets.FTP_USERNAME }}
+          FTP_PASS: ${{ secrets.FTP_PASSWORD }}
+          TARGET: ${{ env.REMOTE_DIR }}
+        run: |
+          lftp -u "$FTP_USER","$FTP_PASS" "$FTP_HOST" <<LFTPEOF
+            set ftp:ssl-allow yes
+            set ftp:ssl-force yes
+            set ftp:ssl-protect-data no
+            set ssl:verify-certificate no
+            set ftp:passive-mode yes
+            echo "### DEPLOY TARGET ###"
+            cls -l $TARGET
+            echo "### assets/styles ###"
+            cls -l ${TARGET}assets/styles/
+            echo "### assets/scripts ###"
+            cls -l ${TARGET}assets/scripts/
+            bye
+          LFTPEOF
