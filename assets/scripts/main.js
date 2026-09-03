@@ -512,6 +512,7 @@ const ANNOUNCEMENT_STORAGE_KEY = "goldtrap:announcement-dismissed-version";
 
 import { faqServiceInstance } from "./faq-index-page.js";
 import { initFaqPage } from "./faq-page.js";
+import { initFaqSearchAnimation } from "./faq-search.js";
 
 
 /* ----------------------------------------------------------------------
@@ -2985,6 +2986,17 @@ function init() {
         // The per-question copy link: one implementation, both pages.
         renderCopyLink: renderFaqCopyLink,
         initCopyLinks: initFaqCopyLinks
+    });
+
+    /*
+     * The FAQ search's rotating placeholder and glitter. Its own module
+     * owns the behaviour and every timing; it returns immediately on a
+     * page with no FAQ search field, so the homepage is unaffected.
+     */
+    initFaqSearchAnimation({
+        siteName,
+        siteOwner,
+        eaVersion: eaCurrentVersion
     });
 
     initFooter();

@@ -892,3 +892,157 @@ Three suite assertions were updated because they encoded behaviour this
 brief deliberately changed: the homepage's first question is no longer open
 on load (two suites), and a chip tap now moves the page to the category
 content on purpose rather than staying put.
+
+---
+
+## FAQ Search — Rotating Placeholder and Glitter — 1 September 2026
+
+Two effects that make the search control invite a click. Both live in a new
+`assets/scripts/faq-search.js`, which owns their configuration and their
+lifecycle.
+
+### Where things live
+
+| file | responsibility |
+| --- | --- |
+| `main.js` | global site configuration |
+| `faq-page-content.js` | the canonical FAQ database |
+| **`faq-search.js`** | **FAQ search UI behaviour and its animation config** |
+
+`main.js` calls `initFaqSearchAnimation({ siteName, siteOwner, eaVersion })`
+and knows nothing else about it. The module returns immediately on a page
+with no FAQ search field, so the homepage is untouched.
+
+### Configuration
+
+Every timing is in `faqSearchAnimationConfig`, in milliseconds, and nothing
+in the file hard-codes a duration:
+
+```js
+enabled: true,
+glitterIntervalMin: 7000,  glitterIntervalMax: 14000,
+typingSpeedMin: 45,        typingSpeedMax: 95,
+deletingSpeedMin: 20,      deletingSpeedMax: 40,
+holdDurationMin: 1800,     holdDurationMax: 2800,
+questionGapDuration: 500,  startDelay: 1500,
+questionRefs: [ … ]
+```
+
+Each MIN/MAX pair draws a fresh random value every cycle, which is what
+stops the effect feeling mechanical.
+
+### The rotating questions are references, not copies
+
+`questionRefs` holds `"<categoryId>/<questionId>"` references resolved
+against `faq-page-content.js` at runtime:
+
+```js
+questionRefs: [
+    "getting-started/what-is-goldtrap",
+    "vps-running/do-i-need-a-vps",
+    …
+]
+```
+
+The brief asked for an array of question strings. References are used
+instead **because copying the wording would create a second copy of FAQ
+text**, which is exactly what the single-source-of-truth architecture
+exists to prevent. Editing a question in the database changes the
+placeholder too, and the two can never drift. A reference that no longer
+resolves is skipped rather than throwing, so renaming an id costs one
+rotating question, not an error.
+
+### No immediate repetition
+
+A shuffled queue, not `questions[Math.random()]`: every question is shown
+once per round in a random order, then the list reshuffles. The reshuffle
+also swaps the first entry if it matches the one just shown, so a question
+cannot repeat across the boundary between rounds either.
+
+### It writes to `placeholder`, never to `value`
+
+The visitor's text is theirs. The animation suspends the instant any field
+is focused or holds any text, and each field's own placeholder comes back;
+it resumes only when every field is empty and unfocused. Verified: typing
+`vps` while the animation was running left the value exactly `vps`, the
+placeholder static, and the search filtering correctly.
+
+### One animation, whichever field is on screen
+
+The FAQ page has two search fields — the hero one and the compact sticky
+one — and they are two views of one search, so there is **one** typewriter
+that writes to whichever is visible. Timers are held in single variables
+and every scheduling path clears before it sets, so two chains can never
+run at once.
+
+> `offsetParent !== null` was not enough to decide which field is visible:
+> the hero field stays rendered after it scrolls away, so it kept winning
+> over the sticky field the visitor was actually looking at. The check is
+> now whether the field's box is inside the viewport, and the fields that
+> are not being written to are restored to their own placeholder — so
+> opening the sticky search mid-question cannot leave half a question in
+> the hero field.
+
+A `MutationObserver` on the sticky panel's `hidden` attribute re-evaluates
+when the panel opens or closes, and everything stops in a background tab.
+
+### The glitter
+
+A single gold band sweeps across the control: a `::after` pseudo-element,
+clipped to the control, `pointer-events: none`, so nothing moves, nothing
+resizes and nothing is clickable. The class is added, the animation plays
+**once**, the class is removed — never a permanent glow or an animated
+border. It never plays while the field is focused.
+
+Scheduling is recursive `setTimeout`, not `setInterval`: play, then wait a
+fresh random 7–14s, then play again. Measured intervals in a fast-config
+test run came out different each time, confirming the randomisation.
+
+### Reduced motion
+
+`prefers-reduced-motion: reduce` disables both: the CSS drops the sweep,
+and the module keeps the static placeholder. Verified — a reduced-motion
+context showed exactly one placeholder value ("Search for an answer…") over
+2.6 seconds and zero glitter samples. A visitor who turns the preference on
+mid-session gets the static state immediately.
+
+### Verification — 24 assertions
+
+Real questions typed from the database; character-by-character growth and
+deletion; a completed question held; no consecutive repeats; the value never
+written; focus suspends and restores the static placeholder; typed text
+never overwritten; search still filters while suspended; clearing and
+blurring resumes; the glitter fires repeatedly at differing intervals, plays
+once, cannot be clicked and does not resize the control; the sticky mobile
+field gets the animation while the hero field does not; sticky search still
+filters; no horizontal overflow; reduced motion disables both; the homepage
+is unaffected; no console errors.
+
+The wider regression set was re-run alongside it — desktop typography and
+gutters, the source-code timer, announcement bar and version system, copy
+links, FAQ interaction, mobile FAQ, dialogs, clipboard, FAQ search and
+no-results, the homepage FAQ, and identity strings across six languages.
+**618 assertions, 0 failures.**
+
+Two notes on that run, both recorded rather than papered over:
+
+- **Google's engine was intermittently unavailable** through this sandbox's
+  proxy bridge. The round-trip suite reports that as *inconclusive* and
+  skips rather than failing an assertion about the page; the six-language
+  identity suite ran fully and passed 82/0, which is the coverage that
+  matters here.
+- **The Arabic browser-tab title transliterates the brand name.** A
+  `<title>` element cannot carry a `notranslate` span, so its text is
+  translated. "GOLDENBOX EA" reads as two ordinary English words where
+  "GOLDTRAP EA" was treated as a name, so the new name is the more
+  translatable of the two. Every *visible* instance of the brand is still
+  protected — this is the browser tab only. Flagged, not changed: fixing it
+  means marking the `<title>`, which is outside this pass.
+
+One suite needed a structural fix rather than a behaviour change: the
+homepage pill-by-pill comparison injects a five-pass-old
+`faq-page-content.js` as its baseline, and `faq-search.js` statically
+imports `getQuestionByRef`, which that old file predates — so the baseline
+page threw before rendering. It now injects only the old
+`faq-index-page.js`, which is self-contained and carries its own FAQ data,
+reproducing the same baseline without the incompatible file.
