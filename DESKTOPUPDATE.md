@@ -2415,3 +2415,138 @@ text was altered.
    Markets IB" happens to survive, but nothing guarantees it). It was not on
    your list, so it was left alone. One line to add if you want it
    protected.
+
+---
+
+# Announcement Bar — Homepage / FAQ Page Parity
+
+**Date:** 1 September 2026
+**Scope:** the announcement bar only. Nothing else on either page was
+touched.
+
+## What was actually different
+
+There is **one** announcement bar implementation. Both pages use byte-identical
+markup (same `.action-bar` block, same ids), the same rules in
+`styles.css`, and the same `initAnnouncementBar()` in `main.js`. Compared
+property by property at 1920, 390 and 820px, the two bars had **zero**
+computed differences — height, padding, min-height, border, background,
+typography, and the measured positions of the icon, the link and the close
+button were the same on both pages, on every viewport.
+
+Yet the rendered pixels differed by 65,597 in a 1920 × 68 crop. The
+difference was **the background behind the bar**, and it was real:
+
+| sample (x, y) | homepage | FAQ page |
+| --- | --- | --- |
+| 100, 10 | `rgb(5,5,5)` | `rgb(16,14,7)` |
+| 500, 10 | `rgb(5,5,5)` | `rgb(33,27,12)` |
+
+The FAQ page's bar sat on the site's warm gold glow; the homepage's sat on
+flat `#050505`.
+
+**The mockup settles which is right.** Sampling
+`mockups/desktop.png` across the bar band (y5–y45) gives `(21,19,11)` at
+x=100 and x=1800, fading to `(5,5,5)` at centre — warm, not flat. The
+mobile mockup shows the same at 360px. **The FAQ page matched the mockup
+and the homepage did not.**
+
+## The cause
+
+`.hero::before` carries the glow with `inset: -100px 0 0` — it deliberately
+overhangs 100px above its own element so it sits behind the transparent
+header, as the comment in the stylesheet says. The element carrying that
+glow starts at a different height on each page:
+
+| page | element with `.hero` | its top | glow reaches up to |
+| --- | --- | --- | --- |
+| FAQ page | a wrapper `<div class="hero">` around the header and `<main>` | y66, immediately below the bar | y−34 — **covers the whole bar** |
+| homepage | `<section class="hero">`, inside `<main>`, after the header | y146 | y46 — **stops 46px short**, so the bar's top 46 rows stayed flat |
+
+A fixed 100px offset is enough on one page and short on the other. Nothing
+was "removed" and nothing was overriding anything; the offset was simply
+never right for the homepage's structure.
+
+## The fix
+
+One rule, both pages, no per-page value and no second implementation:
+
+```css
+.hero::before {
+    inset: calc(-1 * var(--hero-glow-rise, 100px)) 0 0;
+}
+```
+
+`updateHeroGlowRise()` in `main.js` writes `--hero-glow-rise` from the
+measured distance between the top of the page and the element carrying the
+glow, with **100px as a floor**:
+
+- FAQ page: `max(100, 66)` = 100px — **byte-for-byte the behaviour it
+  already had**, so the page the brief calls correct is unchanged.
+- homepage: `max(100, 146)` = 146px — the glow now reaches the top of the
+  page and the bar renders exactly as the FAQ page's does.
+
+It is recomputed alongside `--sticky-offset`, so it follows the
+announcement bar being dismissed, the text wrapping to more lines, and
+resize. The CSS fallback keeps the previous behaviour if the script never
+runs.
+
+Structural alternatives were rejected: moving the homepage `<header>` inside
+`<section class="hero">` would place it inside `<main>` and break the
+"skip to main content" link, and wrapping header + main in a second `.hero`
+would nest one glow inside another and add a stray hairline under the
+footer.
+
+## Result
+
+| | before | after |
+| --- | --- | --- |
+| desktop bar, differing pixels between the two pages | 65,597 | **1,319** |
+| sample at (100, 10) | `5,5,5` vs `16,14,7` | `18,15,8` vs `16,14,7` |
+| sample at (500, 10) | `5,5,5` vs `33,27,12` | `34,28,12` vs `33,27,12` |
+| computed-property differences (1920 / 390 / 820) | 0 | 0 |
+
+## The version system
+
+Preserved exactly — `let announcementStatus = "new"` and
+`const announcementVersion = "2026-08-28"`, no timer-based expiry. Tested on
+**both pages at desktop and mobile**, 24 assertions:
+
+- a fresh visitor sees the bar;
+- dismissing hides it and records the version in
+  `goldtrap:announcement-dismissed-version`;
+- it stays dismissed after a reload;
+- the dismissal carries across to the other page, since both read the same
+  key;
+- changing `announcementVersion` shows the bar again on both pages;
+- dismissing the new announcement records the new version.
+
+## Verification
+
+**530 assertions across fourteen suites, 0 failures** — including the
+desktop regression, translation, identity strings, copy links, the mobile
+FAQ page and the announcement-bar suite from the previous pass. Zero
+console errors.
+
+## Flagged rather than changed
+
+1. **At 390px the two bars are still not pixel-identical** (24,330 differing
+   pixels). The glow is a radial gradient sized in percentages of its own
+   box, and the two boxes have different heights — the FAQ page's spans the
+   whole document, the homepage's spans the hero section. Both bars are warm
+   and read the same; the peak of the glow sits at a different x. Equalising
+   it exactly would mean restructuring one of the pages, which is beyond a
+   consistency pass. Say the word if you want that.
+
+2. **Neither page reproduces the mockup's glow *shape* over the bar.** The
+   mockup is warm at both edges and dark in the centre; ours is a
+   left-weighted radial. That is the approved hero glow, which predates this
+   pass — the bar simply inherits it. Not changed, because changing it would
+   redesign the hero.
+
+3. **If the homepage still looks wrong in your browser, check the cache.**
+   Both pages load the same `styles.css` and `main.js`, so a stale copy of
+   either produces exactly the symptom reported: one page updated, the other
+   not. The deployed GitHub Pages build measures 65.75px with 21/21 padding
+   on **both** pages; `goldenboxea.com` still serves the older 51px bar on
+   **both**, because that host has not been redeployed.

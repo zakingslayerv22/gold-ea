@@ -1683,6 +1683,37 @@ function updateStickyOffset() {
         "--sticky-offset",
         `${Math.round(offset)}px`
     );
+
+    updateHeroGlowRise();
+}
+
+/**
+ * How far the hero's warm glow has to reach ABOVE itself to sit behind the
+ * header and the announcement bar, as the mockup shows.
+ *
+ * The element carrying the glow starts at a different height on each page —
+ * a wrapper just below the bar on the FAQ page, the hero section below the
+ * header on the homepage — so a fixed offset covers one and falls short on
+ * the other. Measuring the real distance to the top of the page makes one
+ * CSS rule correct on both.
+ *
+ * The 100px floor preserves the FAQ page's existing look exactly: its hero
+ * sits 66px down, so the measurement never lowers what was already there.
+ * Recomputed alongside the sticky offset, which means it also follows the
+ * announcement bar being dismissed or wrapping to more lines.
+ */
+function updateHeroGlowRise() {
+    const hero = qs(".hero");
+    if (!hero) {
+        return;
+    }
+
+    const distanceToTop = hero.getBoundingClientRect().top + window.scrollY;
+
+    document.documentElement.style.setProperty(
+        "--hero-glow-rise",
+        `${Math.max(100, Math.round(distanceToTop))}px`
+    );
 }
 
 /** Recomputes the offset whenever the chrome can have changed. */
