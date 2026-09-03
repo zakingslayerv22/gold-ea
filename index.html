@@ -10,7 +10,7 @@
         pre-JavaScript fallback and the data-title-template on <html> is
         the pattern main.js fills in.
     -->
-    <title>GOLDTRAP EA — Automated MT4/MT5 Gold Trading</title>
+    <title>GOLDENBOX EA — Automated MT4/MT5 Gold Trading</title>
     <meta name="description" content="">
 
     <!-- Open Graph -->
@@ -82,7 +82,7 @@
                 <a class="brand" href="index.html">
                     <img class="brand__mark" src="assets/images/logo-gb.svg"
                          alt="" width="48" height="48">
-                    <span class="brand__name" data-site-name>GOLDTRAP EA</span>
+                    <span class="brand__name" data-site-name>GOLDENBOX EA</span>
                 </a>
 
                 <!--
@@ -165,7 +165,7 @@
                             Automated MT4/MT5 Trading
                         </p>
 
-                        <h1 class="hero__title scroll-reveal" id="hero-title" data-site-name>GOLDTRAP EA</h1>
+                        <h1 class="hero__title scroll-reveal" id="hero-title" data-site-name>GOLDENBOX EA</h1>
 
                         <p class="hero__subtitle scroll-reveal">
                             Optimized for Gold Trading. Built for MT4 &amp; MT5.
@@ -179,7 +179,7 @@
 
                         <div class="hero__actions scroll-reveal">
                             <a class="btn btn--gold btn--lg" href="#pricing">
-                                <span>Get <span data-site-name>GOLDTRAP EA</span></span>
+                                <span>Get <span data-site-name>GOLDENBOX EA</span></span>
                                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
                             </a>
                             <a class="btn btn--dark btn--lg" href="#how-it-works">How it works</a>
@@ -274,7 +274,7 @@
 
 
                 <!-- ==================================================
-                     SECTION 3 — HOW GOLDTRAP WORKS (§7)
+                     SECTION 3 — HOW GOLDENBOX WORKS (§7)
                      ================================================== -->
                 <section class="section section--black" id="how-it-works" aria-labelledby="how-it-works-title">
                     <div class="container section__inner">
@@ -392,13 +392,13 @@
 
 
                 <!-- ==================================================
-                     SECTION 5 — GET GOLDTRAP EA (§9)
+                     SECTION 5 — GET GOLDENBOX EA (§9)
                      SECTION 6 — SOURCE CODE (§11) shares this band
                      ================================================== -->
                 <section class="section section--zinc" id="pricing" aria-labelledby="pricing-title">
                     <div class="container section__inner">
                         <h2 class="section-heading scroll-reveal" id="pricing-title">
-                            Get <span data-site-name>GOLDTRAP EA</span>
+                            Get <span data-site-name>GOLDENBOX EA</span>
                         </h2>
                         <p class="section-lead scroll-reveal">Choose how you want to get started.</p>
 
@@ -454,13 +454,27 @@
                                                 source · No refund
                                             </span>
                                         </p>
+
+                                        <!--
+                                            The source-code countdown. Its own timer, independent
+                                            of the pricing plans; price, duration, increment and
+                                            visibility all come from `sourceCodeTimer` in main.js.
+                                            Starts in the reserved-space state so the card cannot
+                                            jump when the timer is turned on or off (§9.4).
+                                        -->
+                                        <p class="source-code__timer is-hidden" data-source-code-timer>
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+                                            <span data-source-code-timer-value></span>
+                                        </p>
                                     </div>
 
                                     <div class="source-code__actions">
                                         <!-- §12: opens the shared dialog; price read from the page -->
                                         <button type="button" class="btn btn--gold" id="source-code-purchase">
                                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="6" width="18" height="14" rx="2"/><path d="M3 10h18"/><circle cx="17" cy="15" r="1.2"/></svg>
-                                            Purchase — $9,650 USD
+                                            <!-- Rewritten by main.js from sourceCodeTimer; the
+                                                 text here is the pre-JavaScript fallback. -->
+                                            <span class="btn-label" id="source-code-purchase-label">Purchase — $9,650 USD</span>
                                         </button>
 
                                         <!-- §12.2 destination from telegramPersonal -->
@@ -490,7 +504,7 @@
                         </h2>
                         <p class="section-lead section-lead--center scroll-reveal">
                             Follow these simple steps to get
-                            <span data-site-name>GOLDTRAP EA</span> for free.
+                            <span data-site-name>GOLDENBOX EA</span> for free.
                         </p>
 
                         <div class="free-access__grid">
@@ -533,7 +547,7 @@
                             Downloads
                         </p>
                         <h2 class="section-heading section-heading--sm section-heading--center scroll-reveal" id="downloads-title">
-                            Download <span data-site-name>GOLDTRAP EA</span>
+                            Download <span data-site-name>GOLDENBOX EA</span>
                         </h2>
                         <p class="section-lead section-lead--center scroll-reveal">
                             Compiled for MetaTrader 4 &amp; 5. Install into your platform's

@@ -1755,7 +1755,12 @@ button {
  * the countdown cannot jitter as it ticks, while the typeface stays the
  * body face. Bold and prominent, as agreed.
  */
-.plan-card__timer {
+/*
+ * Shared by the pricing plans and the source-code card — one visual
+ * treatment for one countdown implementation.
+ */
+.plan-card__timer,
+.source-code__timer {
     display: flex;
     align-items: center;
     gap: 8px;
@@ -1769,8 +1774,19 @@ button {
     font-feature-settings: "tnum" 1;
 }
 
-.plan-card__timer.is-hidden {
+/*
+ * §9.4: a hidden timer keeps its allocated space. visibility, never
+ * display, so the card cannot jump when it is turned on or off.
+ */
+.plan-card__timer.is-hidden,
+.source-code__timer.is-hidden {
     visibility: hidden;
+}
+
+/* The source-code card's own spacing around the shared timer row. */
+.source-code__timer {
+    margin-top: 12px;
+    font-size: var(--fs-sm);
 }
 
 .plan-card__divider {

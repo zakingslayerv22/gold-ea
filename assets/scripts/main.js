@@ -24,7 +24,7 @@
  *           copyright, the purchase dialogs and the live-chat label.
  * ====================================================================== */
 
-const siteName = "GOLDTRAP EA";
+const siteName = "GOLDENBOX EA";
 const siteOwner = "Richie Gold";
 
 /*
@@ -174,6 +174,36 @@ const paymentAmountSuffix = "USDT";
  * ====================================================================== */
 
 const pricingTimerStatus = "hide";
+
+
+/* ======================================================================
+ * SOURCE CODE TIMER  (CLAUDE.md §9.3 applied to the source-code offer)
+ * ======================================================================
+ * The source-code card runs its OWN countdown, completely independent of
+ * the pricing plans above: resetting or reconfiguring this one never
+ * touches a plan timer, and changing a plan never touches this one. They
+ * share the countdown implementation (runCountdown) but not a single piece
+ * of state.
+ *
+ *   startingPrice      the price the card opens at, in whole units. The
+ *                      figure in the HTML is only a pre-JavaScript
+ *                      fallback — this value is what the page shows.
+ *   countdownDuration  seconds per cycle. 3600 = one hour.
+ *   increment          added to the price each time the countdown expires.
+ *   status             "show" or "hide", exactly like pricingTimerStatus.
+ *                      Hidden keeps its space (visibility, not display), so
+ *                      the card never jumps when it is turned on or off.
+ *
+ * Everything here is editable without touching the HTML: the price, the
+ * purchase button's label and the dialog all follow this configuration.
+ * ====================================================================== */
+
+const sourceCodeTimer = {
+    startingPrice: 9650,
+    countdownDuration: 3600,
+    increment: 250,
+    status: "hide"
+};
 
 
 /* ======================================================================
@@ -2220,37 +2250,69 @@ function renderPlanCard(plan, index) {
  * @param {HTMLElement} card the .plan-card element
  * @param {object}      plan the matching entry from pricingPlans
  */
-function setTimer(card, plan) {
-    const timerElement = qs("[data-plan-timer]", card);
-    const valueElement = qs("[data-plan-timer-value]", card);
-
+/**
+ * ONE countdown implementation, used by both the pricing plans and the
+ * source-code card. Each call owns its own `remaining` and its own
+ * interval, so two countdowns started from here are fully independent —
+ * they share code, never state.
+ *
+ * Visibility follows CLAUDE.md §9.4 for every caller: a hidden timer keeps
+ * its allocated space through `visibility: hidden` (the .is-hidden class),
+ * so turning one on or off never shifts the card.
+ *
+ * @param {object} options
+ * @param {Element} options.timerElement the row that shows or reserves space
+ * @param {Element} options.valueElement where the formatted time is written
+ * @param {number}  options.duration     seconds per cycle
+ * @param {boolean} options.visible      false hides it but keeps its space
+ * @param {Function} options.onElapsed   called each time the cycle expires
+ * @returns {Function|null} a stop function, or null when nothing started
+ */
+function runCountdown({ timerElement, valueElement, duration, visible, onElapsed }) {
     if (!timerElement || !valueElement) {
-        return;
+        return null;
     }
 
-    // Visibility is global (pricingTimerStatus); the countdown itself is per-plan.
-    const shouldShow = pricingTimerStatus === "show" && plan.timerTime > 0;
-
-    /*
-     * §9.4: when hidden the timer keeps its allocated space using
-     * visibility: hidden, so showing or hiding it never shifts the layout.
-     */
-    if (!shouldShow) {
+    if (!visible || !(duration > 0)) {
         timerElement.classList.add("is-hidden");
-        return;
+        return null;
     }
 
     timerElement.classList.remove("is-hidden");
 
-    let remaining = plan.timerTime;
-    let currentPrice = plan.price;
+    let remaining = duration;
 
-    function formatRemaining(totalSeconds) {
+    const format = (totalSeconds) => {
         const hours = String(Math.floor(totalSeconds / 3600)).padStart(2, "0");
         const minutes = String(Math.floor((totalSeconds % 3600) / 60)).padStart(2, "0");
         const seconds = String(totalSeconds % 60).padStart(2, "0");
         return `${hours}:${minutes}:${seconds} left at this price`;
-    }
+    };
+
+    valueElement.textContent = format(remaining);
+
+    // Loops for as long as the page is open; it never runs only once.
+    const handle = window.setInterval(() => {
+        remaining -= 1;
+
+        if (remaining <= 0) {
+            if (typeof onElapsed === "function") {
+                onElapsed();
+            }
+            remaining = duration;
+        }
+
+        valueElement.textContent = format(remaining);
+    }, TIMER_TICK_MS);
+
+    return () => window.clearInterval(handle);
+}
+
+function setTimer(card, plan) {
+    const timerElement = qs("[data-plan-timer]", card);
+    const valueElement = qs("[data-plan-timer-value]", card);
+
+    let currentPrice = plan.price;
 
     function applyPrice(newPrice) {
         currentPrice = newPrice;
@@ -2271,19 +2333,14 @@ function setTimer(card, plan) {
         });
     }
 
-    function tick() {
-        remaining -= 1;
-
-        if (remaining <= 0) {
-            applyPrice(currentPrice + plan.increment);
-            remaining = plan.timerTime;
-        }
-
-        valueElement.textContent = formatRemaining(remaining);
-    }
-
-    valueElement.textContent = formatRemaining(remaining);
-    window.setInterval(tick, TIMER_TICK_MS);
+    // Visibility is global (pricingTimerStatus); the countdown is per-plan.
+    return runCountdown({
+        timerElement,
+        valueElement,
+        duration: plan.timerTime,
+        visible: pricingTimerStatus === "show",
+        onElapsed: () => applyPrice(currentPrice + plan.increment)
+    });
 }
 
 /**
@@ -2322,7 +2379,63 @@ function openPlanDialog(card) {
  * the section's HTML automatically updates the dialog.
  * ====================================================================== */
 
+/**
+ * The source-code card's own countdown.
+ *
+ * Independent of every pricing plan: its own configuration object, its own
+ * price, its own interval. It shares runCountdown() with the plans and
+ * nothing else, so resetting or reconfiguring one can never disturb the
+ * other.
+ *
+ * The visible price is written from `sourceCodeTimer.startingPrice` rather
+ * than trusted from the HTML, and both the price line and the purchase
+ * button's label are rewritten on every increment — which keeps the dialog
+ * correct for free, since it reads the price from #source-code-price
+ * exactly as it did before (§12).
+ */
+function initSourceCodeTimer() {
+    const priceElement = qs("#source-code-price");
+    if (!priceElement) {
+        return;
+    }
+
+    const timerElement = qs("[data-source-code-timer]");
+    const valueElement = qs("[data-source-code-timer-value]");
+    const labelElement = qs("#source-code-purchase-label");
+    const currencyElement = qs("#source-code-currency");
+    const currency = currencyElement ? currencyElement.textContent.trim() : "";
+
+    let currentPrice = Number(sourceCodeTimer.startingPrice) || 0;
+
+    function applyPrice(newPrice) {
+        currentPrice = newPrice;
+
+        // A price is an identifier, so it is re-marked as it is written.
+        protectIdentityText(priceElement, `$${formatPrice(newPrice)}`);
+
+        withElement(labelElement, (label) => {
+            label.textContent =
+                `Purchase — $${formatPrice(newPrice)} ${currency}`.trim();
+            protectIdentityTerms(label);
+        });
+    }
+
+    // The configured price is authoritative from the first paint.
+    applyPrice(currentPrice);
+
+    return runCountdown({
+        timerElement,
+        valueElement,
+        duration: sourceCodeTimer.countdownDuration,
+        visible: sourceCodeTimer.status === "show",
+        onElapsed: () =>
+            applyPrice(currentPrice + (Number(sourceCodeTimer.increment) || 0))
+    });
+}
+
 function initSourceCode() {
+    initSourceCodeTimer();
+
     const trigger = qs("#source-code-purchase");
     if (!trigger) {
         return;

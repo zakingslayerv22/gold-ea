@@ -2550,3 +2550,136 @@ console errors.
    not. The deployed GitHub Pages build measures 65.75px with 21/21 padding
    on **both** pages; `goldenboxea.com` still serves the older 51px bar on
    **both**, because that host has not been redeployed.
+
+---
+
+# Source Code Programmable Countdown Timer
+
+**Date:** 1 September 2026
+**Scope:** the source-code timer and the site identity constants. Nothing
+else was touched.
+
+## Site identity
+
+```js
+const siteName = "GOLDENBOX EA";
+const siteOwner = "Richie Gold";
+```
+
+Verified in the browser that both propagate through the existing system:
+the nav wordmark, the hero H1, every section heading that embeds the name,
+the document title, the footer copyright ("© 2026 GOLDENBOX EA by Richie
+Gold"), the live-chat label and the FAQ text all follow the constants. No
+duplicate declaration exists anywhere.
+
+The pre-JavaScript fallback text in both HTML files — the `<title>` and the
+`data-site-name` elements that `applySiteIdentity()` rewrites — was updated
+to match, so the old name cannot flash before the script runs or show at all
+with JavaScript disabled.
+
+## The timer
+
+One countdown implementation now serves both the pricing plans and the
+source-code card. `runCountdown()` was **extracted from** the existing
+`setTimer()` rather than copied:
+
+```js
+runCountdown({ timerElement, valueElement, duration, visible, onElapsed })
+```
+
+It owns the visibility rule, the formatting and the interval, and returns a
+stop function. Each call gets its own `remaining` and its own interval —
+**they share code, never state**. `setTimer()` now supplies the plan's price
+logic through `onElapsed`, and `initSourceCodeTimer()` supplies the
+source-code card's. Nothing else about the pricing timers changed.
+
+### Configuration
+
+```js
+const sourceCodeTimer = {
+    startingPrice: 9650,
+    countdownDuration: 3600,
+    increment: 250,
+    status: "hide"
+};
+```
+
+`status` uses `"show"` / `"hide"` to match the established
+`pricingTimerStatus` convention rather than the `showTimer` boolean in the
+brief — the project already had a name for this idea.
+
+Everything is editable from JavaScript alone. Proved by a test that serves a
+rewritten `main.js` with `startingPrice: 4321, countdownDuration: 3,
+increment: 111, status: "show"` and **no HTML change at all**: the timer
+appears, the card shows `$4,321`, the button reads `Purchase — $4,321 USD`,
+and the price climbs 4321 → 4432 → 4543 … on each expiry.
+
+### Behaviour
+
+- **Independent.** Three source-code increments left every plan price
+  untouched (`FREE, $299, $740` before and after), and the plan timers ran
+  their own 3600s cycles while the source-code one ran 3s cycles.
+- **Loops.** It restarts and increments again, indefinitely — not a
+  one-shot.
+- **Hidden keeps its space.** `visibility: hidden` via the same `.is-hidden`
+  class the plans use, never `display: none`. The source-code card measures
+  **348px with the timer hidden and 348px with it shown** — no jump.
+- **The price is JavaScript-owned.** `startingPrice` is written on the first
+  paint, so the figure in the HTML is only a fallback. Both the price line
+  and the purchase button's label are rewritten on every increment.
+- **The dialog is unchanged.** It still reads the price from the visible
+  `#source-code-price` exactly as before (§12), so it follows the timer for
+  free — verified showing `$9,650` at rest and the incremented figure after
+  three cycles.
+
+### Accessibility
+
+The source-code timer deliberately carries **no `aria-live`**. A countdown
+that changes every second behind `aria-live="polite"` is announced every
+second, which §8 rules out. The digits remain readable in the accessibility
+tree; they simply are not announced on a loop.
+
+> **Flagged.** The existing pricing timers *do* carry `aria-live="polite"`.
+> They are hidden by default (`pricingTimerStatus = "hide"`), so nothing is
+> announced today, but turning them on would produce per-second
+> announcements. Removing that one attribute would fix it — not done here
+> because this brief explicitly excludes the pricing timers.
+
+## Verification
+
+**27 assertions** covering: hidden by default, reserved space, no card jump,
+configured price on the first paint, button label in step, countdown
+decreasing, reaching zero, incrementing, restarting, looping a second time,
+independence from all three plan timers, the dialog receiving the current
+and the incremented price, config-only reconfiguration, and no horizontal
+overflow at 1920 and 390 with the timer visible.
+
+The wider regression set was re-run in full: desktop typography and
+gutters, translation in Chromium and WebKit, identity strings across six
+languages, announcement bar and version system, copy links, FAQ
+interaction, mobile FAQ, dialogs, clipboard, FAQ search and no-results, and
+the homepage FAQ. **613 assertions across seventeen suites, 0 failures.**
+
+One note on the translation suites: Google's engine reaches this sandbox
+through a proxy bridge and is intermittently slow to answer. Two suites used
+fixed waits and occasionally sampled the page before it had translated. They
+now poll for the engine, and the round-trip suite reports an unavailable
+engine as *inconclusive* rather than failing an assertion about the page —
+an honest harness condition instead of a phantom product defect.
+
+## Flagged rather than changed
+
+Three strings still contain "GoldTrap" and were **deliberately left alone**,
+because they are machine values rather than the site name:
+
+1. **`eaCurrentFileName = "GoldTrap_v4_2_3.ex5"`** — names the actual
+   downloadable file, and it is the only "GoldTrap" text still rendered on
+   the page (in the two download cards). Renaming it would advertise a file
+   that may not exist on the server. Change it when the file itself is
+   renamed.
+2. **`telegramChannel = "https://t.me/goldtrapea"`** — a real URL.
+3. **The storage keys** `goldtrap:announcement-dismissed-version` and
+   `goldtrap-translate-reset`, and the FAQ question ids such as
+   `what-is-goldtrap`. Renaming the first would reset every visitor's
+   announcement dismissal; renaming the ids would break every deep link
+   already copied from the FAQ page.
