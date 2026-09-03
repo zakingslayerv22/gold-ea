@@ -4360,13 +4360,19 @@ font {
 
 /*
  * RAIL MECHANICS.
- * The query is deliberately wider than the phone breakpoint. Ten chips do
- * not fit on one row until roughly 1000px, so at 768px they still wrapped
- * onto four rows — 26% of the viewport, over budget. A landscape phone
- * (844 x 390) is wide but only 390px TALL, where four rows is 66% of the
- * screen, so short viewports get the rail regardless of their width.
+ * The query runs the whole way up to the desktop breakpoint. Ten chips do
+ * not fit on one row until roughly 1000px, so below that they wrap: four
+ * rows at 768px, and three rows — 208px, 23% of the viewport — at the
+ * tablet reference width of ~918px. Pinning that much chrome above the
+ * answers is the same problem the phone layout was built to solve, so
+ * tablet gets the same single-row scrolling rail rather than a third
+ * behaviour of its own. Desktop keeps its approved wrapping bar.
+ *
+ * A landscape phone (844 x 390) is wide but only 390px TALL, where even
+ * three rows is most of the screen, so short viewports get the rail
+ * regardless of their width.
  */
-@media (max-width: 899.98px), (max-height: 540px) {
+@media (max-width: 1023.98px), (max-height: 540px) {
 
     .faq-sticky-bar {
         top: var(--sticky-offset);

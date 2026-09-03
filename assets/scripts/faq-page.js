@@ -587,7 +587,7 @@ export function initFaqPage(config = {}) {
         // The same query the stylesheet uses for the scrolling rail, so the
         // pinned button exists exactly where the rail does.
         const isMobile = () =>
-            window.matchMedia("(max-width: 899.98px), (max-height: 540px)").matches;
+            window.matchMedia("(max-width: 1023.98px), (max-height: 540px)").matches;
 
         const observer = new IntersectionObserver(
             (entries) => {
