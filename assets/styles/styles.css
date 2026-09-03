@@ -4360,19 +4360,31 @@ font {
 
 /*
  * RAIL MECHANICS.
- * The query runs the whole way up to the desktop breakpoint. Ten chips do
- * not fit on one row until roughly 1000px, so below that they wrap: four
- * rows at 768px, and three rows — 208px, 23% of the viewport — at the
- * tablet reference width of ~918px. Pinning that much chrome above the
- * answers is the same problem the phone layout was built to solve, so
- * tablet gets the same single-row scrolling rail rather than a third
- * behaviour of its own. Desktop keeps its approved wrapping bar.
+ * The chips wrap badly on anything narrower than a desktop window, so
+ * below this query they become one horizontally scrolling row instead.
+ *
+ * WHY 1065.98px, and how to re-derive it if the categories change.
+ * The bar's content box caps at --faq-bar-width (1040px), but until the
+ * viewport is wide enough it is `viewport - --gutter * 2` instead. The
+ * ten chips need a 1002px content box to make the two rows the desktop
+ * design was approved with, and 1002 + 32 * 2 = 1066px of viewport. So:
+ *
+ *   >= 1066px  two-row bar   199px  <- approved desktop presentation
+ *   1024-1065  THREE-row bar 259px  <- more chrome than either neighbour
+ *   <= 1023px  scrolling rail 62px
+ *
+ * That middle band is the fault this query closes. It is not merely
+ * "different from desktop": it is a non-monotonic step that peaks at
+ * 34% of the viewport height on a 1024 x 768 tablet in landscape, worse
+ * than both the tablet width below it and the desktop width above it.
+ * Extending the rail to 1065.98px makes the progression monotonic and
+ * leaves every width from 1066px up exactly as approved.
  *
  * A landscape phone (844 x 390) is wide but only 390px TALL, where even
- * three rows is most of the screen, so short viewports get the rail
+ * two rows is most of the screen, so short viewports get the rail
  * regardless of their width.
  */
-@media (max-width: 1023.98px), (max-height: 540px) {
+@media (max-width: 1065.98px), (max-height: 540px) {
 
     .faq-sticky-bar {
         top: var(--sticky-offset);
@@ -4563,7 +4575,13 @@ font {
         padding: 16px 4px 16px 16px;
     }
 
-    .faq-copy-link {
+    /*
+     * Scoped to .faq-group, which only exists on the FAQ page. The same
+     * copy control is rendered inside the homepage FAQ section, and that
+     * section is not part of this pass — an unscoped rule here would
+     * quietly restyle it.
+     */
+    .faq-group .faq-copy-link {
         margin-inline-start: 0;
     }
 }
