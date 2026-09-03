@@ -758,3 +758,137 @@ approved 24, see *Single source of truth* above.
    of truth* above for why they are not merged into the 72.
 3. **The `/` keyboard hint** is a desktop affordance and will be reviewed in
    the mobile pass.
+
+---
+
+## FAQ Interaction Pass — 1 September 2026
+
+Four focused changes. No redesign, no tablet work.
+
+### 1. Site identity
+
+`siteOwner` is now `"Richie Gold"`; `siteName` was already `"GOLDTRAP EA"`.
+Both remain the single authoritative values in `main.js` — there is no
+duplicate anywhere. Verified in the browser that every rendered instance
+follows the config: the nav wordmark, the hero H1, the document title, the
+footer copyright ("© 2026 GOLDTRAP EA by Richie Gold") and the live-chat
+hover label ("Chat with Richie Gold"). Two stylesheet comments that quoted
+the old owner as an example were updated so they do not mislead.
+
+### 2. Mobile sticky search — the full-screen sheet is gone
+
+**What was wrong.** Tapping the compact Search button opened a
+`position: fixed; inset: 0` sheet over the whole page. The FAQ list sat
+behind it, so a visitor could type a query and see nothing until they closed
+the search again. Search is only useful while its results are visible.
+
+**What it does now.** The panel keeps the desktop implementation —
+`position: absolute; top: 100%` on the sticky bar — so it expands as one
+compact row directly beneath the category rail. The mobile-only sheet rules
+were deleted rather than duplicated; both viewports now share one panel.
+
+Measured at 390 × 844: the open panel covers **under 25% of the viewport**,
+the results container stays visible below it, and the FAQ list live-filters
+as the visitor types. Verified:
+
+- the input receives focus on open (`preventScroll`, so the page does not
+  move — measured 0px of scroll change);
+- the current query is carried into the compact field and back out;
+- typing filters immediately while the panel stays open, and matching
+  questions are on screen and readable;
+- changing the query updates the results without closing anything;
+- **scrolling the results does not close the search**;
+- Escape closes it, focus returns to the Search button, and the results
+  state and query survive;
+- reopening restores the query;
+- no horizontal overflow.
+
+The `backdrop-filter: none` on the mobile sticky bar stays: it was added
+because a `backdrop-filter` makes an element a containing block for
+fixed-position descendants, and although the panel is no longer fixed, a
+solid background is cheaper for a phone to paint.
+
+### 3. Desktop category click now scrolls the content into view
+
+**What was wrong.** With the rail pinned halfway down a long page, clicking
+a category changed the active chip and nothing else. The heading and its
+questions stayed wherever they were, usually far above the fold, so the
+click appeared to do nothing.
+
+**What it does now.** `revealActiveCategoryContent()` scrolls the chosen
+category's `.faq-group` into view with `block: "start"`. It is deliberately
+separate from `revealActiveChip()`, which moves the horizontal rail with
+`block: "nearest"` so the chip itself is visible — **two different scroll
+concerns, and conflating them is what makes a rail scroll the page.**
+
+It only scrolls when the target is not already comfortably in view, so
+clicking a category while reading the top of the page does not throw the
+visitor down past the hero.
+
+### 4. Sticky offset — and a bug it exposed
+
+The landing position comes from `scroll-margin-top` on `.faq-group`, never
+from an offset in the scroll call. That margin is
+`calc(var(--faq-sticky-offset) + 16px)`, and `--faq-sticky-offset` is the
+existing `--sticky-offset` (site chrome) **plus the FAQ category rail**,
+written by `updateFaqStickyOffset()` in `main.js`. Pages without a rail fall
+back to `--sticky-offset`.
+
+**The rail changes height as you scroll.** Its compact Search button appears
+once the hero search leaves the viewport, which on desktop pushes the chips
+onto another row: the rail is **148px at the top of the page and 199px once
+pinned**. Measuring it once at load left every scrolled-to heading 35px
+underneath the chips. The bar, the header and the rail are now all watched
+by a `ResizeObserver`, so the offset follows the rail growing, the
+announcement bar being dismissed, and the text wrapping.
+
+That bug was also silently affecting the **deep-link landings** from the
+previous pass — a copied question link landed under the rail. Two test
+assertions that only checked "on screen" have been tightened to require the
+target to clear the rail, and both now pass.
+
+Verified with the announcement bar visible and dismissed, on three
+categories each: the category becomes active, its heading lands **below**
+the rail, the heading and its first questions are on screen, and the page
+never jumps to the top.
+
+### 5. Homepage FAQ starts collapsed
+
+`openFirstFaqItem()` is gone — the helper as well as its two call sites, so
+no dead code remains. On load and on every category change, every question
+is closed and every trigger has `aria-expanded="false"`.
+
+Interaction after load is unchanged: click A opens A, click A again closes
+A, click B closes A and opens B, and clicking anywhere else leaves the open
+answer open.
+
+### Not regressed
+
+The FAQ data architecture, all FAQ text, the featured-question selection,
+live search (question, answer and category matching), the mutually exclusive
+no-results state, the popular-question behaviour, the sticky rail itself and
+its chips, the announcement bar, navigation, translation and the live chat
+are all untouched and re-verified.
+
+### Verification
+
+| suite | result |
+| --- | --- |
+| FAQ interaction pass (this pass) | 47 / 0 |
+| Mobile FAQ (6 viewports) | 60 / 0 |
+| Announcement bar + version system | 24 / 0 and 24 / 0 |
+| Copy link | 23 / 0 |
+| Identity strings, six languages | 83 / 0 |
+| Desktop regression | 48 / 0 |
+| Translation (Chromium + WebKit) | 28 / 0 |
+| Interactions (dialogs, clipboard, timers) | 12 / 0 |
+| FAQ page under translation | 9 / 0 |
+| FAQ desktop / fix pass / no-results | 52, 44, 27 / 0 |
+| Homepage / homepage FAQ / pill-by-pill | 10, 12, 83 / 0 |
+
+**586 assertions across sixteen suites, 0 failures.** Zero console errors.
+
+Three suite assertions were updated because they encoded behaviour this
+brief deliberately changed: the homepage's first question is no longer open
+on load (two suites), and a chip tap now moves the page to the category
+content on purpose rather than staying put.

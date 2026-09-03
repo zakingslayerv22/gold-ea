@@ -25,7 +25,7 @@
  * ====================================================================== */
 
 const siteName = "GOLDTRAP EA";
-const siteOwner = "Abang Rimba";
+const siteOwner = "Richie Gold";
 
 /*
  * The current Expert Advisor version, e.g. "v4.2.3".
@@ -725,7 +725,7 @@ function protectIdentityTerms(root = document.body) {
              * protected span. Google replaces each translatable text node
              * wholesale and trims its edges, so a space left outside is
              * silently eaten and the line renders as
-             * "© 2026 GOLDTRAP EAporAbang Rimba". Inside the span it is
+             * "© 2026 GOLDTRAP EAporRichie Gold". Inside the span it is
              * untouchable. `index` clamps the start so two adjacent terms
              * cannot both claim the same space.
              */
@@ -1685,6 +1685,35 @@ function updateStickyOffset() {
     );
 
     updateHeroGlowRise();
+    updateFaqStickyOffset();
+}
+
+/**
+ * The offset for content scrolled to on the FAQ page.
+ *
+ * --sticky-offset covers the site chrome. The FAQ page pins a second bar
+ * below it — the category rail — so anything scrolled to there has to clear
+ * BOTH or it lands underneath the chips. This writes the combined figure to
+ * --faq-sticky-offset, measured rather than assumed: the rail is 62px on a
+ * phone and taller on desktop, and the announcement bar above it is
+ * dismissible.
+ *
+ * Falls back to --sticky-offset on pages with no rail.
+ */
+function updateFaqStickyOffset() {
+    const rail = qs(".faq-sticky-bar");
+    const base = parseFloat(
+        document.documentElement.style.getPropertyValue("--sticky-offset")
+    ) || 0;
+
+    const railHeight = rail && !rail.hidden
+        ? rail.getBoundingClientRect().height
+        : 0;
+
+    document.documentElement.style.setProperty(
+        "--faq-sticky-offset",
+        `${Math.round(base + railHeight)}px`
+    );
 }
 
 /**
@@ -1722,11 +1751,20 @@ function initStickyOffset() {
     window.addEventListener("resize", updateStickyOffset);
     window.addEventListener("orientationchange", updateStickyOffset);
 
-    // The announcement bar is dismissible and the header can wrap, so watch
-    // them rather than guessing when they change.
+    /*
+     * The announcement bar is dismissible, the header can wrap, and the FAQ
+     * category rail CHANGES HEIGHT as you scroll — its compact Search button
+     * appears once the hero search leaves the viewport, which on desktop
+     * pushes the chips onto another row and makes the rail 148px tall at
+     * the top of the page and 199px once pinned. Measuring any of these once
+     * at load lands a scrolled-to heading underneath the rail, so they are
+     * watched rather than assumed.
+     */
     if ("ResizeObserver" in window) {
         const observer = new ResizeObserver(() => updateStickyOffset());
-        qsa(".site-header, .action-bar").forEach((element) => observer.observe(element));
+        qsa(".site-header, .action-bar, .faq-sticky-bar").forEach((element) =>
+            observer.observe(element)
+        );
     }
 }
 
@@ -2390,6 +2428,15 @@ function initFaq() {
         return;
     }
 
+    /*
+     * Every question starts CLOSED, on load and on every category change.
+     * The section previously opened its first question automatically; that
+     * pre-empts the visitor's choice and makes the first answer look like
+     * part of the page rather than something they revealed. Opening is now
+     * always an explicit act, and aria-expanded is false on every trigger
+     * until one is clicked.
+     */
+
     // "all" renders every category stacked; otherwise one category at a time.
     const mode = root.dataset.faqMode === "all" ? "all" : "single";
     const questionLimit = Number(root.dataset.faqLimit) || Infinity;
@@ -2409,7 +2456,6 @@ function initFaq() {
             .join("");
         // FAQ prose mentions MT4/MT5, XAUUSD and the product by name.
         protectIdentityTerms(panelsContainer);
-        openFirstFaqItem(panelsContainer);
     } else {
         categoriesContainer.innerHTML = categoryIds
             .map(
@@ -2461,9 +2507,6 @@ function initFaq() {
 
         // Re-rendered content is unprotected until this runs over it.
         protectIdentityTerms(panelsContainer);
-
-        // The mockup shows the first question of a category already open.
-        openFirstFaqItem(panelsContainer);
     }
 
     // Copy controls: one delegated listener for every question, present
@@ -2560,21 +2603,6 @@ function initFaq() {
     });
 }
 
-/** Opens the first question in a freshly rendered set, as the mockup shows. */
-function openFirstFaqItem(scope) {
-    const trigger = qs(".faq-item__trigger", scope);
-    if (!trigger) {
-        return;
-    }
-
-    trigger.setAttribute("aria-expanded", "true");
-    trigger.closest(".faq-item").classList.add("is-open");
-
-    withElement(qs(`#${trigger.getAttribute("aria-controls")}`, scope), (panel) => {
-        panel.hidden = false;
-    });
-}
-
 /**
  * Renders questions into two independent columns, alternating left/right,
  * exactly as the mockup lays them out. Independent columns mean an open
@@ -2649,7 +2677,7 @@ function initFooter() {
     // Copyright is generated — the year is never hard-coded (§18.1).
     withElement(qs("#footer-copyright"), (element) => {
         /*
-         * "© 2026 GOLDTRAP EA by Abang Rimba" — the year and the word "by"
+         * "© 2026 GOLDTRAP EA by Richie Gold" — the year and the word "by"
          * are prose and may translate; the two names may not. The sentence
          * is written whole and protectIdentityTerms() (run at the end of
          * init) wraps just the names.

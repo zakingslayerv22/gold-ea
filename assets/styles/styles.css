@@ -147,6 +147,13 @@
      */
     --sticky-offset: 0px;
 
+    /*
+     * The same figure plus the FAQ page's category rail. Written by
+     * main.js; the fallback keeps the site chrome offset on pages without
+     * a rail, and before the script runs.
+     */
+    --faq-sticky-offset: var(--sticky-offset);
+
     /* --- Radii --- */
     --radius-pill: 999px;
     --radius-sm: 12px;            /* inner rows: dialog rows, licence field         */
@@ -952,10 +959,19 @@ button {
 /*
  * Anything scrolled to lands below the sticky chrome. One property, shared
  * with the rail's `top`, rather than a magic number in the scroll call.
+ *
+ * The FAQ page pins a second bar — the category rail — under the site
+ * chrome, so its content clears --faq-sticky-offset (site chrome + rail),
+ * which main.js measures at runtime. The homepage has no rail, so
+ * --faq-sticky-offset falls back to --sticky-offset there.
  */
-.faq-item,
-.faq-question {
+.faq-item {
     scroll-margin-top: calc(var(--sticky-offset) + 16px);
+}
+
+.faq-question,
+.faq-group {
+    scroll-margin-top: calc(var(--faq-sticky-offset, var(--sticky-offset)) + 16px);
 }
 
 
@@ -4344,28 +4360,22 @@ font {
         height: 18px;
     }
 
-    /* ---- Search sheet ---------------------------------------------------
-     * Full screen rather than an in-place expansion: 72 questions produce
-     * long result lists, and a sheet gives them the whole screen while
-     * matching what a phone user expects from a search control.
+    /* ---- Compact search row ---------------------------------------------
+     * A row that expands directly beneath the sticky navigation, NOT a
+     * full-screen sheet.
+     *
+     * The sheet was tried and removed: it covered the results with an
+     * opaque panel, so a visitor typing a query could not see what they had
+     * matched until they closed the search again. Search is only useful
+     * while its results are visible, so the panel now occupies one row and
+     * the FAQ list stays on screen underneath it, live-filtering as the
+     * visitor types.
+     *
+     * It keeps the desktop panel's own positioning (absolute, below the
+     * bar) — the same visual language, just sized for a phone.
      * ------------------------------------------------------------------ */
-    .faq-sticky-search-panel {
-        position: fixed;
-        inset: 0;
-        top: 0;
-        z-index: 80;
-        display: flex;
-        flex-direction: column;
-        padding-top: env(safe-area-inset-top, 0px);
-        background: var(--bg-zinc);
-        border: 0;
-        box-shadow: none;
-        overflow-y: auto;
-        overscroll-behavior: contain;
-    }
-
     .faq-sticky-search-panel__inner {
-        padding-block: var(--space-sm, 16px);
+        padding-block: var(--space-sm, 12px);
     }
 
     .faq-sticky-search-panel .faq-search--compact {

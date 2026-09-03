@@ -660,6 +660,62 @@ export function initFaqPage(config = {}) {
         });
     }
 
+    /**
+     * Brings the chosen category's CONTENT into view.
+     *
+     * This is a different scroll concern from revealActiveChip(), which
+     * moves the horizontal rail so the chip itself is visible. Selecting a
+     * category from a rail that is still pinned halfway down a long page
+     * used to change the active state and nothing else: the heading and its
+     * questions stayed wherever they happened to be, often far above the
+     * fold, so the visitor saw no result from their own click.
+     *
+     * The landing position comes from `scroll-margin-top` on .faq-group,
+     * which is derived from --faq-sticky-offset (site chrome + the category
+     * rail, both measured at runtime). No magic pixel offset here.
+     *
+     * It only scrolls when the target is not already comfortably in view,
+     * so clicking a category while reading the top of the page does not
+     * throw the visitor down past the hero for no reason.
+     */
+    function revealActiveCategoryContent() {
+        if (!results) {
+            return;
+        }
+
+        const target = activeCategoryId === "all"
+            ? qs(".faq-group", results)
+            : qs(`.faq-group[data-category-id="${activeCategoryId}"]`, results);
+
+        if (!target) {
+            return;     // No results for this category: nothing to scroll to.
+        }
+
+        // Everything above the target that is pinned to the viewport.
+        const chrome = parseFloat(
+            getComputedStyle(target).scrollMarginTop
+        ) || 0;
+
+        const top = target.getBoundingClientRect().top;
+        const alreadyVisible = top >= chrome && top <= window.innerHeight * 0.5;
+
+        if (alreadyVisible) {
+            return;
+        }
+
+        // The section is revealed immediately: the scroll-reveal observer
+        // will not have fired by the time a smooth scroll lands, and an
+        // element at opacity 0 looks like nothing happened.
+        target.classList.add("is-visible");
+
+        const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+        target.scrollIntoView({
+            block: "start",
+            behavior: reduced ? "auto" : "smooth"
+        });
+    }
+
     /** Fades the rail's left edge once it has been scrolled away from 0. */
     function updateRailFade() {
         if (!navigation) {
@@ -713,6 +769,7 @@ export function initFaqPage(config = {}) {
         update();
         // The chip has just been re-rendered, so re-find it by state.
         revealActiveChip();
+        revealActiveCategoryContent();
     });
 
     popularList?.addEventListener("click", (event) => {
