@@ -986,17 +986,48 @@ run at once.
 A `MutationObserver` on the sticky panel's `hidden` attribute re-evaluates
 when the panel opens or closes, and everything stops in a background tab.
 
-### The glitter
+### The border shine
 
-A single gold band sweeps across the control: a `::after` pseudo-element,
-clipped to the control, `pointer-events: none`, so nothing moves, nothing
-resizes and nothing is clickable. The class is added, the animation plays
-**once**, the class is removed — never a permanent glow or an animated
-border. It never plays while the field is focused.
+A bright gold highlight travels **once around the search bar's border**,
+then the border returns to normal — light catching polished metal, not a
+glow. At any moment only a short arc of the border is lit.
+
+**How it is built.** A `::after` pseudo-element covers the control, painted
+with a **conic gradient** whose bright stop sits at one angle, and masked to
+a 1px ring (everything, minus the content box). Because the ring inherits
+`border-radius`, it follows the existing rounded corners exactly. Rotating
+the gradient's start angle walks the highlight around the perimeter.
+
+The angle is a **registered custom property** (`@property --faq-shine-angle`
+as an `<angle>`) — a plain custom property cannot be animated smoothly, only
+interpolated as a string, so registering it is what makes the trip continuous
+rather than a jump.
+
+The control's own border stays visible underneath throughout; this layer only
+adds the moving highlight. `pointer-events: none`, no size change, no radius
+change, no box-shadow pulse, no background animation. The class is added, the
+animation runs **once**, the class is removed — never a permanent glow or a
+permanently animated border. It never plays while the field is focused.
+
+> **Superseded.** The first implementation was a diagonal band sweeping
+> across the whole control. That reads as "the box is glowing" rather than
+> "the edge is catching the light", so it was replaced entirely rather than
+> layered on top.
 
 Scheduling is recursive `setTimeout`, not `setInterval`: play, then wait a
 fresh random 7–14s, then play again. Measured intervals in a fast-config
 test run came out different each time, confirming the randomisation.
+
+Its four settings sit with the placeholder's in `faqSearchAnimationConfig`:
+`shimmerEnabled`, `shimmerIntervalMin`, `shimmerIntervalMax` and
+`shimmerDuration`. The duration is written to the element as
+`--faq-shimmer-duration`, so the CSS animation and the JavaScript that
+removes the class read **one** configured value rather than each carrying a
+copy.
+
+**The placeholder animation was not touched** by this correction — not its
+questions, speeds, hold, queue, suspension rules or search behaviour. The
+two effects are independent; only the border visual changed.
 
 ### Reduced motion
 

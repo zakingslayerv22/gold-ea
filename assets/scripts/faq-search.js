@@ -6,7 +6,9 @@
  *
  *   1. A typewriter PLACEHOLDER that types a real FAQ question, holds it,
  *      deletes it, and moves on to another.
- *   2. A brief gold GLITTER sweep across the control at random intervals.
+ *   2. A gold BORDER SHINE: a bright highlight travelling once around the
+ *      control's edge at random intervals, like light catching polished
+ *      metal. The border, not the box.
  *
  * WHERE THINGS LIVE
  *   main.js             global site configuration
@@ -35,7 +37,9 @@ import { getQuestionByRef } from "./faq-page-content.js";
  *
  * HOW TO ADJUST
  *   enabled ................ false turns both effects off entirely
- *   glitterIntervalMin/Max . gap between glitter sweeps
+ *   shimmerEnabled ......... false leaves the border static
+ *   shimmerIntervalMin/Max . gap between border shines
+ *   shimmerDuration ........ how long one trip around the border takes
  *   typingSpeedMin/Max ..... per-character delay while typing
  *   deletingSpeedMin/Max ... per-character delay while deleting
  *                            (lower than typing: backspacing is quick)
@@ -58,9 +62,19 @@ import { getQuestionByRef } from "./faq-page-content.js";
 export const faqSearchAnimationConfig = {
     enabled: true,
 
-    /* Glitter: a sweep every 7–14 seconds. */
-    glitterIntervalMin: 7000,
-    glitterIntervalMax: 14000,
+    /*
+     * Border shine. A bright highlight travels once around the search
+     * bar's gold edge, then the border goes back to normal. It is not a
+     * glow and it is not continuous — most of the time nothing animates.
+     *
+     *   shimmerEnabled ....... false leaves the border completely static
+     *   shimmerIntervalMin/Max gap between shines (7–14 seconds)
+     *   shimmerDuration ...... how long one trip around the border takes
+     */
+    shimmerEnabled: true,
+    shimmerIntervalMin: 7000,
+    shimmerIntervalMax: 14000,
+    shimmerDuration: 1400,
 
     /* Typewriter. */
     typingSpeedMin: 45,
@@ -194,8 +208,8 @@ export function initFaqSearchAnimation(config = {}) {
     // Exactly one pending timer at a time, for each effect. Every path
     // that schedules work goes through these, so nothing can leak.
     let typeTimer = null;
-    let glitterTimer = null;
-    let glitterClearTimer = null;
+    let shimmerTimer = null;
+    let shimmerClearTimer = null;
     let suspended = false;
 
     function clearTypeTimer() {
@@ -203,11 +217,11 @@ export function initFaqSearchAnimation(config = {}) {
         typeTimer = null;
     }
 
-    function clearGlitterTimers() {
-        window.clearTimeout(glitterTimer);
-        window.clearTimeout(glitterClearTimer);
-        glitterTimer = null;
-        glitterClearTimer = null;
+    function clearShimmerTimers() {
+        window.clearTimeout(shimmerTimer);
+        window.clearTimeout(shimmerClearTimer);
+        shimmerTimer = null;
+        shimmerClearTimer = null;
     }
 
     /**
@@ -329,17 +343,21 @@ export function initFaqSearchAnimation(config = {}) {
     }
 
     /* ------------------------------------------------------------------
-     * Glitter
+     * Border shine
      * ---------------------------------------------------------------- */
 
     /**
-     * One sweep across the visible search control.
+     * One trip of the highlight around the visible control's border.
      *
-     * A class is added, the CSS animation plays once, the class comes off
-     * — so the control is never permanently animated, and a focused field
+     * A class is added, the CSS animation runs once, the class comes off —
+     * so the border is static except during that trip, and a focused field
      * is left alone entirely.
+     *
+     * shimmerDuration is written to the element as a custom property, so
+     * the CSS animation and the class-removal timeout read the SAME
+     * configured value rather than each carrying their own copy.
      */
-    function playGlitter() {
+    function playShimmer() {
         const target = visibleInput();
         const control = target ? target.closest(".faq-search") : null;
 
@@ -347,26 +365,32 @@ export function initFaqSearchAnimation(config = {}) {
             return;
         }
 
-        control.classList.add("is-glittering");
-        glitterClearTimer = window.setTimeout(
-            () => control.classList.remove("is-glittering"),
-            1200
+        const duration = faqSearchAnimationConfig.shimmerDuration;
+        control.style.setProperty("--faq-shimmer-duration", `${duration}ms`);
+        control.classList.add("is-shimmering");
+
+        shimmerClearTimer = window.setTimeout(
+            () => control.classList.remove("is-shimmering"),
+            duration
         );
     }
 
     /*
      * Recursive scheduling, deliberately not setInterval: each wait is a
-     * fresh random value, so the sweep never falls into a mechanical
+     * fresh random value, so the shine never falls into a mechanical
      * rhythm.
      */
-    function scheduleGlitter() {
-        window.clearTimeout(glitterTimer);
-        glitterTimer = window.setTimeout(() => {
-            playGlitter();
-            scheduleGlitter();
+    function scheduleShimmer() {
+        if (!faqSearchAnimationConfig.shimmerEnabled) {
+            return;
+        }
+        window.clearTimeout(shimmerTimer);
+        shimmerTimer = window.setTimeout(() => {
+            playShimmer();
+            scheduleShimmer();
         }, randomBetween(
-            faqSearchAnimationConfig.glitterIntervalMin,
-            faqSearchAnimationConfig.glitterIntervalMax
+            faqSearchAnimationConfig.shimmerIntervalMin,
+            faqSearchAnimationConfig.shimmerIntervalMax
         ));
     }
 
@@ -376,10 +400,10 @@ export function initFaqSearchAnimation(config = {}) {
 
     function stop() {
         clearTypeTimer();
-        clearGlitterTimers();
+        clearShimmerTimers();
         document
-            .querySelectorAll(".faq-search.is-glittering")
-            .forEach((control) => control.classList.remove("is-glittering"));
+            .querySelectorAll(".faq-search.is-shimmering")
+            .forEach((control) => control.classList.remove("is-shimmering"));
         restorePlaceholders();
     }
 
@@ -389,19 +413,19 @@ export function initFaqSearchAnimation(config = {}) {
         }
         // Restarting always clears first, so there is only ever one chain.
         clearTypeTimer();
-        clearGlitterTimers();
+        clearShimmerTimers();
 
         typeTimer = window.setTimeout(
             () => typeQuestion(nextQuestion()),
             faqSearchAnimationConfig.startDelay
         );
-        scheduleGlitter();
+        scheduleShimmer();
     }
 
     /** Called whenever the visitor's relationship to the search changes. */
     function refresh() {
         if (shouldAnimate()) {
-            if (!typeTimer && !glitterTimer) {
+            if (!typeTimer && !shimmerTimer) {
                 start();
             }
             return;

@@ -3720,60 +3720,103 @@ font {
     box-shadow: 0 0 0 3px rgba(221, 185, 84, 0.16);
 }
 
-/* --- Search glitter ---------------------------------------------------
- * A single gold sweep across the control, played on demand by
- * faq-search.js adding .is-glittering and removing it again. It is
- * deliberately NOT a permanent glow or an animated border: the class is
- * present for about a second, at random intervals, and never while the
- * field is focused.
+/* --- Search border shine ----------------------------------------------
+ * A bright highlight travels ONCE around the search bar's gold edge, then
+ * the border goes back to normal. Light catching polished metal, not a
+ * glow: at any moment only a short arc of the border is lit.
  *
- * The sweep is a pseudo-element clipped to the control, so nothing moves,
- * nothing resizes, and it cannot be clicked.
+ * HOW IT IS BUILT
+ * A pseudo-element covers the control and is painted with a conic
+ * gradient whose bright stop sits at one angle. A two-layer mask —
+ * everything, minus the content box — leaves only a 1px ring visible, and
+ * because the ring is drawn with `border-radius: inherit` it follows the
+ * existing rounded corners exactly. Rotating the gradient's start angle
+ * then walks the highlight around the perimeter.
+ *
+ * The angle is a registered custom property (@property below): a bare
+ * custom property cannot be animated, only interpolated as a string, so
+ * registering it as an <angle> is what makes the trip smooth rather than
+ * a jump.
+ *
+ * The control's own border stays underneath throughout — this layer only
+ * adds the moving highlight. Nothing here changes the control's size,
+ * radius, position or hit area (`pointer-events: none`).
+ *
+ * TIMING lives in faq-search.js. It writes --faq-shimmer-duration from
+ * `shimmerDuration`, so the CSS animation and the JavaScript that removes
+ * the class read one value, and the interval between shines is scheduled
+ * there too.
  * ------------------------------------------------------------------- */
+
+@property --faq-shine-angle {
+    syntax: "<angle>";
+    inherits: false;
+    initial-value: 0deg;
+}
+
 .faq-search {
     position: relative;
-    overflow: hidden;
 }
 
 .faq-search::after {
     content: "";
     position: absolute;
     inset: 0;
+    border-radius: inherit;
+    /* The ring's thickness — matches the control's own 1px border. */
+    padding: 1px;
     pointer-events: none;
     opacity: 0;
-    /* A narrow, soft band of the site's own gold. */
-    background: linear-gradient(105deg,
-        rgba(221, 185, 84, 0) 35%,
-        rgba(241, 217, 152, 0.16) 48%,
-        rgba(255, 246, 221, 0.30) 52%,
-        rgba(241, 217, 152, 0.16) 56%,
-        rgba(221, 185, 84, 0) 70%);
-    background-size: 260% 100%;
-    background-position: 130% center;
+
+    /*
+     * Normal edge → subtle gold → bright highlight → subtle gold → normal
+     * edge, all inside a narrow arc so the lit part is obviously moving.
+     */
+    background: conic-gradient(
+        from var(--faq-shine-angle),
+        rgba(221, 185, 84, 0) 0deg,
+        rgba(221, 185, 84, 0) 24deg,
+        rgba(221, 185, 84, 0.55) 44deg,
+        rgba(241, 217, 152, 0.95) 56deg,
+        #FFF6DD 62deg,
+        rgba(241, 217, 152, 0.95) 68deg,
+        rgba(221, 185, 84, 0.55) 80deg,
+        rgba(221, 185, 84, 0) 100deg,
+        rgba(221, 185, 84, 0) 360deg);
+
+    /* Keep only the ring: the whole box minus its content box. */
+    -webkit-mask:
+        linear-gradient(#000 0 0) content-box,
+        linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask:
+        linear-gradient(#000 0 0) content-box,
+        linear-gradient(#000 0 0);
+    mask-composite: exclude;
 }
 
-.faq-search.is-glittering::after {
-    animation: faq-search-glitter 1.1s ease-in-out 1;
+.faq-search.is-shimmering::after {
+    animation: faq-search-shine var(--faq-shimmer-duration, 1400ms) linear 1;
 }
 
-@keyframes faq-search-glitter {
-    0%   { opacity: 0;    background-position: 130% center; }
-    15%  { opacity: 1; }
-    85%  { opacity: 1; }
-    100% { opacity: 0;    background-position: -30% center; }
+@keyframes faq-search-shine {
+    0%   { opacity: 0; --faq-shine-angle: 0deg; }
+    12%  { opacity: 1; }
+    88%  { opacity: 1; }
+    100% { opacity: 0; --faq-shine-angle: 360deg; }
 }
 
 /*
- * Reduced motion: no sweep at all. faq-search.js separately stops the
- * typewriter and restores the static placeholder, so a visitor who asks
- * for less motion gets a completely still control.
+ * Reduced motion: no travelling highlight at all. The control's own gold
+ * border is untouched, and faq-search.js separately keeps the placeholder
+ * static, so the whole control is still.
  */
 @media (prefers-reduced-motion: reduce) {
-    .faq-search.is-glittering::after {
+    .faq-search.is-shimmering::after {
         animation: none;
         opacity: 0;
     }
-}
+}}
 
 .faq-search__icon {
     flex-shrink: 0;
