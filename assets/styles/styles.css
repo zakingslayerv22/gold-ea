@@ -103,7 +103,7 @@
     --grad-gold: linear-gradient(180deg, var(--gold-100) 0%, var(--gold-500) 100%);
     --grad-gold-text: linear-gradient(180deg, var(--gold-200) 0%, var(--gold-600) 100%);
     --grad-green: linear-gradient(180deg, #34D39B 0%, #16A97A 100%);
-    --grad-blue: linear-gradient(180deg, #6DC3F0 0%, #3A9FD8 100%);
+    --grad-blue: #1F6FA8;
 
     /*
      * --- Containers ---
@@ -134,7 +134,7 @@
      * height comes from this padding, never from a fixed height, so it
      * grows correctly when the announcement wraps to two or three lines.
      */
-    --action-bar-padding-block: 21px;
+    --action-bar-padding-block: 10px;   /* measured on the reference bar */
 
     /*
      * How much fixed/sticky chrome sits at the top of the viewport. Written
@@ -998,13 +998,21 @@ button {
  * Symmetric padding, single source. See --action-bar-padding-block.
  * min-height is deliberately `auto`: a min-height would centre the text in
  * a fixed box and mask a broken padding value instead of exposing it.
+ *
+ * Measured against the reference bar at 1440 / 768 / 390. There the row is
+ * a centred flex line, max-width 1280 INCLUDING its own 40px side padding,
+ * 10px top and bottom, 8px between the icon and the text. Height is not
+ * set: it falls out of the line box, which is why the bar grows from 40.3px
+ * to 59.5px to 70.5px as the sentence wraps to two and three lines.
  */
 .action-bar__inner {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 10px;
+    gap: 8px;
     min-height: auto;
+    /* 1280 total, not 1280 + gutters: the reference caps the padding box. */
+    max-width: var(--container-wide);
     padding: var(--action-bar-padding-block) 40px;
     text-align: center;
 }
@@ -1017,7 +1025,9 @@ button {
 /* Default gray, white on hover (CLAUDE.md §5.1). */
 .action-bar__link {
     color: var(--text-dim);
+    /* 14px / 19.25px on the reference, i.e. a 1.375 ratio. */
     font-size: var(--fs-sm);
+    line-height: 1.375;
 }
 
 .action-bar__link:hover,
@@ -1037,19 +1047,39 @@ button {
     text-underline-offset: 3px;
 }
 
+/*
+ * 28 x 28 at 12px from the right edge, vertically centred — the reference's
+ * own numbers. The ::before below keeps the tappable area at 44px so the
+ * smaller visual circle does not shrink the touch target.
+ */
 .action-bar__close {
     position: absolute;
     top: 50%;
-    right: clamp(16px, 2vw, 40px);
+    right: 12px;
     transform: translateY(-50%);
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 32px;
-    height: 32px;
+    width: 28px;
+    height: 28px;
+    padding: 6px;
     border-radius: 50%;
     color: var(--text-dim);
     transition: color var(--transition), background var(--transition);
+}
+
+/*
+ * Invisible 44px hit area centred on the 28px circle. Pointer events only;
+ * it paints nothing and cannot affect layout.
+ */
+.action-bar__close::before {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 44px;
+    height: 44px;
+    transform: translate(-50%, -50%);
 }
 
 .action-bar__close:hover,
@@ -1090,9 +1120,17 @@ button {
     height: 48px;
 }
 
+/*
+ * Measured on the reference brand lockup at 1440, 768 and 390: 14px,
+ * line-height 17.5px, weight 900, letter-spacing -0.28px, and constant at
+ * every width. 0.875rem is that 14px; --ls-heading is -0.02em, which lands
+ * on -0.28px by itself. The earlier 0.6rem rendered at 9.6px, well under
+ * the reference.
+ */
 .brand__name {
     font-family: var(--font-display);
-    font-size: 0.6rem;
+    font-size: 0.875rem;
+    line-height: 1.25;
     font-weight: 900;
     letter-spacing: var(--ls-heading);
     text-transform: uppercase;
@@ -1371,9 +1409,33 @@ button {
         radial-gradient(78% 66% at 45% 6%, rgba(180, 145, 50, 0.065) 0%, rgba(0, 0, 0, 0) 88%);
 }
 
+/*
+ * HERO CONTAINER GEOMETRY, measured on the reference.
+ *
+ * Every other section caps its CONTENT box at 1280 and adds the gutter
+ * outside it, which puts section content 80px from a 1440 viewport edge —
+ * the reference does the same, and .container already matches it.
+ *
+ * The hero is the one exception on the reference: its max-width of 1280
+ * includes the 32px side padding, so the copy starts 112px from the edge
+ * rather than 80px. Overriding .container's cap here reproduces that
+ * without touching any other section.
+ *
+ *   1440 viewport -> content at x=112, 112px clear on the right
+ *    768 viewport -> content at x=32   (cap inactive; gutter binds)
+ *    390 viewport -> content at x=20   (mobile gutter, as the reference)
+ *
+ * min-height is the reference's own calc(100dvh - 84px). With the existing
+ * align-items: center it is what opens the tall gap between the header and
+ * the eyebrow on a desktop viewport, and it goes inactive on tablet and
+ * phone where the stacked content is already taller — the same responsive
+ * behaviour the reference shows, from one property and no new breakpoint.
+ */
 .hero__inner {
     position: relative;
     z-index: 1;
+    max-width: var(--container-wide);
+    min-height: calc(100dvh - 84px);
     display: grid;
     /*
      * Left copy is fluid; the chart column holds the mockup's panel scaled
@@ -3086,7 +3148,6 @@ font {
     }
 
     .brand__name {
-        font-size: 0.6rem;
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
@@ -3511,24 +3572,14 @@ font {
      * Narrow screens tighten the padding but keep it symmetric, and keep
      * it on the same custom property so the two sides cannot drift.
      */
-    .action-bar {
-        --action-bar-padding-block: 12px;
-    }
-
-    .action-bar__inner {
-        padding: var(--action-bar-padding-block) 44px;
-    }
-
+    /*
+     * The reference keeps the bar's padding at 10px / 40px on phones and
+     * changes only the type: 14px drops to 12px below 640px, the same
+     * breakpoint used here. Line-height stays at 1.375 (12 -> 16.5px), so
+     * a three-line bar measures 70.5px exactly as the reference does.
+     */
     .action-bar__link {
-        font-size: 0.8125rem;
-        line-height: 1.5;
-    }
-
-    /* A 44px touch target on phones; the visual circle stays 32px. */
-    .action-bar__close {
-        right: 8px;
-        min-width: 44px;
-        min-height: 44px;
+        font-size: var(--fs-xs);
     }
 
     /* ---- Live chat ------------------------------------------------------
@@ -3602,10 +3653,6 @@ font {
     .brand__mark {
         width: 36px;
         height: 36px;
-    }
-
-    .brand__name {
-        font-size: 0.6rem;
     }
 
     .lang-select__toggle {
