@@ -63,63 +63,21 @@ import {
     getHomepageQuestions
 } from "./faq-page-content.js";
 
-/**
- * The homepage's four filter pills and the questions each one features.
- *
- * The pill names are homepage presentation, not content: they are the
- * headings the homepage mockup shows, which is why they differ from the
- * full FAQ page's eight category names.
+/*
+ * The pills and the questions each one features are homepage CONTENT, so
+ * they are edited in index-page-content.js. Only the wording of the
+ * questions and answers themselves is off-limits there: those are named
+ * by reference and resolved from faq-page-content.js below.
  */
-const homepageFaqSections = [
-    {
-        id: "basics",
-        name: "Basics",
-        questionRefs: [
-            "homepage/what-is-goldtrap",
-            "homepage/who-is-it-for",
-            "homepage/mt4-and-mt5",
-            "homepage/run-on-mobile",
-            "homepage/which-pair",
-            "homepage/what-strategy"
-        ]
-    },
-    {
-        id: "account-broker",
-        name: "Account & Broker",
-        questionRefs: [
-            "homepage/any-broker",
-            "homepage/cent-and-standard",
-            "homepage/accounts-per-licence",
-            "homepage/licence-binding",
-            "homepage/move-licence",
-            "homepage/what-leverage"
-        ]
-    },
-    {
-        id: "capital-risk",
-        name: "Capital & Risk",
-        questionRefs: [
-            "homepage/how-much-capital",
-            "homepage/can-it-lose-money",
-            "homepage/risk-controls",
-            "homepage/stop-loss",
-            "homepage/daily-profit-target",
-            "homepage/refund"
-        ]
-    },
-    {
-        id: "setup-help",
-        name: "Setup & Help",
-        questionRefs: [
-            "homepage/how-to-install",
-            "homepage/whitelist-url",
-            "homepage/licence-key",
-            "homepage/preset-files",
-            "homepage/need-a-vps",
-            "homepage/get-support"
-        ]
-    }
-];
+import { indexPageContent } from "./index-page-content.js";
+
+/**
+ * The homepage's filter pills and the questions each one features, from
+ * index-page-content.js. Each entry names its questions by reference —
+ * "<categoryId>/<questionId>" — and the wording is resolved out of
+ * faq-page-content.js, so no question or answer is ever duplicated.
+ */
+const homepageFaqSections = indexPageContent.faq.sections;
 
 
 class FaqServiceHomepage {

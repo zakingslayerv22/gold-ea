@@ -1,0 +1,42 @@
+# ======================================================================
+# PRETTIER IGNORE — the whole repository
+# ======================================================================
+# This project's formatting is deliberate. Prettier reflowed files in ways
+# that fought the existing layout and produced noisy diffs, so nothing here
+# is formatted automatically.
+#
+# The first line ignores every path. The negations that would normally
+# follow are intentionally absent: there is no opt-back-in, because no file
+# in this repository should be reformatted automatically.
+#
+# `prettier --check .` will now report that there are no matching files
+# rather than listing violations, and `prettier --write .` becomes a no-op.
+# Running Prettier on an explicitly named path still works, so this stops
+# automatic reformatting without removing the tool.
+#
+# To let Prettier format something again, add a negation below, e.g.:
+#   !some/new/file.js
+# ======================================================================
+
+# Everything.
+*
+**/*
+
+# Named explicitly as well, so the intent survives if the globs above are
+# ever narrowed.
+index.html
+frequently-asked-questions.html
+assets/
+assets/scripts/
+assets/styles/
+assets/images/
+mockups/
+.github/
+*.md
+*.html
+*.css
+*.js
+*.json
+*.yaml
+*.yml
+*.svg

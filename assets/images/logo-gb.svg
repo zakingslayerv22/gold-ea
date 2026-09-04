@@ -1,7 +1,18 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" role="img" aria-label="GoldTrap EA">
   <title>GoldTrap EA</title>
   <circle cx="24" cy="24" r="24" fill="#C9A84C"/>
-  <text x="24" y="24" fill="#09090B" font-family="Poppins, 'Helvetica Neue', Arial, sans-serif"
-        font-size="19" font-weight="800" letter-spacing="-0.4"
-        text-anchor="middle" dominant-baseline="central">GB</text>
+  <!--
+    The "GB" lettering, drawn as outlines rather than a <text> element.
+    It is Montserrat Black (900), the same face .hero__title uses through
+    the font-display custom property, laid out at the original font-size
+    19 with the original negative 0.4 letter-spacing, then centred on the
+    circle.
+
+    Outlines rather than <text> because this file is loaded through an
+    <img>, which renders it in an isolated document: the page's Google
+    Fonts link does not reach inside, so a font-family of "Montserrat"
+    here would silently fall back to a system sans. Outlines render the
+    real face everywhere with no font dependency.
+  -->
+  <path fill="#09090B" d="M17.50 30.95Q15.89 30.95 14.53 30.45Q13.17 29.95 12.17 29.02Q11.18 28.08 10.62 26.81Q10.07 25.54 10.07 24.00Q10.07 22.46 10.62 21.19Q11.18 19.91 12.18 18.98Q13.19 18.05 14.57 17.55Q15.94 17.05 17.60 17.05Q19.57 17.05 21.12 17.71Q22.67 18.38 23.68 19.61L20.81 22.14Q20.18 21.42 19.45 21.05Q18.72 20.67 17.83 20.67Q17.08 20.67 16.49 20.90Q15.89 21.13 15.47 21.57Q15.05 22.00 14.82 22.61Q14.60 23.22 14.60 24.00Q14.60 24.74 14.82 25.36Q15.05 25.98 15.47 26.41Q15.89 26.85 16.47 27.09Q17.05 27.32 17.77 27.32Q18.53 27.32 19.25 27.07Q19.97 26.81 20.79 26.18L23.30 29.26Q22.08 30.08 20.52 30.52Q18.97 30.95 17.50 30.95ZM23.30 29.26 19.40 28.69V23.64H23.30ZM24.82 30.65V17.35H31.92Q34.68 17.35 35.99 18.33Q37.30 19.31 37.30 20.83Q37.30 21.83 36.74 22.62Q36.18 23.41 35.11 23.87Q34.05 24.32 32.49 24.32L32.87 23.30Q34.43 23.30 35.56 23.73Q36.69 24.17 37.31 25.00Q37.93 25.82 37.93 26.98Q37.93 28.71 36.49 29.68Q35.06 30.65 32.30 30.65ZM29.22 27.52H31.92Q32.66 27.52 33.03 27.25Q33.40 26.98 33.40 26.47Q33.40 25.96 33.03 25.69Q32.66 25.42 31.92 25.42H28.92V22.46H31.31Q32.07 22.46 32.43 22.20Q32.78 21.95 32.78 21.47Q32.78 20.98 32.43 20.73Q32.07 20.48 31.31 20.48H29.22Z"/>
 </svg>

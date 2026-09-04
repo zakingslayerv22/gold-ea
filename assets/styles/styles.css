@@ -601,12 +601,18 @@ button {
     filter: brightness(1.12);
 }
 
+/*
+ * Worn by exactly one control, the "View Live Results" link. The label is
+ * white and the inline icon strokes with currentColor, so the icon follows
+ * the label rather than needing a rule of its own.
+ */
 .btn--blue {
     background: var(--grad-blue);
-    color: var(--on-gold);
+    color: var(--text);
     box-shadow: 0 12px 40px -12px rgba(81, 179, 231, 0.65);
 }
 
+/* Subtle lift on hover, the same brightness step every other button uses. */
 .btn--blue:hover,
 .btn--blue:focus-visible {
     filter: brightness(1.12);
@@ -882,7 +888,8 @@ button {
     /* No perpetual animation, and no static gold ring left behind either.
        The launcher, its photo and its green online dot stay fully visible.
        Restated after the .chat-widget rules further down, where it wins. */
-    .chat-widget__pulse {
+    .chat-widget__pulse,
+    .chat-widget__pulse.is-js-timed.is-pulsing {
         animation: none;
         opacity: 0;
     }
@@ -1085,7 +1092,7 @@ button {
 
 .brand__name {
     font-family: var(--font-display);
-    font-size: var(--fs-sm);
+    font-size: 0.6rem;
     font-weight: 900;
     letter-spacing: var(--ls-heading);
     text-transform: uppercase;
@@ -2440,6 +2447,26 @@ button {
 }
 
 /*
+ * JS-TIMED PULSE MODE.
+ * The ring above repeats back-to-back, so the gap between pulses is fixed
+ * at the animation's own duration. initLiveChatPulse() in main.js adds
+ * .is-js-timed and then drives one pulse at a time, which is what makes
+ * liveChatPulseInterval possible.
+ *
+ * The pulse ITSELF is untouched: same @keyframes, same 2.6s duration, same
+ * easing, same colour and glow. Only how often it starts changes. The
+ * continuous rule above stays the no-JS default, so the launcher still
+ * pulses if the script never runs.
+ */
+.chat-widget__pulse.is-js-timed {
+    animation: none;
+}
+
+.chat-widget__pulse.is-js-timed.is-pulsing {
+    animation: chat-pulse 2.6s ease-out 1;
+}
+
+/*
  * Deliberately a SINGLE ring. A second, offset ring meant one was always
  * sitting close to the avatar, which read as a permanent gold outline —
  * the opposite of the intent. One ring per cycle leaves a clear gap, so
@@ -2510,7 +2537,9 @@ button {
  * otherwise be overridden by source order.
  */
 @media (prefers-reduced-motion: reduce) {
-    .chat-widget__pulse {
+    .chat-widget__pulse,
+    /* Same specificity as the timed rule above, so it cannot be outranked. */
+    .chat-widget__pulse.is-js-timed.is-pulsing {
         animation: none;
         opacity: 0;                /* no animation, and no static ring either */
     }
@@ -3057,7 +3086,7 @@ font {
     }
 
     .brand__name {
-        font-size: clamp(0.9375rem, 4.4vw, 1.125rem);
+        font-size: 0.6rem;
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
@@ -3576,7 +3605,7 @@ font {
     }
 
     .brand__name {
-        font-size: 0.875rem;
+        font-size: 0.6rem;
     }
 
     .lang-select__toggle {

@@ -9,6 +9,19 @@
  * Each setting says what it controls and where it shows up.
  * ====================================================================== */
 
+
+/*
+ * Homepage content. Every editable word the homepage renders lives in
+ * this module, so copy changes do not mean editing index.html or this
+ * file. It is a static import, which means it is fetched and evaluated
+ * before any code below runs — there is no ordering hazard.
+ *
+ * The FAQ page loads main.js too, and reads the announcement wording from
+ * here because the announcement bar is shared chrome. It reads nothing
+ * else from this module.
+ */
+import { indexPageContent } from "./index-page-content.js";
+
 /* ======================================================================
  * SITE INFORMATION
  * ======================================================================
@@ -117,6 +130,27 @@ const liveChatIconHoverText = `Chat with ${siteOwner}`;
  */
 const liveChatUsesTelegramFallback = true;
 
+/* ---- Live-chat pulse -------------------------------------------------
+ * The gold ring that radiates out of the launcher.
+ *
+ * Set to false to switch the pulse off. The launcher itself keeps working
+ * exactly as before: the photo, the online dot, the hover label, the
+ * click and the keyboard behaviour are all unaffected.
+ */
+const liveChatPulseEnabled = true;
+
+/*
+ * Time from the START of one pulse to the start of the next, in
+ * milliseconds. Raise it for a calmer launcher, lower it for a busier one.
+ *
+ * This is the GAP only. It does not change how a single pulse looks: the
+ * ring's own travel takes 2.6s and is defined by the chat-pulse keyframes
+ * in styles.css, which this value never touches. Anything shorter than
+ * that 2.6s would cut a pulse off mid-flight, so the value is clamped up
+ * to the animation's real duration, read from the stylesheet at runtime.
+ */
+const liveChatPulseInterval = 5000;
+
 /* ======================================================================
  * LIVE CHART
  * ======================================================================
@@ -191,12 +225,8 @@ const pricingTimerStatus = "hide";
  * purchase button's label and the dialog all follow this configuration.
  * ====================================================================== */
 
-const sourceCodeTimer = {
-  startingPrice: 9650,
-  countdownDuration: 3600,
-  increment: 250,
-  status: "hide",
-};
+/* Content, so it lives in index-page-content.js under sourceCode.timer. */
+const sourceCodeTimer = indexPageContent.sourceCode.timer;
 
 /* ======================================================================
  * ANNOUNCEMENT BAR
@@ -222,23 +252,23 @@ const sourceCodeTimer = {
  * Set to "old" when the announcement should no longer be displayed
  * at all, for everyone, regardless of what they have dismissed.
  */
-let announcementStatus = "new";
+let announcementStatus = indexPageContent.announcement.status;
 
 /*
  * Change this whenever you publish a NEW announcement.
  * Changing this value makes the announcement new again for all visitors.
  */
-const announcementVersion = "2026-08-28";
+const announcementVersion = indexPageContent.announcement.version;
 
-/* The announcement wording. announcementBoldText is emphasised in white,
- * announcementHighlightText is emphasised in gold and underlined. */
-const announcementBoldText = "New Client Offer - Free until Aug 31, 2026:";
-const announcementBodyText = "full access, all features — register with";
-const announcementHighlightText = "VT Markets";
-const announcementTailText = "via our IB link. No payment needed.";
-
-/* Where the announcement text links to. */
-const announcementLink = "https://a689.link";
+/*
+ * The announcement wording and destination. Copy, so it is edited in
+ * index-page-content.js under `announcement`.
+ */
+const announcementBoldText = indexPageContent.announcement.boldText;
+const announcementBodyText = indexPageContent.announcement.bodyText;
+const announcementHighlightText = indexPageContent.announcement.highlightText;
+const announcementTailText = indexPageContent.announcement.tailText;
+const announcementLink = indexPageContent.announcement.link;
 
 /* ======================================================================
  * TELEGRAM LINKS
@@ -271,8 +301,10 @@ const metaTraderWhitelist = "https://a689.link";
 
 const liveActivityColor = "green";
 
-const licenseKeysGeneratedToday = "24";
-const easRunningToday = "2,371";
+/* The two figures are copy, so they live in index-page-content.js. */
+const licenseKeysGeneratedToday =
+  indexPageContent.liveResults.licenseKeysGeneratedToday;
+const easRunningToday = indexPageContent.liveResults.easRunningToday;
 
 /* ======================================================================
  * FOOTER
@@ -433,71 +465,7 @@ const translationExtraLanguages = [
  * Timer visibility is global — see PRICING TIMERS above.
  * ====================================================================== */
 
-const pricingPlans = [
-  {
-    planName: "Free Access",
-    price: 0,
-    increment: 0,
-    timerTime: 0,
-    currency: "",
-    eyebrow: "Free Option",
-    eyebrowIcon: "dot",
-    accent: "green",
-    caption: "Via VT Markets IB registration · 1 account only",
-    steps: [
-      "Register under my link",
-      "Full verify your account",
-      "Create an MT5 trading account",
-      "Submit MT5/MT4 ID + email for instant access",
-    ],
-    note: "Free option is locked to <strong>1 MT5 account ID</strong> only.",
-    cta: {
-      label: "Free Access",
-      type: "green",
-      href: announcementLink,
-      icon: "arrow",
-    },
-  },
-  {
-    planName: "5 Accounts",
-    price: 299,
-    increment: 20,
-    timerTime: 3600,
-    currency: "USDT",
-    eyebrow: "Most Popular",
-    eyebrowIcon: "flame",
-    accent: "gold",
-    caption: "Perfect for most traders",
-    features: [
-      "Lifetime license",
-      "Up to 5 MT5/MT4 accounts",
-      "Use with any broker",
-      "Free upgrades to all future versions",
-      "Priority reply message",
-    ],
-    cta: { label: "Buy Now", type: "gold", icon: "wallet" },
-  },
-  {
-    planName: "Unlimited",
-    price: 740,
-    increment: 20,
-    timerTime: 3600,
-    currency: "USDT",
-    eyebrow: "Unlimited Access",
-    eyebrowIcon: "crown",
-    accent: "gold",
-    caption: "For traders managing multiple accounts",
-    hot: true,
-    features: [
-      "Lifetime license",
-      "Unlimited MT5/MT4 accounts",
-      "Use with any broker",
-      "Free upgrades to all future versions",
-      "Priority reply message",
-    ],
-    cta: { label: "Buy Now", type: "gold", icon: "wallet" },
-  },
-];
+const pricingPlans = indexPageContent.pricing.plans;
 
 /* ======================================================================
  * BEHAVIOUR CONSTANTS
@@ -822,6 +790,51 @@ function eaFileNameFor(platform) {
     return eaCurrentFileName.replace(/\.ex5$/i, ".ex4");
   }
   return eaCurrentFileName;
+}
+
+/* ======================================================================
+ * HOMEPAGE CONTENT BINDING
+ * ======================================================================
+ * index.html keeps the structure; index-page-content.js keeps the words.
+ * An element carrying data-content="hero.subtitle" is filled with the
+ * string found at that path in indexPageContent.
+ *
+ * Deliberately not a rendering framework. The markup, its classes and its
+ * icons stay in the HTML where they can be read; only text nodes are
+ * written. Nothing here runs on a page with no data-content attributes,
+ * so the FAQ page is untouched.
+ *
+ * "{siteName}" and "{siteOwner}" in a string are substituted on the way
+ * in, and protectIdentityTerms() at the end of init() then shields the
+ * substituted identifier from translation.
+ * ====================================================================== */
+
+/** Resolves "a.b.0.c" against the content object, or undefined. */
+function contentByPath(path) {
+  return String(path)
+    .split(".")
+    .reduce(
+      (value, key) =>
+        value === null || value === undefined ? undefined : value[key],
+      indexPageContent,
+    );
+}
+
+function applyPageContent() {
+  qsa("[data-content]").forEach((element) => {
+    const value = contentByPath(element.dataset.content);
+
+    /*
+     * Only strings are written. A missing or non-string path leaves the
+     * markup exactly as authored rather than blanking the element, so a
+     * typo in a path can never empty a section of the page.
+     */
+    if (typeof value !== "string") {
+      return;
+    }
+
+    element.textContent = fillTokens(value);
+  });
 }
 
 function applySiteIdentity() {
@@ -1543,11 +1556,97 @@ function openLiveChat(event) {
   // Otherwise the anchor's configured Telegram href handles the click.
 }
 
+/**
+ * Drives the launcher's gold ring so the GAP between pulses is
+ * configurable, which a plain CSS `infinite` animation cannot express —
+ * there the gap is always the animation's own duration.
+ *
+ * The pulse itself is not redefined here. The @keyframes, the 2.6s
+ * travel, the easing, the colour and the glow all stay in styles.css;
+ * this only decides when each one starts.
+ *
+ * One timer, never more: every path clears the pending timeout before
+ * setting another, so repeated calls cannot stack up loops.
+ */
+function initLiveChatPulse(launcher) {
+  const pulse = qs(".chat-widget__pulse", launcher);
+  if (!pulse) {
+    return;
+  }
+
+  /*
+   * Hand timing to this function. Until this class lands the CSS runs its
+   * own continuous pulse, which is the correct no-JS fallback.
+   */
+  pulse.classList.add("is-js-timed");
+
+  if (!liveChatPulseEnabled) {
+    return; // Class added, no loop started: the ring simply never shows.
+  }
+
+  const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+  let timerId = null;
+
+  /*
+   * The single pulse's real length, taken from the stylesheet rather than
+   * repeated here, so the two can never drift apart.
+   */
+  function pulseDurationMs() {
+    const declared = getComputedStyle(pulse).animationDuration;
+    const seconds = parseFloat(declared);
+    return Number.isFinite(seconds) && seconds > 0 ? seconds * 1000 : 2600;
+  }
+
+  function stop() {
+    if (timerId !== null) {
+      window.clearTimeout(timerId);
+      timerId = null;
+    }
+    pulse.classList.remove("is-pulsing");
+  }
+
+  function pulseOnce() {
+    // Re-adding alone will not replay a finished animation; the class has
+    // to come off and the element be reflowed before it goes back on.
+    pulse.classList.remove("is-pulsing");
+    void pulse.offsetWidth;
+    pulse.classList.add("is-pulsing");
+  }
+
+  function scheduleNext() {
+    // Never let the gap fall inside the pulse, which would clip it.
+    const gap = Math.max(Number(liveChatPulseInterval) || 0, pulseDurationMs());
+    timerId = window.setTimeout(() => {
+      pulseOnce();
+      scheduleNext();
+    }, gap);
+  }
+
+  function start() {
+    stop();
+    if (reducedMotion.matches) {
+      return; // Honour the visitor's preference: no pulse at all.
+    }
+    pulseOnce();
+    scheduleNext();
+  }
+
+  // React if the visitor changes the preference while the page is open.
+  const onPreferenceChange = () => start();
+  if (typeof reducedMotion.addEventListener === "function") {
+    reducedMotion.addEventListener("change", onPreferenceChange);
+  }
+
+  start();
+}
+
 function initLiveChat() {
   const launcher = qs("#live-chat-launcher");
   if (!launcher) {
     return;
   }
+
+  initLiveChatPulse(launcher);
 
   // Hover/focus label text comes from configuration, not the markup.
   withElement(qs("#live-chat-label", launcher), (labelElement) => {
@@ -2988,6 +3087,9 @@ function initScrollReveal() {
 function init() {
   // Theme and identity first: everything rendered later inherits them.
   applySiteColors();
+  // Homepage copy before identity, so the tokens it writes are resolved
+  // and its text is included in the metadata and protection passes.
+  applyPageContent();
   applySiteIdentity();
   initConfiguredLinks();
 
