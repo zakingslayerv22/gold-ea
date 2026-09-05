@@ -32,12 +32,28 @@
  * ====================================================================== */
 
 /*
- * Where the announcement text links to. Declared first because the Free
- * Access pricing plan sends visitors to the same destination.
+ * THE TRADING-ACCOUNT REFERRAL URL — the broker IB/partner link.
+ *
+ * Declared here rather than in main.js for a concrete technical reason:
+ * main.js imports THIS file, so this file cannot import main.js back
+ * without creating a module cycle. Everything below is evaluated before
+ * main.js runs, so any value used inside this object has to be reachable
+ * from here. See the CONFIGURATION AND CONTENT section at the top of
+ * main.js for the full rule.
+ *
+ * It is the single source of truth for the referral destination. The
+ * announcement bar, the trial plan's button and the Free Access button all
+ * point at it, so changing this one line moves all three.
  */
-const announcementLink = "https://a689.link";
+const tradingAccountReferralUrl = "https://exness.com";
 
 export const indexPageContent = {
+  /*
+   * Re-exported on the content object so main.js can read it back and set
+   * it on every [data-referral-link] element in the page.
+   */
+  tradingAccountReferralUrl,
+
   /* ----------------------------------------------------------------
    * ANNOUNCEMENT BAR
    * ----------------------------------------------------------------
@@ -55,12 +71,12 @@ export const indexPageContent = {
     version: "2026-08-28",
 
     /* boldText is emphasised in white; highlightText in gold, underlined. */
-    boldText: "New Client Offer - Free until Aug 31, 2026:",
-    bodyText: "full access, all features — register with",
-    highlightText: "VT Markets",
-    tailText: "via our IB link. No payment needed.",
+    boldText: "New Client Offer - Free for 14 days.",
+    bodyText: "Full access, all features — Register with",
+    highlightText: "Exness",
+    tailText: "via our Referral link. No payment needed.",
 
-    link: announcementLink,
+    link: tradingAccountReferralUrl,
   },
 
   /* ----------------------------------------------------------------
@@ -184,9 +200,13 @@ export const indexPageContent = {
    *   cta         the button: its label, colour and icon
    * ---------------------------------------------------------------- */
   pricing: {
+    /* "{siteName}" is substituted from main.js and protected automatically. */
+    heading: "Get {siteName}",
+    lead: "Choose how you want to get started.",
+
     plans: [
       {
-        planName: "Free Access",
+        planName: "14 Days Trial",
         price: 0,
         increment: 0,
         timerTime: 0,
@@ -194,24 +214,24 @@ export const indexPageContent = {
         eyebrow: "Free Option",
         eyebrowIcon: "dot",
         accent: "green",
-        caption: "Via VT Markets IB registration · 1 account only",
+        caption: "Via Referral Link · 1 account only",
         steps: [
-          "Register under my link",
-          "Full verify your account",
-          "Create an MT5 trading account",
-          "Submit MT5/MT4 ID + email for instant access",
+          "Register with our referral link",
+          "Complete ID verification of your account",
+          "Create an MT4/MT5 trading account",
+          "Submit account ID + email for instant access",
         ],
-        note: "Free option is locked to <strong>1 MT5 account ID</strong> only.",
+        note: "Only <strong>completely verified accounts</strong> are eligible.",
         cta: {
           label: "Free Access",
           type: "green",
-          href: announcementLink,
+          href: tradingAccountReferralUrl,
           icon: "arrow",
         },
       },
       {
-        planName: "5 Accounts",
-        price: 299,
+        planName: "30 Days Plan",
+        price: 120,
         increment: 20,
         timerTime: 3600,
         currency: "USDT",
@@ -220,31 +240,33 @@ export const indexPageContent = {
         accent: "gold",
         caption: "Perfect for most traders",
         features: [
-          "Lifetime license",
-          "Up to 5 MT5/MT4 accounts",
+          "30 days license",
+          // "Up to 5 MT5/MT4 accounts",
           "Use with any broker",
           "Free upgrades to all future versions",
-          "Priority reply message",
+          "Priority support",
+          
         ],
         cta: { label: "Buy Now", type: "gold", icon: "wallet" },
       },
       {
-        planName: "Unlimited",
-        price: 740,
+        planName: "90 Days Plan",
+        price: 288,
         increment: 20,
         timerTime: 3600,
         currency: "USDT",
-        eyebrow: "Unlimited Access",
+        eyebrow: "Extended Access",
         eyebrowIcon: "crown",
         accent: "gold",
         caption: "For traders managing multiple accounts",
         hot: true,
         features: [
-          "Lifetime license",
-          "Unlimited MT5/MT4 accounts",
+          "90 days license",
+          "Save up to 20%",
+          // "Unlimited MT5/MT4 accounts",
           "Use with any broker",
           "Free upgrades to all future versions",
-          "Priority reply message",
+          "Priority support",
         ],
         cta: { label: "Buy Now", type: "gold", icon: "wallet" },
       },
@@ -259,17 +281,40 @@ export const indexPageContent = {
    * the card cannot jump when it is switched on or off.
    * ---------------------------------------------------------------- */
   sourceCode: {
+    /*
+     * The small pill above the card.
+     */
+    tag: "For Partners",
+
+    /*
+     * The card heading is two parts because the second half is painted in
+     * the accent colour by the design. Edit either half freely.
+     */
+    headingLead: "Account",
+    headingAccent: "Management Plan",
+
+    /*
+     * Inline markup is allowed here — this string is bound as HTML.
+     * "{siteName}", "{siteOwner}" and "{eaVersion}" are substituted from
+     * main.js, so the owner's name follows `siteOwner` and is never typed
+     * twice.
+     */
+    text:
+      "Have your account managed by {siteOwner} with {siteName} " +
+      "{eaVersion}. Take your eyes off the chart and wait for your next " +
+      "profit payout.",
+
     features: [
-      "Full MQL4 (.mq4) & MQL5 (.mq5) source",
-      "Modify, customize, rebrand",
-      "No license server lock-in",
-      "Direct support from {siteOwner}",
+      "Minimum equity of $5000",
+      "50:50 profit splitting",
+      "50% refund for Margin Stop Out",
+      "Priority support from {siteOwner}",
     ],
     currency: "USD",
-    priceMeta: "One-time payment · Lifetime ownership of the source · No refund",
+    priceMeta: "Access tested strategies · Work with {siteOwner} · Terms TBD",
     discussLabel: "Discuss on Telegram",
     timer: {
-      startingPrice: 9650,
+      startingPrice: 5000,
       countdownDuration: 3600,
       increment: 250,
       status: "hide",
@@ -282,11 +327,22 @@ export const indexPageContent = {
    * ---------------------------------------------------------------- */
   freeAccess: {
     eyebrow: "Free Access",
+
+    /* Two-part heading; the accent half is painted in the accent colour. */
+    headingLead: "How to Get",
+    headingAccent: "Free Access",
+
+    lead: "Follow these simple steps to get {siteName} for free.",
+
+    /* The green button sends visitors to tradingAccountReferralUrl above. */
+    primaryCtaLabel: "Free Access",
+    secondaryCtaLabel: "Already Registered? Change IB Partner ID",
+
     steps: [
-      "Register Under My Link",
-      "Full Verify Your Account",
-      "Create an MT5 Trading Account",
-      "Submit Your Details",
+      "Register with our referral link",
+      "Complete ID verification of your account",
+      "Create an MT4/MT5 Trading Account",
+      "Submit account ID + email",
     ],
   },
 
@@ -296,6 +352,27 @@ export const indexPageContent = {
    * version configured in main.js, so they stay correct on their own.
    * ---------------------------------------------------------------- */
   downloads: {
+    eyebrow: "Downloads",
+    heading: "Download {siteName}",
+
+    /* Bound as HTML so the <span class="mono"> around the folder name
+     * survives. Edit the words around it freely. */
+    lead:
+      'Compiled for MetaTrader 4 &amp; 5. Install into your platform\'s ' +
+      '<span class="mono">Experts</span> folder and activate with your ' +
+      "license key.",
+
+    /* The two download cards, in the order they appear. */
+    mt5CardTitle: "MetaTrader 5",
+    mt4CardTitle: "MetaTrader 4",
+
+    /* Bound as HTML so the link inside the sentence survives. */
+    licenceHint:
+      'Don\'t have a license yet? <a href="#pricing">Get one here</a>.',
+
+    /* The copy button's resting label. main.js swaps it while copying. */
+    copyLabel: "Copy",
+
     licenceNote: "License key required at runtime",
     downloadLabel: "Download",
     presetTitle: "Need preset .set files?",

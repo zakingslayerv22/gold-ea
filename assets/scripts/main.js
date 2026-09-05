@@ -23,6 +23,117 @@
 import { indexPageContent } from "./index-page-content.js";
 
 /* ======================================================================
+ * CONFIGURATION AND CONTENT — HOW TO ADD A NEW VALUE
+ * ======================================================================
+ * Read this before adding a configurable value anywhere in the project.
+ *
+ * ---------------------------------------------------------------------
+ * 1. WHICH FILE DOES MY VALUE GO IN?
+ * ---------------------------------------------------------------------
+ *   main.js (this file)
+ *       Global configuration and shared behaviour: the site name and
+ *       owner, EA version and file name, Telegram links, wallet and
+ *       payment details, the MetaTrader whitelist URL, live-chat and
+ *       translation settings. Used by BOTH pages.
+ *
+ *   index-page-content.js
+ *       Homepage copy: headings, leads, button labels, card text, the
+ *       announcement wording, the pricing plans, and the trading-account
+ *       referral URL. If it is a word a visitor reads on the homepage, it
+ *       belongs there — not in index.html.
+ *
+ *   faq-page-content.js
+ *       The canonical FAQ questions and answers. Nothing else.
+ *
+ *   faq-index-page.js
+ *       Homepage FAQ rendering and interaction. Behaviour, not content.
+ *
+ * ---------------------------------------------------------------------
+ * 2. WHY A PLAIN `const` IS NOT VISIBLE FROM ANOTHER FILE
+ * ---------------------------------------------------------------------
+ * Every script here is an ES module — index.html loads exactly one entry
+ * point, <script type="module" src="assets/scripts/main.js">, and the
+ * other files arrive through the import statements above.
+ *
+ * In a module, a top-level
+ *
+ *     const someValue = "...";
+ *
+ * is scoped to THAT FILE. It is not attached to `window` and no other
+ * file can see it by name. Writing `someValue` in a second file throws
+ * "ReferenceError: someValue is not defined". This is the single most
+ * common trap in this project. A value crosses a file boundary only if
+ * it is `export`ed and `import`ed.
+ *
+ * ---------------------------------------------------------------------
+ * 3. WHICH DIRECTION CAN VALUES TRAVEL?
+ * ---------------------------------------------------------------------
+ * main.js imports index-page-content.js. That makes the direction
+ * one-way:
+ *
+ *     index-page-content.js  ---- values flow this way -->  main.js
+ *
+ * main.js can read anything the content file exports. The content file
+ * CANNOT import main.js back — that is a module cycle, and because the
+ * content file is evaluated first it would read main.js's constants
+ * before they are initialised and fail.
+ *
+ * So the rule is:
+ *
+ *     A value the CONTENT file needs must live in the CONTENT file.
+ *
+ * That is exactly why tradingAccountReferralUrl is declared in
+ * index-page-content.js and not here: the trial plan's `cta.href` needs
+ * it while that object is being built.
+ *
+ * ---------------------------------------------------------------------
+ * 4. ADDING A NEW HOMEPAGE VALUE — THE WHOLE PATTERN
+ * ---------------------------------------------------------------------
+ * Say you want an editable label on a new button.
+ *
+ *   a) Define it once, in index-page-content.js:
+ *
+ *          export const indexPageContent = {
+ *              downloads: {
+ *                  copyLabel: "Copy",
+ *              },
+ *          };
+ *
+ *   b) Point the markup at it in index.html, by PATH — no text in the
+ *      HTML, just the hook:
+ *
+ *          <span data-content="downloads.copyLabel"></span>
+ *
+ *      applyPageContent() below walks every [data-content] element,
+ *      resolves the dotted path against indexPageContent, and writes the
+ *      string. Use data-content-html instead when the string carries
+ *      inline markup, such as an accent <span> or a link.
+ *
+ *   c) That is all. There is no third step and no registration list.
+ *
+ * To read the same value from JavaScript in this file, go through the
+ * imported object rather than a bare name:
+ *
+ *          link.href = indexPageContent.tradingAccountReferralUrl;
+ *
+ * ---------------------------------------------------------------------
+ * 5. TOKENS
+ * ---------------------------------------------------------------------
+ * Any content string may contain {siteName}, {siteOwner} or {eaVersion}.
+ * fillTokens() substitutes them from the configuration in this file, so
+ * the brand, the owner and the version are still written in exactly one
+ * place, and the substituted value is then protected from translation.
+ *
+ * ---------------------------------------------------------------------
+ * 6. ADDING A NEW GLOBAL VALUE
+ * ---------------------------------------------------------------------
+ * If BOTH pages need it and the content file does not, declare it in the
+ * configuration section below and use it directly in this file. If the
+ * content file needs it too, declare it in index-page-content.js instead
+ * and read it here through indexPageContent, per rule 3.
+ * ====================================================================== */
+
+/* ======================================================================
  * SITE INFORMATION
  * ======================================================================
  * siteName  is the single authoritative source for the product name.
@@ -37,7 +148,7 @@ import { indexPageContent } from "./index-page-content.js";
  * ====================================================================== */
 
 const siteName = "GOLDENBOX EA";
-const siteOwner = "Richie Gold";
+const siteOwner = "Wallstreet Elvaris";
 
 /*
  * The current Expert Advisor version, e.g. "v4.2.3".
@@ -176,7 +287,7 @@ const homepageLiveChartApi =
  * blockchain. Sending funds on the wrong network loses them.
  * ====================================================================== */
 
-const walletAddress = "TM74BDqkK3uoaJpZiFcNNChnj8jXQ3xWrT";
+const walletAddress = "THvBidWoAj6Jq63rHwN2DFnPuPqBbAqaDJ";
 
 /* The chain shown on the "Network" row of the purchase dialogs. */
 const paymentNetwork = "TRC20 (TRON)";
@@ -280,8 +391,8 @@ const announcementLink = indexPageContent.announcement.link;
  * Reused everywhere; never write a Telegram URL into the HTML.
  * ====================================================================== */
 
-const telegramPersonal = "https://t.me/abangrimba";
-const telegramChannel = "https://t.me/goldtrapea";
+const telegramPersonal = "https://t.me/WallstreetElvaris";
+const telegramChannel = "https://t.me/goldenboxea";
 
 /* ======================================================================
  * DOWNLOAD / WHITELIST
@@ -644,6 +755,7 @@ function getIdentityTerms() {
   return [
     siteName,
     siteOwner,
+    indexPageContent.tradingAccountReferralUrl,
     eaCurrentVersion,
     eaCurrentFileName,
     eaFileNameFor("mt4"),
@@ -821,6 +933,26 @@ function contentByPath(path) {
 }
 
 function applyPageContent() {
+  /*
+   * data-content-html is the same lookup as data-content, but the string is
+   * written as MARKUP instead of text. It exists for the handful of lines
+   * that carry inline markup the design depends on — an accent span, the
+   * mono folder name, the link inside the licence hint. Without it those
+   * lines would have to stay hard-coded in index.html.
+   *
+   * innerHTML is safe here: the source is this project's own authored
+   * content module, never anything a visitor can supply.
+   */
+  qsa("[data-content-html]").forEach((element) => {
+    const value = contentByPath(element.dataset.contentHtml);
+
+    if (typeof value !== "string") {
+      return;
+    }
+
+    element.innerHTML = fillTokens(value);
+  });
+
   qsa("[data-content]").forEach((element) => {
     const value = contentByPath(element.dataset.content);
 
@@ -2964,6 +3096,14 @@ function initConfiguredLinks() {
 
   qsa("[data-whitelist-link]").forEach((link) => {
     link.href = metaTraderWhitelist;
+  });
+
+  /*
+   * The broker referral link. One value in index-page-content.js reaches
+   * every element that carries data-referral-link.
+   */
+  qsa("[data-referral-link]").forEach((link) => {
+    link.href = indexPageContent.tradingAccountReferralUrl;
   });
 
   // The site name appears in the header wordmark and the document title.
