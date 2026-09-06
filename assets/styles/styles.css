@@ -4593,6 +4593,14 @@ font {
         justify-content: center;
         /* The word "Search" is hidden; the icon carries it. */
         font-size: 0;
+        /*
+         * ...and the gap goes with it. The label collapses to zero width
+         * but stays a flex item, so the base rule's 7px gap still took up
+         * space beside the icon and pushed it half a gap — 3.5px — left of
+         * the button's centre. With no visible label there is nothing to
+         * space away from, so the icon centres exactly.
+         */
+        gap: 0;
     }
 
     .faq-sticky-search-button svg {
@@ -4672,8 +4680,28 @@ font {
         padding-block: var(--space-lg) var(--space-xl);
     }
 
+    /*
+     * SECTION SEPARATION.
+     * Literal values, not var(--space-lg): the token block earlier in this
+     * same media query is written against `.faq-page`, and no element
+     * carries that class, so the token is undefined and this margin was
+     * collapsing to 0 — the heading sat flush against the previous
+     * section's last question.
+     *
+     * The three gaps form the hierarchy, tightened from desktop's
+     * 54 / 30 / 16 for the narrower screen:
+     *     40px   previous section's last question -> this heading
+     *     24px   heading -> its own first question
+     *     16px   question -> question (unchanged, .faq-group__list gap)
+     * so the heading reads as belonging to what follows it, not to what
+     * came before.
+     */
     .faq-group + .faq-group {
-        margin-top: var(--space-lg);
+        margin-top: 40px;
+    }
+
+    .faq-group__heading {
+        margin-bottom: 24px;
     }
 
     .faq-page__back {
